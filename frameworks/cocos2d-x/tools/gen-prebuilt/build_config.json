@@ -2,11 +2,15 @@
     "xcode_proj_info" : {
         "build/cocos2d_libs.xcodeproj" : {
             "outputdir" : "prebuilt",
-            "targets" :[ "build all libs" ]
+            "targets" :[ "libcocos2d" ]
         },
         "cocos/scripting/lua-bindings/proj.ios_mac/cocos2d_lua_bindings.xcodeproj" : {
             "outputdir" : "prebuilt",
-            "targets" : [ "build all lualibs" ]
+            "targets" : [ "libluacocos2d" ]
+        },
+        "tools/simulator/libsimulator/proj.ios_mac/libsimulator.xcodeproj" : {
+            "outputdir" : "prebuilt",
+            "targets" : [ "libsimulator" ]
         }
     },
     "win32_proj_info" : {

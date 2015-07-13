@@ -45,7 +45,7 @@ def run_shell(cmd, cwd=None):
 
 class Generator(object):
 
-    XCODE_CMD_FMT = "xcodebuild -project \"%s\" -configuration Release -target \"%s\" %s CONFIGURATION_BUILD_DIR=%s"
+    XCODE_CMD_FMT = "xcodebuild -project \"%s\" -configuration %s -target \"%s\" %s CONFIGURATION_BUILD_DIR=%s"
 
     CONFIG_FILE = "build_config.json"
     KEY_XCODE_PROJ_INFO = "xcode_proj_info"
@@ -287,24 +287,27 @@ class Generator(object):
         print("Win32 build succeeded.")
 
     def build_ios_mac(self):
+        confs = ["Debug", "Release"]
         for key in self.xcode_proj_info.keys():
             output_dir = self.xcode_proj_info[key][Generator.KEY_OUTPUT_DIR]
             proj_path = os.path.join(self.engine_dir, key)
             ios_out_dir = os.path.join(self.tool_dir, output_dir, "ios")
             mac_out_dir = os.path.join(self.tool_dir, output_dir, "mac")
 
-            ios_sim_libs_dir = os.path.join(ios_out_dir, "simulator")
-            ios_dev_libs_dir = os.path.join(ios_out_dir, "device")
             for target in self.xcode_proj_info[key][Generator.KEY_TARGETS]:
-                build_cmd = Generator.XCODE_CMD_FMT % (proj_path, "%s iOS" % target, "-sdk iphonesimulator", ios_sim_libs_dir)
+                for conf in confs:
+                    ios_sim_libs_dir = os.path.join(ios_out_dir, "%s-iphonesimulator" % conf)
+                    ios_dev_libs_dir = os.path.join(ios_out_dir, "%s-iphoneos" % conf)
+                    build_cmd = Generator.XCODE_CMD_FMT % (proj_path, conf, "%s iOS" % target, "-sdk iphonesimulator", ios_sim_libs_dir)
+                    run_shell(build_cmd, self.tool_dir)
+
+                    build_cmd = Generator.XCODE_CMD_FMT % (proj_path, conf, "%s iOS" % target, "-sdk iphoneos", ios_dev_libs_dir)
+                    run_shell(build_cmd, self.tool_dir)
+
+                build_cmd = Generator.XCODE_CMD_FMT % (proj_path, "Debug", "%s Mac" % target, "", mac_out_dir)
                 run_shell(build_cmd, self.tool_dir)
 
-                build_cmd = Generator.XCODE_CMD_FMT % (proj_path, "%s iOS" % target, "-sdk iphoneos", ios_dev_libs_dir)
-                run_shell(build_cmd, self.tool_dir)
-
-                build_cmd = Generator.XCODE_CMD_FMT % (proj_path, "%s Mac" % target, "", mac_out_dir)
-                run_shell(build_cmd, self.tool_dir)
-
+            """
             # generate fat libs for iOS
             for lib in os.listdir(ios_sim_libs_dir):
                 sim_lib = os.path.join(ios_sim_libs_dir, lib)
@@ -317,13 +320,13 @@ class Generator(object):
             # remove the simulator & device libs in iOS
             shutil.rmtree(ios_sim_libs_dir)
             shutil.rmtree(ios_dev_libs_dir)
+            """
 
             if not self.disable_strip:
                 # strip the libs
-                ios_strip_cmd = "xcrun -sdk iphoneos strip -S %s/*.a" % ios_out_dir
+                ios_dev_libs_dir = os.path.join(ios_out_dir, "Release-iphoneos")
+                ios_strip_cmd = "xcrun -sdk iphoneos strip -S %s/*.a" % ios_dev_libs_dir
                 run_shell(ios_strip_cmd)
-                mac_strip_cmd = "xcrun strip -S %s/*.a" % mac_out_dir
-                run_shell(mac_strip_cmd)
 
     def build_all_libs(self):
         if os_is_mac():
