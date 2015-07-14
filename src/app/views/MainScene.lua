@@ -1,4 +1,5 @@
 local us = require("lib.moses")
+local jam = require("lib.jam")
 local MainScene = class("MainScene", cc.load("mvc").ViewBase)
 
 function MainScene:onCreate()
@@ -27,6 +28,12 @@ function MainScene:onCreate()
             end
         end
     end
+    jam.sprite("img/hime.png", 32):frameIdx(9, 10, 11):addTo(cc.Node:create():move(self:idx2pt(9, 3)):addTo(self))
+    jam.sprite("img/witch.png", 32):frameIdx(9, 10, 11):addTo(cc.Node:create():move(self:idx2pt(8, 2)):addTo(self))
+    jam.sprite("img/ninja.png", 32):frameIdx(9, 10, 11):addTo(cc.Node:create():move(self:idx2pt(7, 5)):addTo(self))
+    jam.sprite("img/hime.png", 32):frameIdx(0, 1, 2):addTo(cc.Node:create():move(self:idx2pt(1, 3)):addTo(self))
+    jam.sprite("img/witch.png", 32):frameIdx(0, 1, 2):addTo(cc.Node:create():move(self:idx2pt(2, 4)):addTo(self))
+    jam.sprite("img/ninja.png", 32):frameIdx(0, 1, 2):addTo(cc.Node:create():move(self:idx2pt(3, 1)):addTo(self))
 end
 
 function MainScene:idx2pt(i, j)
