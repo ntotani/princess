@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="9" height="16" tilewidth="40" tileheight="40">
+ <tileset firstgid="1" name="pipo-map001" tilewidth="40" tileheight="40">
+  <image source="pipo-map001.png" width="320" height="440"/>
+ </tileset>
+ <layer name="タイル・レイヤー1" width="9" height="16">
+  <data encoding="base64" compression="zlib">
+   eJxjZGBgYBzFo5hMDAClYACR
+  </data>
+ </layer>
+ <layer name="タイル・レイヤー 2" width="9" height="16">
+  <data encoding="base64" compression="zlib">
+   eJzjZmBg4B5EeBTgBwMdP+gYAIOdAxk=
+  </data>
+ </layer>
+</map>
