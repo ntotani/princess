@@ -42,21 +42,70 @@ function MainScene:onCreate()
             end
         end
     end
-    jam.sprite("img/hime.png", 32):frameIdx(9, 10, 11):addTo(cc.Node:create():move(self:idx2pt(9, 3)):addTo(self))
-    jam.sprite("img/witch.png", 32):frameIdx(9, 10, 11):addTo(cc.Node:create():move(self:idx2pt(8, 2)):addTo(self))
-    jam.sprite("img/ninja.png", 32):frameIdx(9, 10, 11):addTo(cc.Node:create():move(self:idx2pt(7, 5)):addTo(self))
-    jam.sprite("img/hime.png", 32):frameIdx(0, 1, 2):addTo(cc.Node:create():move(self:idx2pt(1, 3)):addTo(self))
-    jam.sprite("img/witch.png", 32):frameIdx(0, 1, 2):addTo(cc.Node:create():move(self:idx2pt(2, 4)):addTo(self))
-    jam.sprite("img/ninja.png", 32):frameIdx(0, 1, 2):addTo(cc.Node:create():move(self:idx2pt(3, 1)):addTo(self))
+    self.friends = display.newLayer():addTo(self)
+    self:initChara(9, 3, "hime", true)
+    self:initChara(8, 2, "witch", true)
+    self:initChara(7, 5, "ninja", true)
+    self:initChara(1, 3, "hime")
+    self:initChara(2, 4, "witch")
+    self:initChara(3, 1, "ninja")
+    self.chips = display.newLayer():addTo(self)
     local names = us.keys(CHIPS)
     for i = 1, 4 do
-        local chip = names[math.random(1, #names)]
-        display.newSprite("chip/" .. chip .. ".png"):move((72 + 14) * (i - 1) + 15 + 36, 80):addTo(self)
+        local name = names[math.random(1, #names)]
+        local chip = display.newSprite("chip/" .. name .. ".png"):move((72 + 14) * (i - 1) + 15 + 36, 80):addTo(self.chips)
+        chip.name = name
     end
+    display.newLayer():addTo(self):onTouch(us.bind(self.onTouch, self))
+end
+
+function MainScene:initChara(i, j, job, isFriend)
+    local node = cc.Node:create():move(self:idx2pt(i, j))
+    node.sprite = jam.sprite("img/" .. job .. ".png", 32):addTo(node)
+    if isFriend then
+        node.sprite:frameIdx(9, 10, 11)
+        node:addTo(self.friends)
+    else
+        node.sprite:frameIdx(0, 1, 2)
+        node:addTo(self)
+    end
+    node.idx = {i = i, j = j}
 end
 
 function MainScene:idx2pt(i, j)
     return cc.p(display.cx + 38 * (j - 3) * 1.5, display.cy + 33 * (5 - i))
+end
+
+function MainScene:onTouch(e)
+    if e.name == "began" and not self.holdChip then
+        for _, chip in ipairs(self.chips:getChildren()) do
+            local bb = chip:getBoundingBox()
+            if cc.rectContainsPoint(bb, e) then
+                self.holdChip = chip
+                self.holdChip.backPt = cc.p(chip:getPosition())
+                return true
+            end
+        end
+        return false
+    end
+    if e.name == "moved" and self.holdChip then
+        self.holdChip:move(e)
+    elseif self.holdChip then
+        local len = 48
+        for _, friend in ipairs(self.friends:getChildren()) do
+            local x, y = friend:getPosition()
+            if cc.rectContainsPoint(cc.rect(x - len / 2, y - len / 2, len, len), e) then
+                for _, dir in ipairs(CHIPS[self.holdChip.name]) do
+                    friend.idx.i = friend.idx.i + dir.i
+                    friend.idx.j = friend.idx.j + dir.j
+                    friend:move(self:idx2pt(friend.idx.i, friend.idx.j))
+                end
+                break
+            end
+        end
+        self.holdChip:move(self.holdChip.backPt)
+        self.holdChip = nil
+    end
 end
 
 return MainScene
