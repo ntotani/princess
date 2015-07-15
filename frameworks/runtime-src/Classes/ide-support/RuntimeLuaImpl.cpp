@@ -75,14 +75,11 @@ bool reloadScript(const string& file)
     FileUtils::getInstance()->purgeCachedEntries();
     string modulefile = file;
     
-    if (! modulefile.empty())
-    {
-        resetLuaModule(modulefile);
-    }
-    else
+    if (modulefile.empty() || modulefile == "ENTRY")
     {
         modulefile = ConfigParser::getInstance()->getEntryFile().c_str();
     }
+    resetLuaModule(modulefile);
     
     auto engine = LuaEngine::getInstance();
     LuaStack* luaStack = engine->getLuaStack();

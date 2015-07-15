@@ -19,7 +19,7 @@ class SourcecodeHandler(FileSystemEventHandler):
 def on_sourcecode(event, path):
     if event.is_directory or ('tmp' in path):
         return
-    cmdSocket.send('sendrequest {"cmd":"reload","modulefiles":["%s","src/main.lua"]}\n' % path)
+    cmdSocket.send('sendrequest {"cmd":"reload","modulefiles":["%s","ENTRY"]}\n' % path)
 
 class ResourceHandler(FileSystemEventHandler):
     def on_created(self, event):  on_resource(event, event.src_path)
@@ -29,7 +29,7 @@ class ResourceHandler(FileSystemEventHandler):
 def on_resource(event, path):
     if event.is_directory or ('tmp' in path):
         return
-    cmdSocket.send('sendrequest {"cmd":"reload","modulefiles":["src/main.lua"]}\n')
+    cmdSocket.send('sendrequest {"cmd":"reload","modulefiles":["ENTRY"]}\n')
 
 def receiver():
     while True:
@@ -43,6 +43,7 @@ if __name__ == "__main__":
     Thread(target = receiver).start()
     obs = Observer()
     obs.schedule(SourcecodeHandler(), 'src', recursive=True)
+    obs.schedule(SourcecodeHandler(), 'test', recursive=True)
     obs.schedule(ResourceHandler(), 'res', recursive=True)
     obs.start()
     try:
@@ -54,3 +55,4 @@ if __name__ == "__main__":
     obs.join()
     cmdSocket.send('exit\n')
     cmdSocket.close()
+
