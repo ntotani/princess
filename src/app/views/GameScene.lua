@@ -1,6 +1,6 @@
 local us = require("lib.moses")
 local jam = require("lib.jam")
-local MainScene = class("MainScene", cc.load("mvc").ViewBase)
+local GameScene = class("GameScene", cc.load("mvc").ViewBase)
 
 local CHIPS = {
     f    = {{i = -2, j =  0}},
@@ -28,7 +28,7 @@ local TILES = {
     {0, 0, 1, 0, 0},
 }
 
-function MainScene:onCreate()
+function GameScene:onCreate()
     --[[
     local TILES_PER_SIDE = 3
     local tiles = us.map(us.range(1, TILES_PER_SIDE * 2 - 1 + (TILES_PER_SIDE - 1) * 2), function(e)
@@ -61,7 +61,7 @@ function MainScene:onCreate()
     display.newLayer():addTo(self):onTouch(us.bind(self.onTouch, self))
 end
 
-function MainScene:initChara(i, j, job, isFriend)
+function GameScene:initChara(i, j, job, isFriend)
     local node = cc.Node:create():move(self:idx2pt(i, j))
     node.sprite = jam.sprite("img/" .. job .. ".png", 32):addTo(node)
     if isFriend then
@@ -74,11 +74,11 @@ function MainScene:initChara(i, j, job, isFriend)
     node.idx = {i = i, j = j}
 end
 
-function MainScene:idx2pt(i, j)
+function GameScene:idx2pt(i, j)
     return cc.p(display.cx + 38 * (j - 3) * 1.5, display.cy + 33 * (5 - i))
 end
 
-function MainScene:onTouch(e)
+function GameScene:onTouch(e)
     if e.name == "began" and not self.holdChip then
         for _, chip in ipairs(self.chips:getChildren()) do
             local bb = chip:getBoundingBox()
@@ -126,5 +126,5 @@ function MainScene:onTouch(e)
     end
 end
 
-return MainScene
+return GameScene
 
