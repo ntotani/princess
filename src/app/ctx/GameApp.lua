@@ -29,6 +29,16 @@ local TILES = {
 }
 
 function GameApp:onCreate()
+    self:reset()
+    self.configs_.socket:registerScriptHandler(function(msg)
+        msg = json.decode(msg)
+        if msg.event == "turn" then
+            self:onTurn(msg)
+        end
+    end, cc.WEBSOCKET_MESSAGE)
+end
+
+function GameApp:reset()
     self.chars = {
         {id = 1, i = 9, j = 3, job = "hime",  team = "red"},
         {id = 2, i = 8, j = 2, job = "witch", team = "red"},
@@ -38,12 +48,6 @@ function GameApp:onCreate()
         {id = 6, i = 3, j = 1, job = "ninja", team = "blue"},
     }
     self.chips = {red = us.keys(CHIPS), blue = us.keys(CHIPS)}
-    self.configs_.socket:registerScriptHandler(function(msg)
-        msg = json.decode(msg)
-        if msg.event == "turn" then
-            self:onTurn(msg)
-        end
-    end, cc.WEBSOCKET_MESSAGE)
 end
 
 function GameApp:getTiles()
@@ -99,6 +103,7 @@ function GameApp:onTurn(msg)
                 if ni < 1 or ni > #TILES or nj < 1 or nj > #TILES[1] or TILES[ni][nj] == 0 then
                     -- out of bounds
                     acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = charaId, chip = chipIdx}
+                    friend.dead = true
                     break
                 end
                 local hit = us.detect(self.chars, function(e)
@@ -112,6 +117,9 @@ function GameApp:onTurn(msg)
                     acts[#acts].type = "kill"
                     acts[#acts].target = self.chars[hit].id
                     self.chars[hit].dead = true
+                    if self.chars[hit].job == "hime" then
+                        acts[#acts + 1] = {type = "end", win = friend.team}
+                    end
                     break
                 end
             end

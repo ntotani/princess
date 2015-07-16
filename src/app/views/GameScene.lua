@@ -19,16 +19,24 @@ function GameScene:onCreate()
     end
     self.enemies = display.newLayer():addTo(self)
     self.friends = display.newLayer():addTo(self)
+    self.chips = display.newLayer():addTo(self)
+    self:getApp():addListener(us.bind(self.onTurn, self))
+    self.touchLayer = display.newLayer():addTo(self)
+    self:reset()
+end
+
+function GameScene:reset()
+    for _, e in ipairs(self.enemies:getChildren()) do e:removeSelf() end
+    for _, e in ipairs(self.friends:getChildren()) do e:removeSelf() end
+    for _, e in ipairs(self.chips:getChildren()) do e:removeSelf() end
     for _, e in ipairs(self:getApp():getChars()) do
         self:initChara(e)
     end
-    self.chips = display.newLayer():addTo(self)
     for i, e in ipairs(self:getApp():getChips()) do
         local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), 80):addTo(self.chips)
         chip.idx = i
     end
-    self:getApp():addListener(us.bind(self.onTurn, self))
-    self.touchLayer = display.newLayer():addTo(self):onTouch(us.bind(self.onTouch, self))
+    self.touchLayer:onTouch(us.bind(self.onTouch, self))
 end
 
 function GameScene:initChara(chara)
@@ -89,6 +97,17 @@ function GameScene:onTurn(actions)
     local DEF_TIME = 0.3
     local time = 0
     for _, action in ipairs(actions) do
+        if action.type == "end" then
+            self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
+                local message = display.newSprite("img/" .. (action.win == self:getApp():getTeam() and "win" or "lose") .. ".png"):move(display.center):addTo(self)
+                self.touchLayer:onTouch(function()
+                    message:removeSelf()
+                    self:getApp():reset()
+                    self:reset()
+                end)
+            end)))
+            return
+        end
         local charas = us.flatten({self.friends:getChildren(), self.enemies:getChildren()})
         local actor = charas[us.detect(charas, function(e)
             return e.model.id == action.actor
@@ -138,6 +157,7 @@ function GameScene:onTurn(actions)
                 time = DEF_TIME,
                 x = self:idx2pt(action.i, action.j).x,
                 y = self:idx2pt(action.i, action.j).y,
+                removeSelf = true,
             })
             time = time + DEF_TIME
         end

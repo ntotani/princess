@@ -36,6 +36,10 @@ local TILES = {
 }
 
 function TestApp:onCreate()
+    self:reset()
+end
+
+function TestApp:reset()
     self.chars = {
         {id = 1, i = 9, j = 3, job = "hime",  team = "red"},
         {id = 2, i = 8, j = 2, job = "witch", team = "red"},
@@ -88,6 +92,9 @@ function TestApp:commit(charaId, chipIdx)
             -- kill other chara
             actions[#actions].type = "kill"
             actions[#actions].target = self.chars[hit].id
+            if self.chars[hit].job == "hime" then
+                actions[#actions + 1] = {type = "end", win = friend.team}
+            end
             break
         end
     end
