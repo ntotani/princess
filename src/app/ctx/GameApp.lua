@@ -17,7 +17,7 @@ local CHIPS = {
 }
 
 local TILES = {
-    {0, 0, 1, 0, 0},
+    {0, 0, 3, 0, 0},
     {0, 1, 0, 1, 0},
     {1, 0, 1, 0, 1},
     {0, 1, 0, 1, 0},
@@ -25,8 +25,10 @@ local TILES = {
     {0, 1, 0, 1, 0},
     {1, 0, 1, 0, 1},
     {0, 1, 0, 1, 0},
-    {0, 0, 1, 0, 0},
+    {0, 0, 2, 0, 0},
 }
+local RED_CAMP = 2
+local BLUE_CAMP = 3
 
 function GameApp:onCreate()
     self:reset()
@@ -121,6 +123,11 @@ function GameApp:onTurn(msg)
                         acts[#acts + 1] = {type = "end", win = friend.team}
                     end
                     break
+                end
+                if friend.job == "hime" then
+                    if TILES[ni][nj] == BLUE_CAMP and friend.team == "red" or TILES[ni][nj] == RED_CAMP and friend.team == "blue" then
+                        acts[#acts + 1] = {type = "end", win = friend.team}
+                    end
                 end
             end
         end

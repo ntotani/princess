@@ -12,7 +12,7 @@ function GameScene:onCreate()
     cc.TMXTiledMap:create("tmx/forest.tmx"):addTo(self)
     for i, line in ipairs(self:getApp():getTiles()) do
         for j, e in ipairs(line) do
-            if e == 1 then
+            if e > 0 then
                 display.newSprite("img/tile.png"):move(self:idx2pt(i, j)):addTo(self)
             end
         end
