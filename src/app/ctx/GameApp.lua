@@ -68,6 +68,11 @@ function GameApp:getChips()
     return us.first(self.chips[self:getTeam()], 4)
 end
 
+function GameApp:getEnemyChips()
+    local enemyTeam = self:getTeam() == "red" and "blue" or "red"
+    return us.first(self.chips[enemyTeam], 4)
+end
+
 function GameApp:addListener(listener)
     self.listener = listener
 end

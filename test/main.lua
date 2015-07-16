@@ -51,6 +51,7 @@ function TestApp:reset()
         {id = 6, i = 3, j = 1, job = "ninja", team = "blue"},
     }
     self.chips = us.keys(CHIPS)
+    self.enemyChips = us.keys(CHIPS)
 end
 
 function TestApp:getTiles()
@@ -67,6 +68,10 @@ end
 
 function TestApp:getChips()
     return us.first(self.chips, 4)
+end
+
+function TestApp:getEnemyChips()
+    return us.first(self.enemyChips, 4)
 end
 
 function TestApp:addListener(listener)

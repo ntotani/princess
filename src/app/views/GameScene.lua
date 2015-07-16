@@ -20,6 +20,7 @@ function GameScene:onCreate()
     self.enemies = display.newLayer():addTo(self)
     self.friends = display.newLayer():addTo(self)
     self.chips = display.newLayer():addTo(self)
+    self.enemyChips = display.newLayer():addTo(self)
     self:getApp():addListener(us.bind(self.onTurn, self))
     self.touchLayer = display.newLayer():addTo(self)
     self:reset()
@@ -29,11 +30,17 @@ function GameScene:reset()
     for _, e in ipairs(self.enemies:getChildren()) do e:removeSelf() end
     for _, e in ipairs(self.friends:getChildren()) do e:removeSelf() end
     for _, e in ipairs(self.chips:getChildren()) do e:removeSelf() end
+    for _, e in ipairs(self.enemyChips:getChildren()) do e:removeSelf() end
     for _, e in ipairs(self:getApp():getChars()) do
         self:initChara(e)
     end
     for i, e in ipairs(self:getApp():getChips()) do
         local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), 80):addTo(self.chips)
+        chip.idx = i
+    end
+    for i, e in ipairs(self:getApp():getEnemyChips()) do
+        local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), display.height - 80):addTo(self.enemyChips)
+        chip:setScale(-1)
         chip.idx = i
     end
     self.touchLayer:onTouch(us.bind(self.onTouch, self))
@@ -112,15 +119,16 @@ function GameScene:onTurn(actions)
         local actor = charas[us.detect(charas, function(e)
             return e.model.id == action.actor
         end)]
+        local isMyTeam = us.findWhere(self:getApp():getChars(), {id = action.actor}).team == self:getApp():getTeam()
         if action.type == "dead" then
-            us.findWhere(self.chips:getChildren(), {idx = action.chip}):moveTo({
+            us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip}):moveTo({
                 delay = time,
                 time = DEF_TIME,
-                y = -36,
+                y = isMyTeam and -36 or display.height + 36,
                 removeSelf = true,
             })
-        elseif actor.model.team == self:getApp():getTeam() then
-            us.findWhere(self.chips:getChildren(), {idx = action.chip}):moveTo({
+        else
+            us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip}):moveTo({
                 delay = time,
                 time = DEF_TIME,
                 x = actor:getPositionX(),
@@ -162,12 +170,15 @@ function GameScene:onTurn(actions)
             time = time + DEF_TIME
         end
     end
-    self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
-        for i, e in ipairs(self:getApp():getChips()) do
-            local chips = self.chips:getChildren()
+    local drawChip = function(isMyTeam)
+        local model = isMyTeam and self:getApp():getChips() or self:getApp():getEnemyChips()
+        local view = isMyTeam and self.chips or self.enemyChips
+        for i, e in ipairs(model) do
+            local chips = view:getChildren()
             if i > #chips then
-                local chip = display.newSprite("chip/" .. e .. ".png"):addTo(self.chips)
-                chip:move(display.width + chip:getContentSize().width, 80):moveTo({
+                local chip = display.newSprite("chip/" .. e .. ".png"):addTo(view)
+                chip:setScale(isMyTeam and 1 or -1)
+                chip:move(display.width + chip:getContentSize().width, isMyTeam and 80 or display.height - 80):moveTo({
                     time = DEF_TIME,
                     x = self:getChipX(i),
                 })
@@ -180,6 +191,10 @@ function GameScene:onTurn(actions)
                 chips[i].idx = i
             end
         end
+    end
+    self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
+        drawChip(true)
+        drawChip(false)
     end), cc.DelayTime:create(DEF_TIME), cc.CallFunc:create(function()
         self.touchLayer:onTouch(us.bind(self.onTouch, self))
     end)))
