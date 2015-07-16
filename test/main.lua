@@ -44,7 +44,7 @@ function TestApp:onCreate()
         {id = 5, i = 2, j = 4, job = "witch", team = "blue"},
         {id = 6, i = 3, j = 1, job = "ninja", team = "blue"},
     }
-    self.chips = {"f", "flf", "b", "ff"}
+    self.chips = us.keys(CHIPS)
 end
 
 function TestApp:getTiles()
@@ -60,7 +60,7 @@ function TestApp:getChars()
 end
 
 function TestApp:getChips()
-    return self.chips
+    return us.first(self.chips, 4)
 end
 
 function TestApp:addListener(listener)
@@ -69,13 +69,13 @@ end
 
 function TestApp:commit(charaId, chipIdx)
     local friend = us.findWhere(self.chars, {id = charaId})
-    local acts = {}
-    for _, dir in ipairs(CHIPS[self.chips[chipIdx]]) do
+    local actions = {}
+    for _, dir in ipairs(CHIPS[table.remove(self.chips, chipIdx)]) do
         local ni = friend.i + dir.i
         local nj = friend.j + dir.j
         if ni < 1 or ni > #TILES or nj < 1 or nj > #TILES[1] or TILES[ni][nj] == 0 then
             -- out of bounds
-            acts[#acts + 1] = {type = "ob", who = charaId}
+            actions[#actions + 1] = {type = "ob", actor = charaId, chip = chipIdx, i = ni, j = nj}
             break
         end
         local hit = us.detect(self.chars, function(e)
@@ -83,15 +83,18 @@ function TestApp:commit(charaId, chipIdx)
         end)
         friend.i = ni
         friend.j = nj
-        acts[#acts + 1] = {type = "move", who = charaId, i = ni, j = nj}
+        actions[#actions + 1] = {type = "move", actor = charaId, chip = chipIdx, i = ni, j = nj}
         if hit then
             -- kill other chara
-            acts[#acts].type = "kill"
-            acts[#acts].target = self.chars[hit].id
+            actions[#actions].type = "kill"
+            actions[#actions].target = self.chars[hit].id
             break
         end
     end
-    self.listener(acts)
+    if #self.chips < 1 then
+        self.chips = us.keys(CHIPS)
+    end
+    self.listener(actions)
 end
 
 local function main()

@@ -24,10 +24,10 @@ function GameScene:onCreate()
     end
     self.chips = display.newLayer():addTo(self)
     for i, e in ipairs(self:getApp():getChips()) do
-        local chip = display.newSprite("chip/" .. e .. ".png"):move((72 + 14) * (i - 1) + 15 + 36, 80):addTo(self.chips)
+        local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), 80):addTo(self.chips)
         chip.idx = i
     end
-    self:getApp():addListener(us.bind(self.onAction, self))
+    self:getApp():addListener(us.bind(self.onTurn, self))
     self.touchLayer = display.newLayer():addTo(self):onTouch(us.bind(self.onTouch, self))
 end
 
@@ -50,6 +50,10 @@ function GameScene:idx2pt(i, j)
         j = #self:getApp():getTiles()[1] - j + 1
     end
     return cc.p(display.cx + 38 * (j - 3) * 1.5, display.cy + 33 * (5 - i))
+end
+
+function GameScene:getChipX(idx)
+    return (72 + 14) * (idx - 1) + 15 + 36
 end
 
 function GameScene:onTouch(e)
@@ -81,24 +85,76 @@ function GameScene:onTouch(e)
     end
 end
 
-function GameScene:onAction(acts)
-    for _, act in ipairs(acts) do
+function GameScene:onTurn(actions)
+    local time = 0
+    for _, action in ipairs(actions) do
         local charas = us.flatten({self.friends:getChildren(), self.enemies:getChildren()})
         local actor = charas[us.detect(charas, function(e)
-            return e.model.id == act.who
+            return e.model.id == action.actor
         end)]
-        if act.type == "move" then
-            actor:move(self:idx2pt(act.i, act.j))
-        elseif act.type == "kill" then
-            actor:move(self:idx2pt(act.i, act.j))
-            charas[us.detect(charas, function(e)
-                return e.model.id == act.target
-            end)]:removeSelf()
-        elseif act.type == "ob" then
-            actor:removeSelf()
+        if actor.model.team == self:getApp():getTeam() then
+            us.findWhere(self.chips:getChildren(), {idx = action.chip}):moveTo({
+                delay = time,
+                time = 0.2,
+                x = actor:getPositionX(),
+                y = actor:getPositionY(),
+                removeSelf = true,
+            })
+        end
+        time = time + 0.2
+        if action.type == "move" then
+            actor:moveTo({
+                delay = time,
+                time = 0.2,
+                x = self:idx2pt(action.i, action.j).x,
+                y = self:idx2pt(action.i, action.j).y,
+            })
+            time = time + 0.2
+        elseif action.type == "kill" then
+            actor:moveTo({
+                delay = time,
+                time = 0.2,
+                x = self:idx2pt(action.i, action.j).x,
+                y = self:idx2pt(action.i, action.j).y,
+                onComplete = function()
+                    local charas = us.flatten({self.friends:getChildren(), self.enemies:getChildren()})
+                    charas[us.detect(charas, function(e)
+                        return e.model.id == action.target
+                    end)]:removeSelf()
+                end,
+            })
+            time = time + 0.2
+        elseif action.type == "ob" then
+            actor:moveTo({
+                delay = time,
+                time = 0.2,
+                x = self:idx2pt(action.i, action.j).x,
+                y = self:idx2pt(action.i, action.j).y,
+            })
+            time = time + 0.2
         end
     end
-    -- TODO next turn
+    self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
+        for i, e in ipairs(self:getApp():getChips()) do
+            local chips = self.chips:getChildren()
+            if i > #chips then
+                local chip = display.newSprite("chip/" .. e .. ".png"):addTo(self.chips)
+                chip:move(display.width + chip:getContentSize().width, 80):moveTo({
+                    time = 0.2,
+                    x = self:getChipX(i),
+                })
+                chip.idx = i
+            elseif chips[i].idx ~= i then
+                chips[i]:moveTo({
+                    time = 0.2,
+                    x = self:getChipX(i),
+                })
+                chips[i].idx = i
+            end
+        end
+    end), cc.DelayTime:create(0.2), cc.CallFunc:create(function()
+        self.touchLayer:onTouch(us.bind(self.onTouch, self))
+    end)))
 end
 
 return GameScene

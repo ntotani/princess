@@ -37,7 +37,7 @@ function GameApp:onCreate()
         {id = 5, i = 2, j = 4, job = "witch", team = "blue"},
         {id = 6, i = 3, j = 1, job = "ninja", team = "blue"},
     }
-    self.chips = {"f", "flf", "b", "ff"}
+    self.chips = {red = us.keys(CHIPS), blue = us.keys(CHIPS)}
     self.configs_.socket:registerScriptHandler(function(msg)
         msg = json.decode(msg)
         if msg.event == "turn" then
@@ -59,7 +59,7 @@ function GameApp:getChars()
 end
 
 function GameApp:getChips()
-    return self.chips
+    return us.first(self.chips[self:getTeam()], 4)
 end
 
 function GameApp:addListener(listener)
@@ -90,28 +90,31 @@ function GameApp:onTurn(msg)
         local charaId = tonumber(e:sub(1, 1))
         local chipIdx = tonumber(e:sub(2, 2))
         local friend = us.findWhere(self.chars, {id = charaId})
-        for _, dir in ipairs(CHIPS[self.chips[chipIdx]]) do
+        for _, dir in ipairs(CHIPS[table.remove(self.chips[friend.team], chipIdx)]) do
             local ni = friend.i + dir.i * (friend.team == "red" and 1 or -1)
             local nj = friend.j + dir.j * (friend.team == "red" and 1 or -1)
             if ni < 1 or ni > #TILES or nj < 1 or nj > #TILES[1] or TILES[ni][nj] == 0 then
                 -- out of bounds
-                acts[#acts + 1] = {type = "ob", who = charaId}
+                acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = charaId, chip = chipIdx}
                 break
             end
             local hit = us.detect(self.chars, function(e)
-                return e.i == ni and e.j == nj
+                return e.i == ni and e.j == nj and not e.dead
             end)
             friend.i = ni
             friend.j = nj
-            acts[#acts + 1] = {type = "move", who = charaId, i = ni, j = nj}
+            acts[#acts + 1] = {type = "move", i = ni, j = nj, actor = charaId, chip = chipIdx}
             if hit then
                 -- kill other chara
                 acts[#acts].type = "kill"
                 acts[#acts].target = self.chars[hit].id
+                self.chars[hit].dead = true
                 break
             end
         end
     end
+    if #self.chips.red < 1 then self.chips.red = us.keys(CHIPS) end
+    if #self.chips.blue < 1 then self.chips.blue = us.keys(CHIPS) end
     self.listener(acts)
 end
 
