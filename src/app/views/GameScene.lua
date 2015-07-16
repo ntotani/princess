@@ -86,34 +86,42 @@ function GameScene:onTouch(e)
 end
 
 function GameScene:onTurn(actions)
+    local DEF_TIME = 0.3
     local time = 0
     for _, action in ipairs(actions) do
         local charas = us.flatten({self.friends:getChildren(), self.enemies:getChildren()})
         local actor = charas[us.detect(charas, function(e)
             return e.model.id == action.actor
         end)]
-        if actor.model.team == self:getApp():getTeam() then
+        if action.type == "dead" then
             us.findWhere(self.chips:getChildren(), {idx = action.chip}):moveTo({
                 delay = time,
-                time = 0.2,
+                time = DEF_TIME,
+                y = -36,
+                removeSelf = true,
+            })
+        elseif actor.model.team == self:getApp():getTeam() then
+            us.findWhere(self.chips:getChildren(), {idx = action.chip}):moveTo({
+                delay = time,
+                time = DEF_TIME,
                 x = actor:getPositionX(),
                 y = actor:getPositionY(),
                 removeSelf = true,
             })
         end
-        time = time + 0.2
+        time = time + DEF_TIME
         if action.type == "move" then
             actor:moveTo({
                 delay = time,
-                time = 0.2,
+                time = DEF_TIME,
                 x = self:idx2pt(action.i, action.j).x,
                 y = self:idx2pt(action.i, action.j).y,
             })
-            time = time + 0.2
+            time = time + DEF_TIME
         elseif action.type == "kill" then
             actor:moveTo({
                 delay = time,
-                time = 0.2,
+                time = DEF_TIME,
                 x = self:idx2pt(action.i, action.j).x,
                 y = self:idx2pt(action.i, action.j).y,
                 onComplete = function()
@@ -123,15 +131,15 @@ function GameScene:onTurn(actions)
                     end)]:removeSelf()
                 end,
             })
-            time = time + 0.2
+            time = time + DEF_TIME
         elseif action.type == "ob" then
             actor:moveTo({
                 delay = time,
-                time = 0.2,
+                time = DEF_TIME,
                 x = self:idx2pt(action.i, action.j).x,
                 y = self:idx2pt(action.i, action.j).y,
             })
-            time = time + 0.2
+            time = time + DEF_TIME
         end
     end
     self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
@@ -140,19 +148,19 @@ function GameScene:onTurn(actions)
             if i > #chips then
                 local chip = display.newSprite("chip/" .. e .. ".png"):addTo(self.chips)
                 chip:move(display.width + chip:getContentSize().width, 80):moveTo({
-                    time = 0.2,
+                    time = DEF_TIME,
                     x = self:getChipX(i),
                 })
                 chip.idx = i
             elseif chips[i].idx ~= i then
                 chips[i]:moveTo({
-                    time = 0.2,
+                    time = DEF_TIME,
                     x = self:getChipX(i),
                 })
                 chips[i].idx = i
             end
         end
-    end), cc.DelayTime:create(0.2), cc.CallFunc:create(function()
+    end), cc.DelayTime:create(DEF_TIME), cc.CallFunc:create(function()
         self.touchLayer:onTouch(us.bind(self.onTouch, self))
     end)))
 end

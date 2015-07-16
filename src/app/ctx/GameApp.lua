@@ -90,26 +90,30 @@ function GameApp:onTurn(msg)
         local charaId = tonumber(e:sub(1, 1))
         local chipIdx = tonumber(e:sub(2, 2))
         local friend = us.findWhere(self.chars, {id = charaId})
-        for _, dir in ipairs(CHIPS[table.remove(self.chips[friend.team], chipIdx)]) do
-            local ni = friend.i + dir.i * (friend.team == "red" and 1 or -1)
-            local nj = friend.j + dir.j * (friend.team == "red" and 1 or -1)
-            if ni < 1 or ni > #TILES or nj < 1 or nj > #TILES[1] or TILES[ni][nj] == 0 then
-                -- out of bounds
-                acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = charaId, chip = chipIdx}
-                break
-            end
-            local hit = us.detect(self.chars, function(e)
-                return e.i == ni and e.j == nj and not e.dead
-            end)
-            friend.i = ni
-            friend.j = nj
-            acts[#acts + 1] = {type = "move", i = ni, j = nj, actor = charaId, chip = chipIdx}
-            if hit then
-                -- kill other chara
-                acts[#acts].type = "kill"
-                acts[#acts].target = self.chars[hit].id
-                self.chars[hit].dead = true
-                break
+        if friend.dead then
+            acts[#acts + 1] = {type = "dead", actor = charaId, chip = chipIdx}
+        else
+            for _, dir in ipairs(CHIPS[table.remove(self.chips[friend.team], chipIdx)]) do
+                local ni = friend.i + dir.i * (friend.team == "red" and 1 or -1)
+                local nj = friend.j + dir.j * (friend.team == "red" and 1 or -1)
+                if ni < 1 or ni > #TILES or nj < 1 or nj > #TILES[1] or TILES[ni][nj] == 0 then
+                    -- out of bounds
+                    acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = charaId, chip = chipIdx}
+                    break
+                end
+                local hit = us.detect(self.chars, function(e)
+                    return e.i == ni and e.j == nj and not e.dead
+                end)
+                friend.i = ni
+                friend.j = nj
+                acts[#acts + 1] = {type = "move", i = ni, j = nj, actor = charaId, chip = chipIdx}
+                if hit then
+                    -- kill other chara
+                    acts[#acts].type = "kill"
+                    acts[#acts].target = self.chars[hit].id
+                    self.chars[hit].dead = true
+                    break
+                end
             end
         end
     end
