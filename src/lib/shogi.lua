@@ -43,8 +43,8 @@ function Shogi:reset()
         {id = 6, i = 3, j = 1, job = "ninja", team = "blue"},
     }
     self.chips = {
-        red = us.keys(CHIPS),
-        blue = us.keys(CHIPS),
+        red = us(CHIPS):keys():shuffle():value(),
+        blue = us(CHIPS):keys():shuffle():value(),
     }
 end
 
@@ -102,8 +102,8 @@ function Shogi:processTurn(commands)
             end
         end
     end
-    if #self.chips.red < 1 then self.chips.red = us.keys(CHIPS) end
-    if #self.chips.blue < 1 then self.chips.blue = us.keys(CHIPS) end
+    if #self.chips.red < 1 then self.chips.red = us(CHIPS):keys():shuffle():value() end
+    if #self.chips.blue < 1 then self.chips.blue = us(CHIPS):keys():shuffle():value() end
     return acts
 end
 
