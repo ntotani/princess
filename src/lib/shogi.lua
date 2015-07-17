@@ -30,7 +30,8 @@ local TILES = {
 local RED_CAMP = 2
 local BLUE_CAMP = 3
 
-function Shogi:ctor()
+function Shogi:ctor(seed)
+    randomSeed(seed)
     self:reset()
 end
 
@@ -44,9 +45,19 @@ function Shogi:reset()
         {id = 6, i = 3, j = 1, job = "ninja", team = "blue"},
     }
     self.chips = {
-        red = {"skill"},--us(CHIPS):keys():shuffle():value(),
-        blue = us(CHIPS):keys():shuffle():value(),
+        red = self:drawChips(),
+        blue = self:drawChips(),
     }
+end
+
+function Shogi:drawChips()
+    return us(CHIPS):keys():map(function(_, e)
+        return {val = e, w = random()}
+    end):sort(function(a, b)
+        return a.w < b.w
+    end):map(function(_, e)
+        return e.val
+    end):value()
 end
 
 function Shogi:getTiles()
@@ -80,6 +91,17 @@ function Shogi:processTurn(commands)
                         if self:move(friend, dir, acts) then break end
                     end
                 elseif friend.job == "witch" then
+                    local target = self:farEnemies(friend)[1]
+                    friend.i, friend.j, target.i, target.j = target.i, target.j, friend.i, friend.j
+                    acts[#acts + 1] = {
+                        type = "swap",
+                        actor = friend.id,
+                        target = target.id,
+                        fi = target.i,
+                        fj = target.j,
+                        ti = friend.i,
+                        tj = friend.j,
+                    }
                 end
             else
                 for _, dir in ipairs(CHIPS[chip]) do
@@ -88,8 +110,8 @@ function Shogi:processTurn(commands)
             end
         end
     end
-    if #self.chips.red < 1 then self.chips.red = us(CHIPS):keys():shuffle():value() end
-    if #self.chips.blue < 1 then self.chips.blue = us(CHIPS):keys():shuffle():value() end
+    if #self.chips.red < 1 then self.chips.red = self:drawChips() end
+    if #self.chips.blue < 1 then self.chips.blue = self:drawChips() end
     return acts
 end
 
@@ -125,6 +147,39 @@ function Shogi:move(friend, dir, acts)
         end
     end
     return false
+end
+
+function Shogi:farEnemies(who)
+    local dirs = {
+        {i = -2, j =  0},
+        {i = -1, j =  1},
+        {i = -1, j = -1},
+        {i =  1, j =  1},
+        {i =  1, j = -1},
+        {i =  2, j =  0},
+    }
+    local dist = us.map(TILES, function(_, e)
+        return us.rep(-1, #e)
+    end)
+    local currentDist = 0
+    dist[who.i][who.j] = 0
+    local queue = {{i = who.i, j = who.j}}
+    while #queue > 0 do
+        local c = table.remove(queue, 1)
+        for _, dir in ipairs(dirs) do
+            local ni, nj = c.i + dir.i, c.j + dir.j
+            if ni > 0 and ni <= #dist and nj > 0 and nj <= #dist[1] and dist[ni][nj] == -1 then
+                currentDist = currentDist + 1
+                dist[ni][nj] = currentDist
+                table.insert(queue, {i = ni, j = nj})
+            end
+        end
+    end
+    return us(self.chars):select(function(i, e)
+        return e.team ~= who.team
+    end):sort(function(a, b)
+        return dist[a.i][a.j] > dist[b.i][b.j]
+    end):value()
 end
 
 function Shogi.new(...)

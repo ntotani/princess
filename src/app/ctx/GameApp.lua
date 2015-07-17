@@ -14,6 +14,10 @@ function GameApp:getTeam()
     return self.configs_.team
 end
 
+function GameApp:getSeed()
+    return self.configs_.seed
+end
+
 function GameApp:addListener(listener)
     self.listener = listener
 end

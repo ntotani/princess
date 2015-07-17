@@ -9,7 +9,7 @@ function GameScene:onCreate()
         return us.rep(0, TILES_PER_SIDE * 2 - 1)
     end)
     ]]
-    self.shogi = require("lib.shogi").new()
+    self.shogi = require("lib.shogi").new(self:getApp():getSeed())
     cc.TMXTiledMap:create("tmx/forest.tmx"):addTo(self)
     for i, line in ipairs(self.shogi:getTiles()) do
         for j, e in ipairs(line) do
@@ -146,6 +146,22 @@ function GameScene:onTurn(commands)
                 time = DEF_TIME,
                 x = self:idx2pt(action.i, action.j).x,
                 y = self:idx2pt(action.i, action.j).y,
+            })
+            time = time + DEF_TIME
+        elseif action.type == "swap" then
+            actor:moveTo({
+                delay = time,
+                time = DEF_TIME,
+                x = self:idx2pt(action.ti, action.tj).x,
+                y = self:idx2pt(action.ti, action.tj).y,
+            })
+            charas[us.detect(charas, function(e)
+                return e.model.id == action.target
+            end)]:moveTo({
+                delay = time,
+                time = DEF_TIME,
+                x = self:idx2pt(action.fi, action.fj).x,
+                y = self:idx2pt(action.fi, action.fj).y,
             })
             time = time + DEF_TIME
         elseif action.type == "kill" then

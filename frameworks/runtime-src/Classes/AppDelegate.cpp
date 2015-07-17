@@ -18,6 +18,20 @@ using namespace CocosDenshion;
 USING_NS_CC;
 using namespace std;
 
+mt19937 rnd;
+
+int random_seed_glue(lua_State* L)
+{
+    rnd = mt19937(lua_tonumber(L, 1));
+    return 0;
+}
+
+int random_glue(lua_State* L)
+{
+    lua_pushnumber(L, rnd());
+    return 1;
+}
+
 AppDelegate::AppDelegate()
 {
 }
@@ -67,9 +81,9 @@ bool AppDelegate::applicationDidFinishLaunching()
     LuaStack* stack = engine->getLuaStack();
     stack->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
 
-    //register custom function
-    //LuaStack* stack = engine->getLuaStack();
-    //register_custom_function(stack->getLuaState());
+    lua_getglobal(stack->getLuaState(), "_G");
+    lua_register(stack->getLuaState(), "randomSeed", random_seed_glue);
+    lua_register(stack->getLuaState(), "random", random_glue);
 
 #if (COCOS2D_DEBUG > 0) && (CC_CODE_IDE_DEBUG_SUPPORT > 0)
     // NOTE:Please don't remove this call if you want to debug with Cocos Code IDE

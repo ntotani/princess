@@ -15,6 +15,10 @@ function TestApp:getTeam()
     return "red"
 end
 
+function TestApp:getSeed()
+    return 0
+end
+
 function TestApp:addListener(listener)
     self.listener = listener
 end
