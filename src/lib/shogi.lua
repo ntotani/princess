@@ -13,6 +13,7 @@ local CHIPS = {
     lflf = {{i = -1, j = -1}, {i = -1, j = -1}},
     frf  = {{i = -2, j =  0}, {i = -1, j =  1}},
     flf  = {{i = -2, j =  0}, {i = -1, j = -1}},
+    skill = {},
 }
 
 local TILES = {
@@ -43,7 +44,7 @@ function Shogi:reset()
         {id = 6, i = 3, j = 1, job = "ninja", team = "blue"},
     }
     self.chips = {
-        red = us(CHIPS):keys():shuffle():value(),
+        red = {"skill"},--us(CHIPS):keys():shuffle():value(),
         blue = us(CHIPS):keys():shuffle():value(),
     }
 end
@@ -69,35 +70,20 @@ function Shogi:processTurn(commands)
         if friend.dead then
             acts[#acts + 1] = {type = "dead", actor = charaId, chip = chipIdx}
         else
-            for _, dir in ipairs(CHIPS[table.remove(self.chips[friend.team], chipIdx)]) do
-                local ni = friend.i + dir.i * (friend.team == "red" and 1 or -1)
-                local nj = friend.j + dir.j * (friend.team == "red" and 1 or -1)
-                if ni < 1 or ni > #TILES or nj < 1 or nj > #TILES[1] or TILES[ni][nj] == 0 then
-                    -- out of bounds
-                    acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = charaId, chip = chipIdx}
-                    friend.dead = true
-                    break
-                end
-                local hit = us.detect(self.chars, function(e)
-                    return e.i == ni and e.j == nj and not e.dead
-                end)
-                friend.i = ni
-                friend.j = nj
-                acts[#acts + 1] = {type = "move", i = ni, j = nj, actor = charaId, chip = chipIdx}
-                if hit then
-                    -- kill other chara
-                    acts[#acts].type = "kill"
-                    acts[#acts].target = self.chars[hit].id
-                    self.chars[hit].dead = true
-                    if self.chars[hit].job == "hime" then
-                        acts[#acts + 1] = {type = "end", win = friend.team}
-                    end
-                    break
-                end
+            acts[#acts + 1] = {type = "chip", actor = charaId, chip = chipIdx}
+            local chip = table.remove(self.chips[friend.team], chipIdx)
+            if chip == "skill" then
                 if friend.job == "hime" then
-                    if TILES[ni][nj] == BLUE_CAMP and friend.team == "red" or TILES[ni][nj] == RED_CAMP and friend.team == "blue" then
-                        acts[#acts + 1] = {type = "end", win = friend.team}
+                    self:move(us.findWhere(self.chars, {job = "hime", team = (friend.team == "red" and "blue" or "red")}), {i = -2, j = 0}, acts)
+                elseif friend.job == "ninja" then
+                    for _, dir in ipairs({{i = -1, j = -1}, {i = -1, j = -1}, {i = -1, j = -1}}) do
+                        if self:move(friend, dir, acts) then break end
                     end
+                elseif friend.job == "witch" then
+                end
+            else
+                for _, dir in ipairs(CHIPS[chip]) do
+                    if self:move(friend, dir, acts) then break end
                 end
             end
         end
@@ -105,6 +91,40 @@ function Shogi:processTurn(commands)
     if #self.chips.red < 1 then self.chips.red = us(CHIPS):keys():shuffle():value() end
     if #self.chips.blue < 1 then self.chips.blue = us(CHIPS):keys():shuffle():value() end
     return acts
+end
+
+function Shogi:move(friend, dir, acts)
+    local ni = friend.i + dir.i * (friend.team == "red" and 1 or -1)
+    local nj = friend.j + dir.j * (friend.team == "red" and 1 or -1)
+    if ni < 1 or ni > #TILES or nj < 1 or nj > #TILES[1] or TILES[ni][nj] == 0 then
+        -- out of bounds
+        acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = friend.id}
+        friend.dead = true
+        return true
+    end
+    local hit = us.detect(self.chars, function(e)
+        return e.i == ni and e.j == nj and not e.dead
+    end)
+    friend.i = ni
+    friend.j = nj
+    acts[#acts + 1] = {type = "move", i = ni, j = nj, actor = friend.id}
+    if hit then
+        -- kill other chara
+        acts[#acts].type = "kill"
+        acts[#acts].target = self.chars[hit].id
+        self.chars[hit].dead = true
+        if self.chars[hit].job == "hime" then
+            acts[#acts + 1] = {type = "end", win = friend.team}
+        end
+        return true
+    end
+    if friend.job == "hime" then
+        if TILES[ni][nj] == BLUE_CAMP and friend.team == "red" or TILES[ni][nj] == RED_CAMP and friend.team == "blue" then
+            acts[#acts + 1] = {type = "end", win = friend.team}
+            return true
+        end
+    end
+    return false
 end
 
 function Shogi.new(...)

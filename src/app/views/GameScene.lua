@@ -130,7 +130,7 @@ function GameScene:onTurn(commands)
                 y = isMyTeam and -36 or display.height + 36,
                 removeSelf = true,
             })
-        else
+        elseif action.type == "chip" then
             us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip}):moveTo({
                 delay = time,
                 time = DEF_TIME,
@@ -138,8 +138,8 @@ function GameScene:onTurn(commands)
                 y = actor:getPositionY(),
                 removeSelf = true,
             })
+            time = time + DEF_TIME
         end
-        time = time + DEF_TIME
         if action.type == "move" then
             actor:moveTo({
                 delay = time,
