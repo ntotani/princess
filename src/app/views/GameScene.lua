@@ -9,8 +9,9 @@ function GameScene:onCreate()
         return us.rep(0, TILES_PER_SIDE * 2 - 1)
     end)
     ]]
+    self.shogi = require("lib.shogi").new()
     cc.TMXTiledMap:create("tmx/forest.tmx"):addTo(self)
-    for i, line in ipairs(self:getApp():getTiles()) do
+    for i, line in ipairs(self.shogi:getTiles()) do
         for j, e in ipairs(line) do
             if e > 0 then
                 display.newSprite("img/tile.png"):move(self:idx2pt(i, j)):addTo(self)
@@ -31,14 +32,16 @@ function GameScene:reset()
     for _, e in ipairs(self.friends:getChildren()) do e:removeSelf() end
     for _, e in ipairs(self.chips:getChildren()) do e:removeSelf() end
     for _, e in ipairs(self.enemyChips:getChildren()) do e:removeSelf() end
-    for _, e in ipairs(self:getApp():getChars()) do
+    for _, e in ipairs(self.shogi:getChars()) do
         self:initChara(e)
     end
-    for i, e in ipairs(self:getApp():getChips()) do
+    local friendTeam = self:getApp():getTeam()
+    local enemyTeam = friendTeam == "red" and "blue" or "red"
+    for i, e in ipairs(self.shogi:getChips(friendTeam)) do
         local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), 80):addTo(self.chips)
         chip.idx = i
     end
-    for i, e in ipairs(self:getApp():getEnemyChips()) do
+    for i, e in ipairs(self.shogi:getChips(enemyTeam)) do
         local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), display.height - 80):addTo(self.enemyChips)
         chip:setScale(-1)
         chip.idx = i
@@ -61,8 +64,8 @@ end
 
 function GameScene:idx2pt(i, j)
     if self:getApp():getTeam() == "blue" then
-        i = #self:getApp():getTiles() - i + 1
-        j = #self:getApp():getTiles()[1] - j + 1
+        i = #self.shogi:getTiles() - i + 1
+        j = #self.shogi:getTiles()[1] - j + 1
     end
     return cc.p(display.cx + 38 * (j - 3) * 1.5, display.cy + 33 * (5 - i))
 end
@@ -100,16 +103,16 @@ function GameScene:onTouch(e)
     end
 end
 
-function GameScene:onTurn(actions)
+function GameScene:onTurn(commands)
     local DEF_TIME = 0.3
     local time = 0
-    for _, action in ipairs(actions) do
+    for _, action in ipairs(self.shogi:processTurn(commands)) do
         if action.type == "end" then
             self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
                 local message = display.newSprite("img/" .. (action.win == self:getApp():getTeam() and "win" or "lose") .. ".png"):move(display.center):addTo(self)
                 self.touchLayer:onTouch(function()
                     message:removeSelf()
-                    self:getApp():reset()
+                    self.shogi:reset()
                     self:reset()
                 end)
             end)))
@@ -119,7 +122,7 @@ function GameScene:onTurn(actions)
         local actor = charas[us.detect(charas, function(e)
             return e.model.id == action.actor
         end)]
-        local isMyTeam = us.findWhere(self:getApp():getChars(), {id = action.actor}).team == self:getApp():getTeam()
+        local isMyTeam = us.findWhere(self.shogi:getChars(), {id = action.actor}).team == self:getApp():getTeam()
         if action.type == "dead" then
             us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip}):moveTo({
                 delay = time,
@@ -170,8 +173,9 @@ function GameScene:onTurn(actions)
             time = time + DEF_TIME
         end
     end
-    local drawChip = function(isMyTeam)
-        local model = isMyTeam and self:getApp():getChips() or self:getApp():getEnemyChips()
+    local drawChip = function(team)
+        local isMyTeam = team == self:getApp():getTeam()
+        local model = self.shogi:getChips(team)
         local view = isMyTeam and self.chips or self.enemyChips
         for i, e in ipairs(model) do
             local chips = view:getChildren()
@@ -193,8 +197,8 @@ function GameScene:onTurn(actions)
         end
     end
     self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
-        drawChip(true)
-        drawChip(false)
+        drawChip("red")
+        drawChip("blue")
     end), cc.DelayTime:create(DEF_TIME), cc.CallFunc:create(function()
         self.touchLayer:onTouch(us.bind(self.onTouch, self))
     end)))
