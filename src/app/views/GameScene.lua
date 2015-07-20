@@ -109,7 +109,7 @@ function GameScene:onTurn(commands)
     for _, action in ipairs(self.shogi:processTurn(commands)) do
         if action.type == "end" then
             self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
-                local message = display.newSprite("img/" .. (action.win == self:getApp():getTeam() and "win" or "lose") .. ".png"):move(display.center):addTo(self)
+                local message = display.newSprite("img/" .. (action.lose == self:getApp():getTeam() and "lose" or "win") .. ".png"):move(display.center):addTo(self)
                 self.touchLayer:onTouch(function()
                     message:removeSelf()
                     self.shogi:reset()

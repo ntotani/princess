@@ -122,6 +122,9 @@ function Shogi:move(friend, dir, acts)
         -- out of bounds
         acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = friend.id}
         friend.dead = true
+        if friend.job == "hime" then
+            acts[#acts + 1] = {type = "end", lose = friend.team}
+        end
         return true
     end
     local hit = us.detect(self.chars, function(e)
@@ -136,13 +139,16 @@ function Shogi:move(friend, dir, acts)
         acts[#acts].target = self.chars[hit].id
         self.chars[hit].dead = true
         if self.chars[hit].job == "hime" then
-            acts[#acts + 1] = {type = "end", win = friend.team}
+            acts[#acts + 1] = {type = "end", lose = self.chars[hit].team}
         end
         return true
     end
     if friend.job == "hime" then
-        if TILES[ni][nj] == BLUE_CAMP and friend.team == "red" or TILES[ni][nj] == RED_CAMP and friend.team == "blue" then
-            acts[#acts + 1] = {type = "end", win = friend.team}
+        if TILES[ni][nj] == BLUE_CAMP and friend.team == "red" then
+            acts[#acts + 1] = {type = "end", lose = "blue"}
+            return true
+        elseif TILES[ni][nj] == RED_CAMP and friend.team == "blue" then
+            acts[#acts + 1] = {type = "end", lose = "red"}
             return true
         end
     end
