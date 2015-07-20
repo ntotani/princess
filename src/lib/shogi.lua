@@ -78,11 +78,11 @@ function Shogi:processTurn(commands)
         local charaId = tonumber(e:sub(1, 1))
         local chipIdx = tonumber(e:sub(2, 2))
         local friend = us.findWhere(self.chars, {id = charaId})
+        local chip = table.remove(self.chips[friend.team], chipIdx)
         if friend.dead then
             acts[#acts + 1] = {type = "dead", actor = charaId, chip = chipIdx}
         else
             acts[#acts + 1] = {type = "chip", actor = charaId, chip = chipIdx}
-            local chip = table.remove(self.chips[friend.team], chipIdx)
             if chip == "skill" then
                 if friend.job == "hime" then
                     self:move(us.findWhere(self.chars, {job = "hime", team = (friend.team == "red" and "blue" or "red")}), {i = -2, j = 0}, acts)
