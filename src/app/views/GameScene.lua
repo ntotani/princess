@@ -52,6 +52,7 @@ end
 function GameScene:initChara(chara)
     local node = cc.Node:create():move(self:idx2pt(chara.i, chara.j))
     node.sprite = jam.sprite("img/" .. chara.job .. ".png", 32):addTo(node)
+    node.gauge = self:createHpGauge():move(-16, 16):addTo(node)
     if chara.team == self:getApp():getTeam() then
         node.sprite:frameIdx(9, 10, 11, 10)
         node:addTo(self.friends)
@@ -60,6 +61,22 @@ function GameScene:initChara(chara)
         node:addTo(self.enemies)
     end
     node.model = chara
+end
+
+function GameScene:createHpGauge()
+    local gauge = cc.DrawNode:create()
+    local wid = 32
+    local hei = 8
+    gauge.setValue = function(value)
+        gauge:clear()
+        gauge:drawSolidRect(cc.p(0, 0), cc.p(wid, hei), cc.c4f(1, 1, 1, 1))
+        gauge:drawSolidRect(cc.p(2, 2), cc.p(wid - 2, hei - 2), cc.c4f(0, 0, 0, 1))
+        if value > 0 then
+            gauge:drawSolidRect(cc.p(2, 2), cc.p((wid - 4) * value / 100 + 2, hei - 2), cc.c4f(0, 1, 0, 1))
+        end
+    end
+    gauge.setValue(100)
+    return gauge
 end
 
 function GameScene:idx2pt(i, j)
@@ -165,20 +182,32 @@ function GameScene:onTurn(commands)
                 y = self:idx2pt(action.fi, action.fj).y,
             })
             time = time + DEF_TIME
-        elseif action.type == "kill" then
-            actor:moveTo({
-                delay = time,
-                time = DEF_TIME,
-                x = self:idx2pt(action.i, action.j).x,
-                y = self:idx2pt(action.i, action.j).y,
-                onComplete = function()
+        elseif action.type == "attack" then
+            actor:runAction(cc.Sequence:create(
+                cc.DelayTime:create(time),
+                cc.MoveTo:create(DEF_TIME / 2, self:idx2pt(action.i, action.j)),
+                cc.CallFunc:create(function()
                     local charas = us.flatten({self.friends:getChildren(), self.enemies:getChildren()})
-                    charas[us.detect(charas, function(e)
+                    local chara = charas[us.detect(charas, function(e)
                         return e.model.id == action.target
-                    end)]:removeSelf()
-                end,
-            })
+                    end)]
+                    chara.gauge.setValue(action.hp - action.dmg)
+                    if action.dmg >= action.hp then
+                        chara:removeSelf()
+                    end
+                end),
+                cc.MoveTo:create(DEF_TIME / 2, self:idx2pt(action.fi, action.fj))
+            ))
             time = time + DEF_TIME
+            if action.dmg >= action.hp then
+                actor:moveTo({
+                    delay = time,
+                    time = DEF_TIME,
+                    x = self:idx2pt(action.i, action.j).x,
+                    y = self:idx2pt(action.i, action.j).y,
+                })
+                time = time + DEF_TIME
+            end
         elseif action.type == "ob" then
             actor:moveTo({
                 delay = time,

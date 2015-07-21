@@ -37,12 +37,12 @@ end
 
 function Shogi:reset()
     self.chars = {
-        {id = 1, i = 9, j = 3, job = "hime",  team = "red"},
-        {id = 2, i = 8, j = 2, job = "witch", team = "red"},
-        {id = 3, i = 7, j = 5, job = "ninja", team = "red"},
-        {id = 4, i = 1, j = 3, job = "hime",  team = "blue"},
-        {id = 5, i = 2, j = 4, job = "witch", team = "blue"},
-        {id = 6, i = 3, j = 1, job = "ninja", team = "blue"},
+        {id = 1, i = 9, j = 3, job = "hime",  team = "red",  hp = 100},
+        {id = 2, i = 8, j = 2, job = "witch", team = "red",  hp = 100},
+        {id = 3, i = 7, j = 5, job = "ninja", team = "red",  hp = 100},
+        {id = 4, i = 1, j = 3, job = "hime",  team = "blue", hp = 100},
+        {id = 5, i = 2, j = 4, job = "witch", team = "blue", hp = 100},
+        {id = 6, i = 3, j = 1, job = "ninja", team = "blue", hp = 100},
     }
     self.chips = {
         red = self:drawChips(),
@@ -79,7 +79,7 @@ function Shogi:processTurn(commands)
         local chipIdx = tonumber(e:sub(2, 2))
         local friend = us.findWhere(self.chars, {id = charaId})
         local chip = table.remove(self.chips[friend.team], chipIdx)
-        if friend.dead then
+        if friend.hp <= 0 then
             acts[#acts + 1] = {type = "dead", actor = charaId, chip = chipIdx}
         else
             acts[#acts + 1] = {type = "chip", actor = charaId, chip = chipIdx}
@@ -121,28 +121,37 @@ function Shogi:move(friend, dir, acts)
     if ni < 1 or ni > #TILES or nj < 1 or nj > #TILES[1] or TILES[ni][nj] == 0 then
         -- out of bounds
         acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = friend.id}
-        friend.dead = true
+        friend.hp = 0
         if friend.job == "hime" then
             acts[#acts + 1] = {type = "end", lose = friend.team}
         end
         return true
     end
     local hit = us.detect(self.chars, function(e)
-        return e.i == ni and e.j == nj and not e.dead
+        return e.i == ni and e.j == nj and e.hp > 0
     end)
-    friend.i = ni
-    friend.j = nj
-    acts[#acts + 1] = {type = "move", i = ni, j = nj, actor = friend.id}
+    acts[#acts + 1] = {type = "move", fi = friend.i, fj = friend.j, actor = friend.id}
+    acts[#acts].i = ni
+    acts[#acts].j = nj
     if hit then
-        -- kill other chara
-        acts[#acts].type = "kill"
-        acts[#acts].target = self.chars[hit].id
-        self.chars[hit].dead = true
-        if self.chars[hit].job == "hime" then
-            acts[#acts + 1] = {type = "end", lose = self.chars[hit].team}
+        local target = self.chars[hit]
+        local dmg = 60 -- TODO calc
+        acts[#acts].hp = target.hp
+        acts[#acts].dmg = dmg
+        target.hp = math.max(target.hp - dmg, 0)
+        if target.hp <= 0 then
+            friend.i = ni
+            friend.j = nj
+        end
+        acts[#acts].type = "attack"
+        acts[#acts].target = target.id
+        if target.job == "hime" and target.hp <= 0 then
+            acts[#acts + 1] = {type = "end", lose = target.team}
         end
         return true
     end
+    friend.i = ni
+    friend.j = nj
     if friend.job == "hime" then
         if TILES[ni][nj] == BLUE_CAMP and friend.team == "red" then
             acts[#acts + 1] = {type = "end", lose = "blue"}
