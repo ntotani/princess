@@ -198,6 +198,9 @@ function Shogi:farEnemies(who)
         {i =  1, j = -1},
         {i =  2, j =  0},
     }
+    if who.team == "blue" then
+        dirs = us.reverse(dirs)
+    end
     local dist = us.map(TILES, function(_, e)
         return us.rep(-1, #e)
     end)
