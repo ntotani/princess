@@ -1,6 +1,24 @@
 local us = require("lib.moses")
 local Shogi = {}
 
+local COLOR_RATE = {
+    tue = {tue = 0.5, wed = 0.5, thu = 2.0},
+    wed = {tue = 2.0, wed = 0.5, thu = 0.5},
+    thu = {tue = 0.5, wed = 2.0, thu = 0.5},
+}
+
+local CHARAS = {
+    {id = "1", job = "hime",  attack = 100, block = 100, color = "tue"},
+    {id = "2", job = "hime",  attack = 100, block = 100, color = "wed"},
+    {id = "3", job = "hime",  attack = 100, block = 100, color = "thu"},
+    {id = "4", job = "ninja", attack = 100, block = 100, color = "tue"},
+    {id = "5", job = "ninja", attack = 100, block = 100, color = "wed"},
+    {id = "6", job = "ninja", attack = 100, block = 100, color = "thu"},
+    {id = "7", job = "witch", attack = 100, block = 100, color = "tue"},
+    {id = "8", job = "witch", attack = 100, block = 100, color = "wed"},
+    {id = "9", job = "witch", attack = 100, block = 100, color = "thu"},
+}
+
 local CHIPS = {
     f    = {{i = -2, j =  0}},
     rf   = {{i = -1, j =  1}},
@@ -37,13 +55,20 @@ end
 
 function Shogi:reset()
     self.chars = {
-        {id = 1, i = 9, j = 3, job = "hime",  team = "red",  hp = 100},
-        {id = 2, i = 8, j = 2, job = "witch", team = "red",  hp = 100},
-        {id = 3, i = 7, j = 5, job = "ninja", team = "red",  hp = 100},
-        {id = 4, i = 1, j = 3, job = "hime",  team = "blue", hp = 100},
-        {id = 5, i = 2, j = 4, job = "witch", team = "blue", hp = 100},
-        {id = 6, i = 3, j = 1, job = "ninja", team = "blue", hp = 100},
+        {id = 1, i = 9, j = 3, team = "red",  hp = 100},
+        {id = 2, i = 8, j = 2, team = "red",  hp = 100},
+        {id = 3, i = 7, j = 5, team = "red",  hp = 100},
+        {id = 4, i = 1, j = 3, team = "blue", hp = 100},
+        {id = 5, i = 2, j = 4, team = "blue", hp = 100},
+        {id = 6, i = 3, j = 1, team = "blue", hp = 100},
     }
+    local himes = us.select(CHARAS, function(_, e) return e.job == "hime" end)
+    local others = us.select(CHARAS, function(_, e) return e.job ~= "hime" end)
+    for _, e in ipairs(self.chars) do
+        local masters = (e.id == 1 or e.id == 4) and himes or others
+        local master = masters[(random() % #masters) + 1]
+        setmetatable(e, {__index = master})
+    end
     self.chips = {
         red = self:drawChips(),
         blue = self:drawChips(),
@@ -135,7 +160,7 @@ function Shogi:move(friend, dir, acts)
     acts[#acts].j = nj
     if hit then
         local target = self.chars[hit]
-        local dmg = 60 -- TODO calc
+        local dmg = 40 * friend.attack / target.block * COLOR_RATE[friend.color][target.color]
         acts[#acts].hp = target.hp
         acts[#acts].dmg = dmg
         target.hp = math.max(target.hp - dmg, 0)
