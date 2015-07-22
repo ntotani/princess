@@ -41,7 +41,13 @@ function FormationScene:onCreate()
             self:initChara(e):move(i * 48, display.height - 80):addTo(self)
         end
     end
-    self.touchLayer = display.newLayer():addTo(self):onTouch(us.bind(self.onTouch, self))
+    local notice = cc.Node:create():addTo(self)
+    display.newSprite("img/window.png"):move(display.center):addTo(notice)
+    cc.Label:createWithSystemFont("味方を2体まで赤いマスに配置して下さい", "", 18):move(display.center):addTo(notice):setDimensions(200, 0)
+    self.touchLayer = display.newLayer():addTo(self):onTouch(function()
+        notice:removeSelf()
+        self.touchLayer:onTouch(us.bind(self.onTouch, self))
+    end)
 end
 
 function FormationScene:idx2pt(i, j)
