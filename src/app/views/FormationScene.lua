@@ -27,7 +27,9 @@ function FormationScene:onCreate()
     local myTeam = self:getApp():getTeam()
     for i, e in ipairs(party[myTeam]) do
         if e.job == "hime" then
-            self:initChara(e):move(self:idx2pt(self:searchTileIdx(2))):addTo(self)
+            local ii, jj = self:searchTileIdx(2)
+            self.hime = self:initChara(e):move(self:idx2pt(ii, jj)):addTo(self)
+            self.hime.pos = {i = ii, j = jj}
         else
             local chara = self:initChara(e):move(i * 48, 80):addTo(self.friends)
             chara.pos = nil
@@ -74,6 +76,7 @@ function FormationScene:initChara(chara)
     node.sprite = jam.sprite("img/" .. chara.job .. "_" .. chara.color .. ".png", 32):addTo(node)
     node.sprite:frameIdx(0, 1, 2, 1)
     node.color = display.newSprite("icon/" .. chara.color .. ".png"):move(16, -16):addTo(node)
+    node.model = chara
     return node
 end
 
@@ -108,7 +111,13 @@ function FormationScene:onTouch(e)
                     display.newSprite("img/window.png"):move(display.center):addTo(confirm)
                     cc.Label:createWithSystemFont("この配置でいいですか？", "", 18):move(display.center):addTo(confirm)
                     local ok = cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(function()
-                        print("ok")
+                        local form = {self.hime.model.id .. self.hime.pos.i .. self.hime.pos.j}
+                        for _, friend in ipairs(self.friends:getChildren()) do
+                            if friend.pos then
+                                form[#form + 1] = friend.model.id .. friend.pos.i .. friend.pos.j
+                            end
+                        end
+                        self:getApp():commitForm(form)
                     end):move(50, 0):addChild(cc.Label:createWithSystemFont("はい", "", 18):move(39, 21))
                     local ng = cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(function()
                         for _, friend in ipairs(self.friends:getChildren()) do
