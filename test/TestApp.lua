@@ -16,6 +16,14 @@ function TestApp:addListener(listener)
     self.listener = listener
 end
 
+function TestApp:commitForm(form)
+    self.shogi:commitForm({
+        red = form,
+        blue = {"113", "224", "331"},
+    })
+    self:enterScene("GameScene")
+end
+
 function TestApp:commit(charaId, chipIdx)
     self.listener({charaId .. chipIdx})
 end

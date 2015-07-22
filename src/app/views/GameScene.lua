@@ -3,13 +3,7 @@ local jam = require("lib.jam")
 local GameScene = class("GameScene", cc.load("mvc").ViewBase)
 
 function GameScene:onCreate()
-    --[[
-    local TILES_PER_SIDE = 3
-    local tiles = us.map(us.range(1, TILES_PER_SIDE * 2 - 1 + (TILES_PER_SIDE - 1) * 2), function(e)
-        return us.rep(0, TILES_PER_SIDE * 2 - 1)
-    end)
-    ]]
-    self.shogi = require("lib.shogi").new(self:getApp():getSeed())
+    self.shogi = self:getApp():getShogi()
     cc.TMXTiledMap:create("tmx/forest.tmx"):addTo(self)
     for i, line in ipairs(self.shogi:getTiles()) do
         for j, e in ipairs(line) do
