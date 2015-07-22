@@ -54,6 +54,7 @@ function Shogi:ctor(seed)
 end
 
 function Shogi:reset()
+    --[[
     self.chars = {
         {id = 1, i = 9, j = 3, team = "red",  hp = 100},
         {id = 2, i = 8, j = 2, team = "red",  hp = 100},
@@ -62,13 +63,44 @@ function Shogi:reset()
         {id = 5, i = 2, j = 4, team = "blue", hp = 100},
         {id = 6, i = 3, j = 1, team = "blue", hp = 100},
     }
+    ]]
     local himes = us.select(CHARAS, function(_, e) return e.job == "hime" end)
     local others = us.select(CHARAS, function(_, e) return e.job ~= "hime" end)
-    for _, e in ipairs(self.chars) do
-        local masters = (e.id == 1 or e.id == 4) and himes or others
-        local master = masters[(random() % #masters) + 1]
-        setmetatable(e, {__index = master})
+    self.party = {
+        red  = {himes[(random() % #himes) + 1]},
+        blue = {himes[(random() % #himes) + 1]}
+    }
+    for _ = 1, 5 do
+        self.party.red[#self.party.red + 1] = others[(random() % #others) + 1]
+        self.party.blue[#self.party.blue + 1] = others[(random() % #others) + 1]
     end
+    self.chars = {}
+    self.chips = {}
+end
+
+function Shogi:getParty()
+    return self.party
+end
+
+function Shogi:commitForm(form)
+    local charaId = 1
+    local apply = function(team)
+        for _, e in ipairs(form[team]) do
+            local master = self.party[team][tonumber(e:sub(1, 1))]
+            local chara = {
+                id = charaId,
+                i = tonumber(e:sub(2, 2)),
+                j = tonumber(e:sub(3, 3)),
+                team = team,
+                hp = 100,
+            }
+            setmetatable(chara, {__index = master})
+            self.chars[#self.chars + 1] = chara
+            charaId = charaId + 1
+        end
+    end
+    apply("red")
+    apply("blue")
     self.chips = {
         red = self:drawChips(),
         blue = self:drawChips(),
