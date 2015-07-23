@@ -1,3 +1,7 @@
+machine:
+  environment:
+    XCODE_SCHEME: princess iOS
+
 dependencies:
     cache_directories:
         - runtime/test
