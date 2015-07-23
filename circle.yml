@@ -4,13 +4,13 @@ machine:
 
 dependencies:
     cache_directories:
-        - runtime/test/bin
+        - runtime/test
     pre:
         - |
             brew tap homebrew/versions
             brew install glfw3
-            python frameworks/cocos2d-x/download-deps.py -r yes
-            if [ ! -e runtime/test/bin ]; then
+            if [ ! -e runtime/test ]; then
+                python frameworks/cocos2d-x/download-deps.py -r yes
                 mkdir -p runtime/test
                 cd runtime/test
                 cmake -DCMAKE_BUILD_TYPE=Debug -DDEBUG_MODE=ON ../../frameworks
