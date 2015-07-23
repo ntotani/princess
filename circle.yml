@@ -6,6 +6,7 @@ dependencies:
     cache_directories:
         - runtime/test
     pre:
+        - brew tap homebrew/versions
         - brew install glfw3
         - python frameworks/cocos2d-x/download-deps.py -r yes
         - |
