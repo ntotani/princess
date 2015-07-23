@@ -1,0 +1,14 @@
+{
+    "applications": {
+        "_default": {
+            "link": "princess"
+        }, 
+        "princess": {
+            "applicationId": "so6Tb3E5JowUXObTBdnRJaBWXf8ZQZjAslBlmdoE", 
+            "masterKey": "xAURQgioEkdBPHbecbARpfote3GEUO7LuDj0eohU"
+        }
+    }, 
+    "global": {
+        "parseVersion": "1.3.1"
+    }
+}

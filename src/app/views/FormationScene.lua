@@ -20,6 +20,10 @@ function FormationScene:onCreate()
         end
     end
     for _, e in ipairs(MY_AREA) do
+        if self:getApp():getTeam() == "blue" then
+            e.i = #self.shogi:getTiles() - e.i + 1
+            e.j = #self.shogi:getTiles()[1] - e.j + 1
+        end
         display.newSprite("img/tile_red.png"):move(self:idx2pt(e.i, e.j)):addTo(self)
     end
     self.friends = display.newLayer():addTo(self)
@@ -27,7 +31,7 @@ function FormationScene:onCreate()
     local myTeam = self:getApp():getTeam()
     for i, e in ipairs(party[myTeam]) do
         if e.job == "hime" then
-            local ii, jj = self:searchTileIdx(2)
+            local ii, jj = self:searchTileIdx(myTeam == "red" and 2 or 3)
             self.hime = self:initChara(e):move(self:idx2pt(ii, jj)):addTo(self)
             self.hime.pos = {i = ii, j = jj}
             self.hime.partyIdx = i
@@ -40,7 +44,7 @@ function FormationScene:onCreate()
     end
     for i, e in ipairs(party[myTeam == "red" and "blue" or "red"]) do
         if e.job == "hime" then
-            self:initChara(e):move(self:idx2pt(self:searchTileIdx(3))):addTo(self)
+            self:initChara(e):move(self:idx2pt(self:searchTileIdx(myTeam == "red" and 3 or 2))):addTo(self)
         else
             self:initChara(e):move(i * 48, display.height - 80):addTo(self)
         end

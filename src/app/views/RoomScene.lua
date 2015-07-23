@@ -58,7 +58,7 @@ function RoomScene:initWebsocket(isBuild)
                     matchId = data.id,
                     team = self.corner,
                     seed = data.seed,
-                }):enterScene("GameScene")
+                }):enterScene("FormationScene")
 
             end
         end, cc.WEBSOCKET_MESSAGE)
