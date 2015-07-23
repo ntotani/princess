@@ -1,0 +1,17 @@
+dependencies:
+    cache_directories:
+        - runtime/test
+    pre:
+        - python frameworks/cocos2d-x/download-deps.py -r yes
+        - |
+            if [ ! -e runtime/test ]; then
+                mkdir -p runtime/test
+                cd runtime/test
+                cmake -DCMAKE_BUILD_TYPE=Debug -DDEBUG_MODE=ON ../../frameworks
+                make
+            fi
+
+test:
+    override:
+        - runtime/test/princess `pwd`/
+
