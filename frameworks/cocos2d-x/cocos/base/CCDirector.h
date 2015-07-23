@@ -508,6 +508,7 @@ protected:
     void destroyTextureCache();
 
     void initMatrixStack();
+    void updatePhysics();
 
     std::stack<Mat4> _modelViewMatrixStack;
     std::stack<Mat4> _projectionMatrixStack;
@@ -630,6 +631,27 @@ public:
     virtual void setAnimationInterval(double value) override;
     virtual void startAnimation() override;
     virtual void stopAnimation() override;
+
+protected:
+    bool _invalid;
+};
+
+class VirtualDirector : public Director
+{
+public:
+    VirtualDirector()
+        : _invalid(false)
+    {}
+    virtual ~VirtualDirector(){}
+
+    static VirtualDirector* create();
+
+    virtual void mainLoop() override;
+    virtual void setAnimationInterval(double value) override {}
+    virtual void startAnimation() override { _invalid = false; }
+    virtual void stopAnimation() override { _invalid = true; }
+
+    inline void setDeltaTime(float deltaTime) { _deltaTime = deltaTime; }
 
 protected:
     bool _invalid;

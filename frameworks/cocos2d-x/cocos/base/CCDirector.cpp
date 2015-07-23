@@ -81,10 +81,9 @@ THE SOFTWARE.
 using namespace std;
 
 NS_CC_BEGIN
-// FIXME: it should be a Director ivar. Move it there once support for multiple directors is added
 
 // singleton stuff
-static DisplayLinkDirector *s_SharedDirector = nullptr;
+static Director *s_SharedDirector = nullptr;
 
 #define kDefaultFPS        60  // 60 frames per second
 extern const char* cocos2dVersion(void);
@@ -285,13 +284,7 @@ void Director::drawScene()
     
     if (_runningScene)
     {
-#if CC_USE_PHYSICS
-        auto physicsWorld = _runningScene->getPhysicsWorld();
-        if (physicsWorld && physicsWorld->isAutoStep())
-        {
-            physicsWorld->update(_deltaTime, false);
-        }
-#endif
+        updatePhysics();
         //clear draw stats
         _renderer->clearDrawStats();
         
@@ -329,6 +322,17 @@ void Director::drawScene()
     {
         calculateMPF();
     }
+}
+
+void Director::updatePhysics()
+{
+#if CC_USE_PHYSICS
+    auto physicsWorld = _runningScene->getPhysicsWorld();
+    if (physicsWorld && physicsWorld->isAutoStep())
+    {
+        physicsWorld->update(_deltaTime, false);
+    }
+#endif
 }
 
 void Director::calculateDeltaTime()
@@ -1361,6 +1365,59 @@ void DisplayLinkDirector::setAnimationInterval(double interval)
         stopAnimation();
         startAnimation();
     }    
+}
+
+VirtualDirector* VirtualDirector::create()
+{
+    CCASSERT(s_SharedDirector == nullptr, "Director exist");
+    auto vd = new (std::nothrow) VirtualDirector();
+    s_SharedDirector = vd;
+    CCASSERT(s_SharedDirector, "FATAL: Not enough memory");
+    s_SharedDirector->init();
+    return vd;
+}
+
+void VirtualDirector::mainLoop()
+{
+    if (_purgeDirectorInNextLoop)
+    {
+        _purgeDirectorInNextLoop = false;
+        purgeDirector();
+    }
+    else if (_restartDirectorInNextLoop)
+    {
+        _restartDirectorInNextLoop = false;
+        restartDirector();
+    }
+    else if (! _invalid)
+    {
+        if (! _paused)
+        {
+            _scheduler->update(_deltaTime);
+            _eventDispatcher->dispatchEvent(_eventAfterUpdate);
+        }
+
+        /* to avoid flickr, nextScene MUST be here: after tick and before draw.
+         * FIXME: Which bug is this one. It seems that it can't be reproduced with v0.9
+         */
+        if (_nextScene)
+        {
+            setNextScene();
+        }
+
+        if (_runningScene)
+        {
+            updatePhysics();
+            _eventDispatcher->dispatchEvent(_eventAfterVisit);
+        }
+
+        _eventDispatcher->dispatchEvent(_eventAfterDraw);
+
+        _totalFrames++;
+
+        // release the objects
+        PoolManager::getInstance()->getCurrentPool()->clear();
+    }
 }
 
 NS_CC_END
