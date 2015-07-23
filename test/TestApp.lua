@@ -28,5 +28,10 @@ function TestApp:commit(charaId, chipIdx)
     self.listener({charaId .. chipIdx})
 end
 
+function TestApp:reset()
+    self.shogi:reset()
+    self:enterScene("FormationScene")
+end
+
 return TestApp
 

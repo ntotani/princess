@@ -6,7 +6,7 @@ function GameApp:onCreate()
     self.configs_.socket:registerScriptHandler(function(msg)
         msg = json.decode(msg)
         if msg.event == "turn" then
-            self:onTurn(msg)
+            self.listener(json.decode(msg.data))
         elseif msg.event == "form" then
             self.shogi:commitForm(json.decode(msg.data))
             self:enterScene("GameScene")
@@ -36,6 +36,14 @@ function GameApp:commit(charaId, chipIdx)
     self:sendRequest({acts = {__op = "Add", objects = {charaId .. chipIdx}}})
 end
 
+function GameApp:reset()
+    if self:getTeam() == "red" then
+        self:sendRequest({red = {}, blue = {}, acts = {}})
+    end
+    self.shogi:reset()
+    self:enterScene("FormationScene")
+end
+
 function GameApp:sendRequest(body)
     local xhr = cc.XMLHttpRequest:new()
     xhr.responseType = cc.XMLHTTPREQUEST_RESPONSE_JSON
@@ -51,10 +59,6 @@ function GameApp:sendRequest(body)
         end
     end)
     xhr:send(json.encode(body))
-end
-
-function GameApp:onTurn(msg)
-    self.listener(json.decode(msg.data))
 end
 
 return GameApp

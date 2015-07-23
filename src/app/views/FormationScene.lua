@@ -2,14 +2,13 @@ local us = require("lib.moses")
 local jam = require("lib.jam")
 local FormationScene = class("FormationScene", cc.load("mvc").ViewBase)
 
-local MY_AREA = {
-    {i = 7, j = 3},
-    {i = 7, j = 5},
-    {i = 8, j = 2},
-    {i = 8, j = 4},
-}
-
 function FormationScene:onCreate()
+    self.MY_AREA = {
+        {i = 7, j = 3},
+        {i = 7, j = 5},
+        {i = 8, j = 2},
+        {i = 8, j = 4},
+    }
     self.shogi = self:getApp():getShogi()
     cc.TMXTiledMap:create("tmx/forest.tmx"):addTo(self)
     for i, line in ipairs(self.shogi:getTiles()) do
@@ -19,7 +18,7 @@ function FormationScene:onCreate()
             end
         end
     end
-    for _, e in ipairs(MY_AREA) do
+    for _, e in ipairs(self.MY_AREA) do
         if self:getApp():getTeam() == "blue" then
             e.i = #self.shogi:getTiles() - e.i + 1
             e.j = #self.shogi:getTiles()[1] - e.j + 1
@@ -101,7 +100,7 @@ function FormationScene:onTouch(e)
         self.holdChara:move(e)
     elseif self.holdChara then
         local len = 40
-        for _, tile in ipairs(MY_AREA) do
+        for _, tile in ipairs(self.MY_AREA) do
             local pt = self:idx2pt(tile.i, tile.j)
             if cc.pDistanceSQ(pt, e) < len * len and not us.findWhere(self.friends:getChildren(), {pos = tile}) then
                 self.holdChara:move(pt)

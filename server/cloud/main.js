@@ -55,7 +55,9 @@ Parse.Cloud.define("start", function(req, res) {
     match.save({
         channel: channelId,
         seed: Math.floor(Math.random() * 100000),
-        acts: []
+        acts: [],
+        red: [],
+        blue: []
     }, {
         success: function(obj) {
             push({
@@ -79,7 +81,7 @@ Parse.Cloud.afterSave("Match", function(request) {
     var red = request.object.get("red");
     var blue = request.object.get("blue");
     // TODO validate
-    if (acts.length == 0 && red && blue) {
+    if (acts.length == 0 && red.length > 0 && blue.length > 0) {
         push({
             name: 'form',
             data: JSON.stringify({red: red, blue: blue}),
