@@ -7,9 +7,9 @@ dependencies:
         - runtime/test/bin
     pre:
         - |
+            brew tap homebrew/versions
+            brew install glfw3
             if [ ! -e runtime/test/bin ]; then
-                brew tap homebrew/versions
-                brew install glfw3
                 python frameworks/cocos2d-x/download-deps.py -r yes
                 mkdir -p runtime/test
                 cd runtime/test
