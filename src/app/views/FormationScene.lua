@@ -116,6 +116,7 @@ function FormationScene:onTouch(e)
                     display.newSprite("img/window.png"):move(display.center):addTo(confirm)
                     cc.Label:createWithSystemFont("この配置でいいですか？", "", 18):move(display.center):addTo(confirm)
                     local ok = cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(function()
+                        confirm:removeSelf()
                         local form = {self.hime.partyIdx .. self.hime.pos.i .. self.hime.pos.j}
                         for _, friend in ipairs(self.friends:getChildren()) do
                             if friend.pos then
@@ -123,6 +124,8 @@ function FormationScene:onTouch(e)
                             end
                         end
                         self:getApp():commitForm(form)
+                        display.newSprite("img/window.png"):move(display.center):addTo(self)
+                        cc.Label:createWithSystemFont("相手を待っています...", "", 18):move(display.center):addTo(self)
                     end):move(50, 0):addChild(cc.Label:createWithSystemFont("はい", "", 18):move(39, 21))
                     local ng = cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(function()
                         for _, friend in ipairs(self.friends:getChildren()) do
