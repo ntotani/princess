@@ -48,8 +48,8 @@ local TILES = {
 local RED_CAMP = 2
 local BLUE_CAMP = 3
 
-function Shogi:ctor(seed)
-    randomSeed(seed)
+function Shogi:ctor(ctx)
+    self.ctx = ctx
     self:reset()
 end
 
@@ -67,12 +67,12 @@ function Shogi:reset()
     local himes = us.select(CHARAS, function(_, e) return e.job == "hime" end)
     local others = us.select(CHARAS, function(_, e) return e.job ~= "hime" end)
     self.party = {
-        red  = {himes[(random() % #himes) + 1]},
-        blue = {himes[(random() % #himes) + 1]}
+        red  = {himes[(self.ctx.random() % #himes) + 1]},
+        blue = {himes[(self.ctx.random() % #himes) + 1]}
     }
     for _ = 1, 5 do
-        self.party.red[#self.party.red + 1] = others[(random() % #others) + 1]
-        self.party.blue[#self.party.blue + 1] = others[(random() % #others) + 1]
+        self.party.red[#self.party.red + 1] = others[(self.ctx.random() % #others) + 1]
+        self.party.blue[#self.party.blue + 1] = others[(self.ctx.random() % #others) + 1]
     end
     self.chars = {}
     self.chips = {}
@@ -109,7 +109,7 @@ end
 
 function Shogi:drawChips()
     return us(CHIPS):keys():map(function(_, e)
-        return {val = e, w = random()}
+        return {val = e, w = self.ctx.random()}
     end):sort(function(a, b)
         return a.w < b.w
     end):map(function(_, e)

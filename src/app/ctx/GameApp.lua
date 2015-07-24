@@ -2,7 +2,8 @@ local json = require("json")
 local GameApp = class("GameApp", cc.load("mvc").AppBase)
 
 function GameApp:onCreate()
-    self.shogi = require("lib.shogi").new(self.configs_.seed)
+    randomSeed(self.configs_.seed)
+    self.shogi = require("lib.shogi").new({random = random})
     self.configs_.socket:registerScriptHandler(function(msg)
         msg = json.decode(msg)
         if msg.event == "turn" then

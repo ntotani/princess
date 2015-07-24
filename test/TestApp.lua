@@ -1,7 +1,9 @@
 local TestApp = class("TestApp", cc.load("mvc").AppBase)
 
 function TestApp:onCreate()
-    self.shogi = require("lib.shogi").new(0)
+    self.shogi = require("lib.shogi").new({random = function()
+        return math.random(4294967295)
+    end})
 end
 
 function TestApp:getTeam()
