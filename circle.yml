@@ -6,6 +6,7 @@ dependencies:
     cache_directories:
         - runtime/test
     pre:
+        - brew install tree
         - |
             brew tap homebrew/versions
             brew install glfw3
@@ -19,5 +20,6 @@ dependencies:
 
 test:
     override:
+        - tree runtime/test
         - runtime/test/bin/princess `pwd`/
 
