@@ -1,25 +1,15 @@
-machine:
-  environment:
-    XCODE_SCHEME: princess iOS
-
 dependencies:
     cache_directories:
-        - runtime/test
+        - runtime/linux
     pre:
-        - brew install tree
-        - brew tap homebrew/versions
-        - brew install glfw3
         - |
-            if [ ! -e runtime/test ]; then
+            if [ ! -e runtime/linux ]; then
                 python frameworks/cocos2d-x/download-deps.py -r yes
-                mkdir -p runtime/test
-                cd runtime/test
-                cmake -DCMAKE_BUILD_TYPE=Debug -DDEBUG_MODE=ON ../../frameworks
-                make
+                echo "\n" | frameworks/cocos2d-x/build/install-deps-linux.sh
+                frameworks/cocos2d-x/tools/cocos2d-console/bin/cocos compile -p linux -j 4
             fi
 
 test:
     override:
-        - tree runtime/test
-        - runtime/test/bin/princess `pwd`/
+        - runtime/linux/princess `pwd`/
 
