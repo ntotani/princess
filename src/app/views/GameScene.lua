@@ -26,7 +26,7 @@ function GameScene:reset()
     for _, e in ipairs(self.friends:getChildren()) do e:removeSelf() end
     for _, e in ipairs(self.chips:getChildren()) do e:removeSelf() end
     for _, e in ipairs(self.enemyChips:getChildren()) do e:removeSelf() end
-    for _, e in ipairs(self.shogi:getChars()) do
+    for _, e in ipairs(self.shogi:getCharas()) do
         self:initChara(e)
     end
     local friendTeam = self:getApp():getTeam()
@@ -132,7 +132,7 @@ function GameScene:onTurn(commands)
         local actor = charas[us.detect(charas, function(e)
             return e.model.id == action.actor
         end)]
-        local isMyTeam = us.findWhere(self.shogi:getChars(), {id = action.actor}).team == self:getApp():getTeam()
+        local isMyTeam = us.findWhere(self.shogi:getCharas(), {id = action.actor}).team == self:getApp():getTeam()
         if action.type == "dead" then
             us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip}):moveTo({
                 delay = time,

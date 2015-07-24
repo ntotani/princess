@@ -33,16 +33,16 @@ TestShogi = {
             luaunit.assertNotEquals(self.shogi.party.red[i].job, "hime")
             luaunit.assertNotEquals(self.shogi.party.blue[i].job, "hime")
         end
-        luaunit.assertEquals(self.shogi.chars, {})
+        luaunit.assertEquals(self.shogi:getCharas(), {})
         luaunit.assertEquals(self.shogi.chips, {})
     end,
     testCommitForm = function(self)
         self.shogi:commitForm({red = {"193", "282"}, blue = {"113", "224"}})
-        luaunit.assertEquals(#self.shogi.chars, 4)
-        luaunit.assertEquals(self.shogi.chars[1], {id = 1, i = 9, j = 3, team = "red", hp = 100, job = "hime"})
-        luaunit.assertNotEquals(self.shogi.chars[2].job, "hime")
-        luaunit.assertEquals(self.shogi.chars[3].job, "hime")
-        luaunit.assertNotEquals(self.shogi.chars[4].job, "hime")
+        luaunit.assertEquals(#self.shogi:getCharas(), 4)
+        luaunit.assertEquals(self.shogi:getCharas()[1], {id = 1, i = 9, j = 3, team = "red", hp = 100, job = "hime"})
+        luaunit.assertNotEquals(self.shogi:getCharas()[2].job, "hime")
+        luaunit.assertEquals(self.shogi:getCharas()[3].job, "hime")
+        luaunit.assertNotEquals(self.shogi:getCharas()[4].job, "hime")
         luaunit.assertEquals(#self.shogi.chips.red, 12)
         luaunit.assertEquals(#self.shogi.chips.blue, 12)
     end,

@@ -55,7 +55,7 @@ end
 
 function Shogi:reset()
     --[[
-    self.chars = {
+    self.charas = {
         {id = 1, i = 9, j = 3, team = "red",  hp = 100},
         {id = 2, i = 8, j = 2, team = "red",  hp = 100},
         {id = 3, i = 7, j = 5, team = "red",  hp = 100},
@@ -74,7 +74,7 @@ function Shogi:reset()
         self.party.red[#self.party.red + 1] = others[(self.ctx.random() % #others) + 1]
         self.party.blue[#self.party.blue + 1] = others[(self.ctx.random() % #others) + 1]
     end
-    self.chars = {}
+    self.charas = {}
     self.chips = {}
 end
 
@@ -95,7 +95,7 @@ function Shogi:commitForm(form)
                 hp = 100,
             }
             setmetatable(chara, {__index = master})
-            self.chars[#self.chars + 1] = chara
+            self.charas[#self.charas + 1] = chara
             charaId = charaId + 1
         end
     end
@@ -121,8 +121,8 @@ function Shogi:getTiles()
     return TILES
 end
 
-function Shogi:getChars()
-    return self.chars
+function Shogi:getCharas()
+    return self.charas
 end
 
 function Shogi:getChips(team)
@@ -134,7 +134,7 @@ function Shogi:processTurn(commands)
     for i, e in ipairs(commands) do
         local charaId = tonumber(e:sub(1, 1))
         local chipIdx = tonumber(e:sub(2, 2))
-        local friend = us.findWhere(self.chars, {id = charaId})
+        local friend = us.findWhere(self.charas, {id = charaId})
         local chip = table.remove(self.chips[friend.team], chipIdx)
         if friend.hp <= 0 then
             acts[#acts + 1] = {type = "dead", actor = charaId, chip = chipIdx}
@@ -142,7 +142,7 @@ function Shogi:processTurn(commands)
             acts[#acts + 1] = {type = "chip", actor = charaId, chip = chipIdx}
             if chip == "skill" then
                 if friend.job == "hime" then
-                    self:move(us.findWhere(self.chars, {job = "hime", team = (friend.team == "red" and "blue" or "red")}), {i = -2, j = 0}, acts)
+                    self:move(us.findWhere(self.charas, {job = "hime", team = (friend.team == "red" and "blue" or "red")}), {i = -2, j = 0}, acts)
                 elseif friend.job == "ninja" then
                     for _, dir in ipairs({{i = -1, j = -1}, {i = -1, j = -1}, {i = -1, j = -1}}) do
                         if self:move(friend, dir, acts) then break end
@@ -184,14 +184,14 @@ function Shogi:move(friend, dir, acts)
         end
         return true
     end
-    local hit = us.detect(self.chars, function(e)
+    local hit = us.detect(self.charas, function(e)
         return e.i == ni and e.j == nj and e.hp > 0
     end)
     acts[#acts + 1] = {type = "move", fi = friend.i, fj = friend.j, actor = friend.id}
     acts[#acts].i = ni
     acts[#acts].j = nj
     if hit then
-        local target = self.chars[hit]
+        local target = self.charas[hit]
         local dmg = 40 * friend.attack / target.block * COLOR_RATE[friend.color][target.color]
         acts[#acts].hp = target.hp
         acts[#acts].dmg = dmg
@@ -250,7 +250,7 @@ function Shogi:farEnemies(who)
             end
         end
     end
-    return us(self.chars):select(function(i, e)
+    return us(self.charas):select(function(i, e)
         return e.team ~= who.team
     end):sort(function(a, b)
         return dist[a.i][a.j] > dist[b.i][b.j]
