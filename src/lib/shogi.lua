@@ -2,9 +2,9 @@ local us = require("lib.moses")
 local Shogi = {}
 
 local COLOR_RATE = {
-    tue = {tue = 0.5, wed = 0.5, thu = 2.0},
-    wed = {tue = 2.0, wed = 0.5, thu = 0.5},
-    thu = {tue = 0.5, wed = 2.0, thu = 0.5},
+    tue = {tue = 1.0, wed = 0.5, thu = 2.0},
+    wed = {tue = 2.0, wed = 1.0, thu = 0.5},
+    thu = {tue = 0.5, wed = 2.0, thu = 1.0},
 }
 
 local CHARAS = {
