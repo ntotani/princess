@@ -383,6 +383,7 @@ function table.tostring( tbl, indentLevel, printTableRefs, recursionTable )
             end
         end
     end
+    local table_ref = ''
     if printTableRefs then
         table_ref = "<"..tostring(tbl).."> "
     else
@@ -392,7 +393,7 @@ function table.tostring( tbl, indentLevel, printTableRefs, recursionTable )
     local SEP_LENGTH=2     -- ", "
     local totalLength = 0
     for k, v in ipairs( result ) do
-        l = string.len( v )
+        local l = string.len( v )
         totalLength = totalLength + l
         if l > M.LINE_LENGTH-1 then
             dispOnMultLines = true
@@ -404,6 +405,7 @@ function table.tostring( tbl, indentLevel, printTableRefs, recursionTable )
         dispOnMultLines = true
     end
 
+    local result_str = ''
     if dispOnMultLines then
         indentString = string.rep("    ", indentLevel)
         closingIndentString = string.rep("    ", math.max(0, indentLevel-1) )
