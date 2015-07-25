@@ -2,7 +2,7 @@ local TestApp = class("TestApp", cc.load("mvc").AppBase)
 
 function TestApp:onCreate()
     self.shogi = require("lib.shogi").new({random = function()
-        return math.random(4294967295)
+        return math.random(65535)
     end})
 end
 
