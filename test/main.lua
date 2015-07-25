@@ -15,7 +15,8 @@ function testSample()
     luaunit.assertEquals(node:getPositionX(), 10)
 end
 
-require "test.cases.shogi"
+require "test.cases.TestShogi"
+require "test.cases.TestGameScene"
 
 cc.FileUtils:getInstance():setPopupNotify(false)
 cc.FileUtils:getInstance():addSearchPath("src/")
