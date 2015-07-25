@@ -139,7 +139,48 @@ TestShogi = {
     end,
     testProcessTurn = function(self)
         self.shogi:commitForm({red = {"193", "282"}, blue = {"113", "224"}})
-        self.shogi:processTurn({"11"})
+        local acts = self.shogi:processTurn({"11"})
+        luaunit.assertEquals(#acts, 3)
+        luaunit.assertEquals(acts[1], {type = "chip", actor = 1, chip = 1})
+        luaunit.assertEquals(acts[2].type, "move")
+        luaunit.assertEquals(acts[3].type, "move")
+        local chara = self.shogi:getCharas()[1]
+        luaunit.assertEquals(chara.i, 6)
+        luaunit.assertEquals(chara.j, 2)
+    end,
+    testProcessTurnDead = function(self)
+        self.shogi:commitForm({red = {"144", "282"}, blue = {"113", "224"}})
+        self.shogi:getCharas()[4].hp = 1
+        local acts = self.shogi:processTurn({"11", "41"})
+        luaunit.assertEquals(#acts, 3)
+        luaunit.assertEquals(acts[3], {type = "dead", actor = 4, chip = 1})
+    end,
+    testProcessTurnSkillHime = function(self)
+        self.shogi:commitForm({red = {"193", "282"}, blue = {"113", "224"}})
+        local chips = self.shogi.chips.red
+        table.insert(chips, 1, table.remove(chips, us.detect(chips, "skill"))) -- pop skill top
+        local acts = self.shogi:processTurn({"11"})
+        luaunit.assertEquals(acts[2], {type = "move", fi = 1, fj = 3, actor = 3, i = 3, j = 3})
+    end,
+    testProcessTurnSkillNinja = function(self)
+        self.shogi:commitForm({red = {"193", "275"}, blue = {"113", "224"}})
+        local chips = self.shogi.chips.red
+        table.insert(chips, 1, table.remove(chips, us.detect(chips, "skill"))) -- pop skill top
+        local acts = self.shogi:processTurn({"21"})
+        luaunit.assertEquals(#acts, 4)
+        luaunit.assertEquals(acts[2], {type = "move", fi = 7, fj = 5, actor = 2, i = 6, j = 4})
+        luaunit.assertEquals(acts[3], {type = "move", fi = 6, fj = 4, actor = 2, i = 5, j = 3})
+        luaunit.assertEquals(acts[4], {type = "move", fi = 5, fj = 3, actor = 2, i = 4, j = 2})
+    end,
+    testProcessTurnSkillWitch = function(self)
+        self.shogi:commitForm({red = {"193", "382"}, blue = {"113", "224"}})
+        local chips = self.shogi.chips.red
+        table.insert(chips, 1, table.remove(chips, us.detect(chips, "skill"))) -- pop skill top
+        local acts = self.shogi:processTurn({"21"})
+        luaunit.assertEquals(#acts, 2)
+        luaunit.assertEquals(acts[2], {type = "swap", fi = 8, fj = 2, actor = 2, ti = 2, tj = 4, target = 4})
+    end,
+    testProcessTurnRefill = function(self)
     end,
 }
 
