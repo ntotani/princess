@@ -407,8 +407,8 @@ function table.tostring( tbl, indentLevel, printTableRefs, recursionTable )
 
     local result_str = ''
     if dispOnMultLines then
-        indentString = string.rep("    ", indentLevel)
-        closingIndentString = string.rep("    ", math.max(0, indentLevel-1) )
+        local indentString = string.rep("    ", indentLevel)
+        local closingIndentString = string.rep("    ", math.max(0, indentLevel-1) )
         result_str = table_ref.."{\n"..indentString .. table.concat( result, ",\n"..indentString  ) .. "\n"..closingIndentString.."}"
     else
         result_str = table_ref.."{".. table.concat( result, ", " ) .. "}"

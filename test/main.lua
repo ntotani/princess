@@ -46,6 +46,83 @@ TestShogi = {
         luaunit.assertEquals(#self.shogi.chips.red, 12)
         luaunit.assertEquals(#self.shogi.chips.blue, 12)
     end,
+    testMoveOb = function(self)
+        self.shogi:commitForm({red = {"193", "282"}, blue = {"113", "224"}})
+        local chara = self.shogi:getCharas()[2]
+        luaunit.assertTrue(chara.hp > 0)
+        local acts = {}
+        local ret = self.shogi:move(chara, {i = 1, j = -1}, acts)
+        luaunit.assertTrue(ret)
+        luaunit.assertEquals(acts, {{type = "ob", i = 9, j = 1, actor = 2}})
+        luaunit.assertEquals(chara.hp, 0)
+    end,
+    testMoveObHime = function(self)
+        self.shogi:commitForm({red = {"193", "282"}, blue = {"113", "224"}})
+        local chara = self.shogi:getCharas()[1]
+        local acts = {}
+        self.shogi:move(chara, {i = 2, j = 0}, acts)
+        luaunit.assertEquals(#acts, 2)
+        luaunit.assertEquals(acts[2], {type = "end", lose = "red"})
+    end,
+    testMove = function(self)
+        self.shogi:commitForm({red = {"193", "282"}, blue = {"113", "224"}})
+        local chara = self.shogi:getCharas()[2]
+        local acts = {}
+        local ret = self.shogi:move(chara, {i = -2, j = 0}, acts)
+        luaunit.assertFalse(ret)
+        luaunit.assertEquals(acts, {{type = "move", fi = 8, fj = 2, actor = 2, i = 6, j = 2}})
+        luaunit.assertEquals(chara.i, 6)
+        luaunit.assertEquals(chara.j, 2)
+    end,
+    testMoveHit = function(self)
+        self.shogi:commitForm({red = {"193", "244"}, blue = {"113", "224"}})
+        local chara = self.shogi:getCharas()[2]
+        local hit = self.shogi:getCharas()[4]
+        local acts = {}
+        local ret = self.shogi:move(chara, {i = -2, j = 0}, acts)
+        luaunit.assertTrue(ret)
+        luaunit.assertEquals(acts, {{type = "attack", fi = 4, fj = 4, actor = 2, i = 2, j = 4, hp = 100, dmg = 20, target = 4}})
+        luaunit.assertEquals(hit.hp, 80)
+        luaunit.assertEquals(chara.i, 4)
+        luaunit.assertEquals(chara.j, 4)
+    end,
+    testMoveKill = function(self)
+        self.shogi:commitForm({red = {"193", "244"}, blue = {"113", "224"}})
+        local chara = self.shogi:getCharas()[2]
+        local hit = self.shogi:getCharas()[4]
+        hit.hp = 1
+        local acts = {}
+        self.shogi:move(chara, {i = -2, j = 0}, acts)
+        luaunit.assertEquals(hit.hp, 0)
+        luaunit.assertEquals(chara.i, 2)
+        luaunit.assertEquals(chara.j, 4)
+    end,
+    testMoveKillHime = function(self)
+        self.shogi:commitForm({red = {"193", "233"}, blue = {"113", "224"}})
+        local chara = self.shogi:getCharas()[2]
+        local hit = self.shogi:getCharas()[3]
+        hit.hp = 1
+        local acts = {}
+        self.shogi:move(chara, {i = -2, j = 0}, acts)
+        luaunit.assertEquals(#acts, 2)
+        luaunit.assertEquals(acts[2], {type = "end", lose = "blue"})
+    end,
+    testMoveRedHime = function(self)
+        self.shogi:commitForm({red = {"133", "282"}, blue = {"122", "224"}})
+        local chara = self.shogi:getCharas()[1]
+        local acts = {}
+        local ret = self.shogi:move(chara, {i = -2, j = 0}, acts)
+        luaunit.assertTrue(ret)
+        luaunit.assertEquals(#acts, 2)
+        luaunit.assertEquals(acts[2], {type = "end", lose = "blue"})
+    end,
+    testMoveBlueHime = function(self)
+        self.shogi:commitForm({red = {"184", "282"}, blue = {"173", "224"}})
+        local chara = self.shogi:getCharas()[3]
+        local acts = {}
+        self.shogi:move(chara, {i = -2, j = 0}, acts)
+        luaunit.assertEquals(acts[2], {type = "end", lose = "red"})
+    end,
 }
 
 cc.FileUtils:getInstance():setPopupNotify(false)
