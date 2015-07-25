@@ -123,6 +123,20 @@ TestShogi = {
         self.shogi:move(chara, {i = -2, j = 0}, acts)
         luaunit.assertEquals(acts[2], {type = "end", lose = "red"})
     end,
+    testFarEnemiesRed = function(self)
+        self.shogi:commitForm({red = {"193", "282"}, blue = {"113", "224"}})
+        local enemies = self.shogi:farEnemies(self.shogi:getCharas()[2])
+        luaunit.assertEquals(#enemies, 2)
+        luaunit.assertEquals(enemies[1].id, 4)
+        luaunit.assertEquals(enemies[2].id, 3)
+    end,
+    testFarEnemiesBlue = function(self)
+        self.shogi:commitForm({red = {"193", "282"}, blue = {"113", "224"}})
+        local enemies = self.shogi:farEnemies(self.shogi:getCharas()[4])
+        luaunit.assertEquals(#enemies, 2)
+        luaunit.assertEquals(enemies[1].id, 2)
+        luaunit.assertEquals(enemies[2].id, 1)
+    end,
 }
 
 cc.FileUtils:getInstance():setPopupNotify(false)
