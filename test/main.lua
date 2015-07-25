@@ -137,6 +137,10 @@ TestShogi = {
         luaunit.assertEquals(enemies[1].id, 2)
         luaunit.assertEquals(enemies[2].id, 1)
     end,
+    testProcessTurn = function(self)
+        self.shogi:commitForm({red = {"193", "282"}, blue = {"113", "224"}})
+        self.shogi:processTurn({"11"})
+    end,
 }
 
 cc.FileUtils:getInstance():setPopupNotify(false)
