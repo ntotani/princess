@@ -2,6 +2,8 @@ local us = require("lib.moses")
 local jam = require("lib.jam")
 local GameScene = class("GameScene", cc.load("mvc").ViewBase)
 
+local ACT_DEF_SEC = 0.3
+
 function GameScene:onCreate()
     self.shogi = self:getApp():getShogi()
     cc.TMXTiledMap:create("tmx/forest.tmx"):addTo(self)
@@ -116,103 +118,123 @@ function GameScene:onTouch(e)
 end
 
 function GameScene:onTurn(commands)
-    local DEF_TIME = 0.3
-    local time = 0
-    for _, action in ipairs(self.shogi:processTurn(commands)) do
-        if action.type == "end" then
-            self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
-                display.newSprite("img/" .. (action.lose == self:getApp():getTeam() and "lose" or "win") .. ".png"):move(display.center):addTo(self)
-                self.touchLayer:onTouch(function()
-                    self:getApp():reset()
-                end)
-            end)))
-            return
-        end
-        local charas = us.flatten({self.friends:getChildren(), self.enemies:getChildren()})
-        local actor = charas[us.detect(charas, function(e)
-            return e.model.id == action.actor
-        end)]
-        local isMyTeam = us.findWhere(self.shogi:getCharas(), {id = action.actor}).team == self:getApp():getTeam()
-        if action.type == "dead" then
-            us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip}):moveTo({
-                delay = time,
-                time = DEF_TIME,
-                y = isMyTeam and -36 or display.height + 36,
-                removeSelf = true,
-            })
-            time = time + DEF_TIME
-        elseif action.type == "chip" then
-            us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip}):moveTo({
-                delay = time,
-                time = DEF_TIME,
-                x = actor:getPositionX(),
-                y = actor:getPositionY(),
-                removeSelf = true,
-            })
-            time = time + DEF_TIME
-        end
-        if action.type == "move" then
-            actor:moveTo({
-                delay = time,
-                time = DEF_TIME,
-                x = self:idx2pt(action.i, action.j).x,
-                y = self:idx2pt(action.i, action.j).y,
-            })
-            time = time + DEF_TIME
-        elseif action.type == "swap" then
-            actor:moveTo({
-                delay = time,
-                time = DEF_TIME,
-                x = self:idx2pt(action.ti, action.tj).x,
-                y = self:idx2pt(action.ti, action.tj).y,
-            })
-            charas[us.detect(charas, function(e)
-                return e.model.id == action.target
-            end)]:moveTo({
-                delay = time,
-                time = DEF_TIME,
-                x = self:idx2pt(action.fi, action.fj).x,
-                y = self:idx2pt(action.fi, action.fj).y,
-            })
-            time = time + DEF_TIME
-        elseif action.type == "attack" then
-            actor:runAction(cc.Sequence:create(
-                cc.DelayTime:create(time),
-                cc.MoveTo:create(DEF_TIME / 2, self:idx2pt(action.i, action.j)),
-                cc.CallFunc:create(function()
-                    local charas = us.flatten({self.friends:getChildren(), self.enemies:getChildren()})
-                    local chara = charas[us.detect(charas, function(e)
-                        return e.model.id == action.target
-                    end)]
-                    chara.gauge.setValue(action.hp - action.dmg)
-                    if action.dmg >= action.hp then
-                        chara:removeSelf()
-                    end
-                end),
-                cc.MoveTo:create(DEF_TIME / 2, self:idx2pt(action.fi, action.fj))
-            ))
-            time = time + DEF_TIME
-            if action.dmg >= action.hp then
-                actor:moveTo({
-                    delay = time,
-                    time = DEF_TIME,
-                    x = self:idx2pt(action.i, action.j).x,
-                    y = self:idx2pt(action.i, action.j).y,
-                })
-                time = time + DEF_TIME
+    local actions = self.shogi:processTurn(commands)
+    local parse = nil
+    parse = function()
+        if #actions > 0 then
+            local act = table.remove(actions, 1)
+            local ccacts = self["act2ccacts_" .. act.type](self, act)
+            if act.type ~= "end" then
+                table.insert(ccacts, cc.CallFunc:create(parse))
             end
-        elseif action.type == "ob" then
-            actor:moveTo({
-                delay = time,
-                time = DEF_TIME,
-                x = self:idx2pt(action.i, action.j).x,
-                y = self:idx2pt(action.i, action.j).y,
-                removeSelf = true,
-            })
-            time = time + DEF_TIME
+            self:runAction(cc.Sequence:create(ccacts))
+        else
+            self:runAction(cc.Sequence:create(self:drawChip(), cc.CallFunc:create(function()
+                self.touchLayer:onTouch(us.bind(self.onTouch, self))
+            end)))
         end
     end
-    local drawChip = function(team)
+    parse()
+end
+
+function GameScene:act2ccacts_end(action)
+    local name = action.lose == self:getApp():getTeam() and "lose" or "win"
+    return {
+        cc.CallFunc:create(function()
+            display.newSprite("img/" .. name  .. ".png"):move(display.center):addTo(self)
+            self.touchLayer:onTouch(function()
+                self:getApp():reset()
+            end)
+        end)
+    }
+end
+
+function GameScene:act2ccacts_dead(action)
+    local isMyTeam = us.findWhere(self.shogi:getCharas(), {id = action.actor}).team == self:getApp():getTeam()
+    local chip = us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip})
+    local moveTo = cc.MoveTo:create(ACT_DEF_SEC, cc.p(chip:getPositionX(), isMyTeam and -36 or display.height + 36))
+    return {
+        cc.TargetedAction:create(chip, moveTo),
+        cc.TargetedAction:create(chip, cc.RemoveSelf:create()),
+    }
+end
+
+function GameScene:act2ccacts_chip(action)
+    local isMyTeam = us.findWhere(self.shogi:getCharas(), {id = action.actor}).team == self:getApp():getTeam()
+    local chip = us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip})
+    local actor = self:act2actor(action)
+    local moveTo = cc.MoveTo:create(ACT_DEF_SEC, cc.p(actor:getPosition()))
+    return {
+        cc.TargetedAction:create(chip, moveTo),
+        cc.TargetedAction:create(chip, cc.RemoveSelf:create()),
+    }
+end
+
+function GameScene:act2ccacts_move(action)
+    local actor = self:act2actor(action)
+    local pt = self:idx2pt(action.i, action.j)
+    return {
+        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC, pt))
+    }
+end
+
+function GameScene:act2ccacts_swap(action)
+    local actor = self:act2actor(action)
+    local moveToA = cc.MoveTo:create(ACT_DEF_SEC, self:idx2pt(action.ti, action.tj))
+    local target = self:act2actor(action, "target")
+    local moveToT = cc.MoveTo:create(ACT_DEF_SEC, self:idx2pt(action.fi, action.fj))
+    return {
+        cc.Spawn:create(
+            cc.TargetedAction:create(actor, moveToA),
+            cc.TargetedAction:create(target, moveToT)
+        )
+    }
+end
+
+function GameScene:act2ccacts_attack(action)
+    local actor = self:act2actor(action)
+    local target = self:act2actor(action, "target")
+    local ccacts = {
+        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.i, action.j))),
+        cc.CallFunc:create(function()
+            target.gauge.setValue(action.hp - action.dmg)
+            if action.dmg >= action.hp then
+                target:removeSelf()
+            end
+        end),
+        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.fi, action.fj))),
+    }
+    if action.dmg >= action.hp then
+        table.insert(ccacts, cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC, self:idx2pt(action.i, action.j))))
+    end
+    return ccacts
+end
+
+function GameScene:act2ccacts_ob(action)
+    local actor = self:act2actor(action)
+    return {
+        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC, self:idx2pt(action.i, action.j))),
+        cc.TargetedAction:create(actor, cc.RemoveSelf:create()),
+    }
+end
+
+function GameScene:act2actor(action, key)
+    local charas = us.flatten({self.friends:getChildren(), self.enemies:getChildren()})
+    key = key or "actor"
+    return charas[us.detect(charas, function(e)
+        return e.model.id == action[key]
+    end)]
+end
+
+function GameScene:drawChip()
+    local chipActions = {}
+    local moveChip = function(chip, i)
+        local x = self:getChipX(i)
+        local y = chip:getPositionY()
+        local moveTo = cc.MoveTo:create(ACT_DEF_SEC, cc.p(x, y))
+        table.insert(chipActions, cc.TargetedAction:create(chip, moveTo))
+    end
+    for _, team in ipairs({"red", "blue"}) do
         local isMyTeam = team == self:getApp():getTeam()
         local model = self.shogi:getChips(team)
         local view = isMyTeam and self.chips or self.enemyChips
@@ -220,27 +242,18 @@ function GameScene:onTurn(commands)
             local chips = view:getChildren()
             if i > #chips then
                 local chip = display.newSprite("chip/" .. e .. ".png"):addTo(view)
+                local chipY = isMyTeam and 80 or display.height - 80
+                chip:move(display.width + chip:getContentSize().width, chipY)
                 chip:setScale(isMyTeam and 1 or -1)
-                chip:move(display.width + chip:getContentSize().width, isMyTeam and 80 or display.height - 80):moveTo({
-                    time = DEF_TIME,
-                    x = self:getChipX(i),
-                })
                 chip.idx = i
+                moveChip(chip, i)
             elseif chips[i].idx ~= i then
-                chips[i]:moveTo({
-                    time = DEF_TIME,
-                    x = self:getChipX(i),
-                })
                 chips[i].idx = i
+                moveChip(chips[i], i)
             end
         end
     end
-    self:runAction(cc.Sequence:create(cc.DelayTime:create(time), cc.CallFunc:create(function()
-        drawChip("red")
-        drawChip("blue")
-    end), cc.DelayTime:create(DEF_TIME), cc.CallFunc:create(function()
-        self.touchLayer:onTouch(us.bind(self.onTouch, self))
-    end)))
+    return cc.Spawn:create(chipActions)
 end
 
 return GameScene
