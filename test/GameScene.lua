@@ -7,7 +7,9 @@ require "config"
 require "cocos.init"
 
 local function main()
-    require("test.TestApp"):create():run("GameScene")
+    local app = require("test.TestApp"):create()
+    app:commitForm({"193", "282", "375"})
+    app:run("GameScene")
 end
 
 local status, msg = xpcall(main, __G__TRACKBACK__)
