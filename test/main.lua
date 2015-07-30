@@ -17,6 +17,7 @@ end
 
 require "test.cases.TestShogi"
 require "test.cases.TestGameScene"
+require "test.cases.TestTitleScene"
 
 cc.FileUtils:getInstance():setPopupNotify(false)
 cc.FileUtils:getInstance():addSearchPath("src/")
