@@ -8,6 +8,14 @@ require "cocos.init"
 
 local TitleApp = class("TitleApp", cc.load("mvc").AppBase)
 
+function TitleApp:createRoom(callback)
+    callback(12345)
+end
+
+function TitleApp:joinRoom(roomId)
+    print("join room " .. roomId)
+end
+
 local function main()
     TitleApp:create():run("TitleScene")
 end
