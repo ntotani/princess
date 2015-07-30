@@ -8,7 +8,7 @@ require "config"
 require "cocos.init"
 
 local function main()
-    require("app.MyApp"):create():run("RoomScene")
+    require("app.ctx.TitleApp"):create():run("TitleScene")
 end
 
 local status, msg = xpcall(main, __G__TRACKBACK__)
