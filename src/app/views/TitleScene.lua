@@ -19,9 +19,9 @@ end
 function TitleScene:onRoom()
     self.titles:moveBy({time = 0.2, x = -display.width})
     self.smoke:fadeTo({time = 0.2, opacity = 127, onComplete = function()
-        local message = cc.Label:createWithSystemFont("connecting...", "", 24):move(display.center):addTo(self)
+        local message = cc.Label:createWithTTF("connecting...", "font/PixelMplus12-Regular.ttf", 24):move(display.center):addTo(self)
         self:getApp():createRoom(function(roomId)
-            cc.Label:createWithSystemFont("部屋番号\n" .. roomId, "", 48):move(display.cx, display.height * 0.8):addTo(self)
+            cc.Label:createWithTTF("部屋番号\n" .. roomId, "font/PixelMplus12-Regular.ttf", 48):move(display.cx, display.height * 0.8):addTo(self)
             message:setString("相手の画面で\n部屋番号を入力して下さい")
         end)
     end})
@@ -30,7 +30,7 @@ end
 function TitleScene:onJoin()
     self.titles:moveBy({time = 0.2, x = -display.width})
     self.smoke:fadeTo({time = 0.2, opacity = 127, onComplete = function()
-        local message = cc.Label:createWithSystemFont("部屋番号を入力して下さい", "", 24):move(display.cx, display.height * 0.8):addTo(self)
+        local message = cc.Label:createWithTTF("部屋番号を入力して下さい", "font/PixelMplus12-Regular.ttf", 24):move(display.cx, display.height * 0.8):addTo(self)
         local menu = cc.Menu:create():move(0, 0):addTo(self)
         local nums = cc.Node:create():addTo(self)
         local roomId = ""
@@ -46,7 +46,7 @@ function TitleScene:onJoin()
                 roomId = roomId .. num
                 message:setString(roomId)
             end)
-            cc.Label:createWithSystemFont(num, "", 24):move(x, y):addTo(nums):setColor(display.COLOR_BLACK)
+            cc.Label:createWithTTF(num, "font/PixelMplus12-Regular.ttf", 24):move(x, y):addTo(nums):setColor(display.COLOR_BLACK)
         end
         cc.MenuItemImage:create("img/button_ok.png", "img/button_ok.png"):move(display.cx, 72):addTo(menu):onClicked(function()
             if roomId == "" then return end

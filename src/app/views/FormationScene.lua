@@ -50,7 +50,7 @@ function FormationScene:onCreate()
     end
     local notice = cc.Node:create():addTo(self)
     display.newSprite("img/window.png"):move(display.center):addTo(notice)
-    cc.Label:createWithSystemFont("味方を2体まで赤いマスに配置して下さい", "", 18):move(display.center):addTo(notice):setDimensions(200, 0)
+    cc.Label:createWithTTF("味方を2体まで赤いマスに配置して下さい", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(notice):setDimensions(200, 0)
     self.touchLayer = display.newLayer():addTo(self):onTouch(function()
         notice:removeSelf()
         self.touchLayer:onTouch(us.bind(self.onTouch, self))
@@ -113,7 +113,7 @@ function FormationScene:onTouch(e)
                     self.touchLayer:removeTouch()
                     local confirm = cc.Node:create():addTo(self)
                     display.newSprite("img/window.png"):move(display.center):addTo(confirm)
-                    cc.Label:createWithSystemFont("この配置でいいですか？", "", 18):move(display.center):addTo(confirm)
+                    cc.Label:createWithTTF("この配置でいいですか？", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(confirm)
                     local ok = cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(function()
                         confirm:removeSelf()
                         local form = {self.hime.partyIdx .. self.hime.pos.i .. self.hime.pos.j}
@@ -124,8 +124,8 @@ function FormationScene:onTouch(e)
                         end
                         self:getApp():commitForm(form)
                         display.newSprite("img/window.png"):move(display.center):addTo(self)
-                        cc.Label:createWithSystemFont("相手を待っています...", "", 18):move(display.center):addTo(self)
-                    end):move(50, 0):addChild(cc.Label:createWithSystemFont("はい", "", 18):move(39, 21))
+                        cc.Label:createWithTTF("相手を待っています...", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(self)
+                    end):move(50, 0):addChild(cc.Label:createWithTTF("はい", "font/PixelMplus12-Regular.ttf", 18):move(39, 21))
                     local ng = cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(function()
                         for _, friend in ipairs(self.friends:getChildren()) do
                             friend:move(friend.backPt)
@@ -133,7 +133,7 @@ function FormationScene:onTouch(e)
                         end
                         confirm:removeSelf()
                         self.touchLayer:onTouch(us.bind(self.onTouch, self))
-                    end):move(-50, 0):addChild(cc.Label:createWithSystemFont("いいえ", "", 18):move(39, 21))
+                    end):move(-50, 0):addChild(cc.Label:createWithTTF("いいえ", "font/PixelMplus12-Regular.ttf", 18):move(39, 21))
                     cc.Menu:create(ok, ng):move(display.cx, display.cy - 70):addTo(confirm)
                 end
                 return
