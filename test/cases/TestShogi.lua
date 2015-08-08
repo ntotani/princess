@@ -7,7 +7,7 @@ TestShogi = {
         self.shogi = require("lib.shogi").new({random = function()
             table.insert(rnds, table.remove(rnds, 1))
             return rnds[#rnds]
-        end})
+        end, mapId = 1})
     end,
     testReset = function(self)
         luaunit.assertEquals(#self.shogi.party.red, 6)

@@ -35,6 +35,7 @@ local CHIPS = {
 }
 
 local TILES = {
+{
     {0, 0, 3, 0, 0},
     {0, 1, 0, 1, 0},
     {1, 0, 1, 0, 1},
@@ -45,11 +46,13 @@ local TILES = {
     {0, 1, 0, 1, 0},
     {0, 0, 2, 0, 0},
 }
+}
 local RED_CAMP = 2
 local BLUE_CAMP = 3
 
 function Shogi:ctor(ctx)
     self.ctx = ctx
+    self.tiles = TILES[ctx.mapId]
     self:reset()
 end
 
@@ -118,7 +121,7 @@ function Shogi:drawChips()
 end
 
 function Shogi:getTiles()
-    return TILES
+    return self.tiles
 end
 
 function Shogi:getCharas()
@@ -175,7 +178,7 @@ end
 function Shogi:move(friend, dir, acts)
     local ni = friend.i + dir.i * (friend.team == "red" and 1 or -1)
     local nj = friend.j + dir.j * (friend.team == "red" and 1 or -1)
-    if ni < 1 or ni > #TILES or nj < 1 or nj > #TILES[1] or TILES[ni][nj] == 0 then
+    if ni < 1 or ni > #self.tiles or nj < 1 or nj > #self.tiles[1] or self.tiles[ni][nj] == 0 then
         -- out of bounds
         acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = friend.id}
         friend.hp = 0
@@ -210,10 +213,10 @@ function Shogi:move(friend, dir, acts)
     friend.i = ni
     friend.j = nj
     if friend.job == "hime" then
-        if TILES[ni][nj] == BLUE_CAMP and friend.team == "red" then
+        if self.tiles[ni][nj] == BLUE_CAMP and friend.team == "red" then
             acts[#acts + 1] = {type = "end", lose = "blue"}
             return true
-        elseif TILES[ni][nj] == RED_CAMP and friend.team == "blue" then
+        elseif self.tiles[ni][nj] == RED_CAMP and friend.team == "blue" then
             acts[#acts + 1] = {type = "end", lose = "red"}
             return true
         end
@@ -233,7 +236,7 @@ function Shogi:farEnemies(who)
     if who.team == "blue" then
         dirs = us.reverse(dirs)
     end
-    local dist = us.map(TILES, function(_, e)
+    local dist = us.map(self.tiles, function(_, e)
         return us.rep(-1, #e)
     end)
     local currentDist = 0
