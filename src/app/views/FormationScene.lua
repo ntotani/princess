@@ -2,6 +2,8 @@ local us = require("lib.moses")
 local jam = require("lib.jam")
 local FormationScene = class("FormationScene", cc.load("mvc").ViewBase)
 
+local CHARA_NUM = 3
+
 function FormationScene:onCreate()
     self.MY_AREA = self:isSideFour() and {
         {i = 11, j = 2},
@@ -58,7 +60,7 @@ function FormationScene:onCreate()
     end
     local notice = cc.Node:create():addTo(self)
     display.newSprite("img/window.png"):move(display.center):addTo(notice)
-    cc.Label:createWithTTF("味方を2体まで赤いマスに配置して下さい", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(notice):setDimensions(200, 0)
+    cc.Label:createWithTTF("味方を" .. CHARA_NUM .. "体まで赤いマスに配置して下さい", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(notice):setDimensions(200, 0)
     self.touchLayer = display.newLayer():addTo(self):onTouch(function()
         notice:removeSelf()
         self.touchLayer:onTouch(us.bind(self.onTouch, self))
@@ -109,7 +111,7 @@ function FormationScene:onTouch(e)
                 local form = us.select(self.friends:getChildren(), function(_, friend)
                     return friend.pos
                 end)
-                if #form >= 2 then
+                if #form >= CHARA_NUM then
                     self.touchLayer:removeTouch()
                     local confirm = cc.Node:create():addTo(self)
                     display.newSprite("img/window.png"):move(display.center):addTo(confirm)
