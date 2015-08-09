@@ -3,7 +3,13 @@ local jam = require("lib.jam")
 local FormationScene = class("FormationScene", cc.load("mvc").ViewBase)
 
 function FormationScene:onCreate()
-    self.MY_AREA = {
+    self.MY_AREA = self:isSideFour() and {
+        {i = 11, j = 2},
+        {i = 11, j = 4},
+        {i = 11, j = 6},
+        {i = 12, j = 3},
+        {i = 12, j = 5},
+    } or {
         {i = 7, j = 3},
         {i = 7, j = 5},
         {i = 8, j = 2},
@@ -14,7 +20,8 @@ function FormationScene:onCreate()
     for i, line in ipairs(self.shogi:getTiles()) do
         for j, e in ipairs(line) do
             if e > 0 then
-                display.newSprite("img/tile.png"):move(self:idx2pt(i, j)):addTo(self)
+                local path = self:isSideFour() and "img/tile_4.png" or "img/tile.png"
+                display.newSprite(path):move(self:idx2pt(i, j)):addTo(self)
             end
         end
     end
@@ -23,7 +30,8 @@ function FormationScene:onCreate()
             e.i = #self.shogi:getTiles() - e.i + 1
             e.j = #self.shogi:getTiles()[1] - e.j + 1
         end
-        display.newSprite("img/tile_red.png"):move(self:idx2pt(e.i, e.j)):addTo(self)
+        local path = self:isSideFour() and "img/tile_red_4.png" or "img/tile_red.png"
+        display.newSprite(path):move(self:idx2pt(e.i, e.j)):addTo(self)
     end
     self.friends = display.newLayer():addTo(self)
     local party = self.shogi:getParty()
@@ -55,14 +63,6 @@ function FormationScene:onCreate()
         notice:removeSelf()
         self.touchLayer:onTouch(us.bind(self.onTouch, self))
     end)
-end
-
-function FormationScene:idx2pt(i, j)
-    if self:getApp():getTeam() == "blue" then
-        i = #self.shogi:getTiles() - i + 1
-        j = #self.shogi:getTiles()[1] - j + 1
-    end
-    return cc.p(display.cx + 38 * (j - 3) * 1.5, display.cy + 33 * (5 - i))
 end
 
 function FormationScene:searchTileIdx(tile)

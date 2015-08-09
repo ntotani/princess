@@ -10,7 +10,8 @@ function GameScene:onCreate()
     for i, line in ipairs(self.shogi:getTiles()) do
         for j, e in ipairs(line) do
             if e > 0 then
-                display.newSprite("img/tile.png"):move(self:idx2pt(i, j)):addTo(self)
+                local path = self:isSideFour() and "img/tile_4.png" or "img/tile.png"
+                display.newSprite(path):move(self:idx2pt(i, j)):addTo(self)
             end
         end
     end
@@ -74,14 +75,6 @@ function GameScene:createHpGauge()
     end
     gauge.setValue(100)
     return gauge
-end
-
-function GameScene:idx2pt(i, j)
-    if self:getApp():getTeam() == "blue" then
-        i = #self.shogi:getTiles() - i + 1
-        j = #self.shogi:getTiles()[1] - j + 1
-    end
-    return cc.p(display.cx + 38 * (j - 3) * 1.5, display.cy + 33 * (5 - i))
 end
 
 function GameScene:getChipX(idx)

@@ -65,4 +65,22 @@ function ViewBase:showWithScene(transition, time, more)
     return self
 end
 
+local TILE_SIDE_FOUR = true
+
+local tileMarginX = TILE_SIDE_FOUR and 28 or 38
+local tileMarginY = TILE_SIDE_FOUR and 24 or 33
+
+function ViewBase:isSideFour() return TILE_SIDE_FOUR end
+
+function ViewBase:idx2pt(i, j)
+    local row = #self.shogi:getTiles()
+    local col = #self.shogi:getTiles()[1]
+    if self:getApp():getTeam() == "blue" then
+        i = row - i + 1
+        j = col - j + 1
+    end
+    return cc.p(display.cx + tileMarginX * (j - math.ceil(col / 2)) * 1.5, display.cy + tileMarginY * (math.ceil(row / 2) - i))
+end
+
 return ViewBase
+
