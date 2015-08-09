@@ -104,11 +104,12 @@ function Shogi:commitForm(form)
     local charaId = 1
     local apply = function(team)
         for _, e in ipairs(form[team]) do
-            local master = self.party[team][tonumber(e:sub(1, 1))]
+            e = string.split(e, ",")
+            local master = self.party[team][tonumber(e[1])]
             local chara = {
                 id = charaId,
-                i = tonumber(e:sub(2, 2)),
-                j = tonumber(e:sub(3, 3)),
+                i = tonumber(e[2]),
+                j = tonumber(e[3]),
                 team = team,
                 hp = 100,
             }

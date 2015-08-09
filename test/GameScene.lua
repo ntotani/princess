@@ -8,7 +8,7 @@ require "cocos.init"
 
 local function main()
     local app = require("test.TestApp"):create()
-    app:commitForm({"193", "282", "375"})
+    app:commitForm({"1,13,4", "2,12,3", "3,11,6"})
     app:run("GameScene")
 end
 

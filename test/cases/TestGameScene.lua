@@ -5,7 +5,7 @@ TestGameScene = {}
 
 function TestGameScene:setUp()
     self.app = require("test.TestApp"):create()
-    self.app.shogi:commitForm({red = {"193"}, blue = {"113"}})
+    self.app.shogi:commitForm({red = {"1,13,4"}, blue = {"1,1,4"}})
     self.scene = require("app.views.GameScene"):create(self.app, "GameScene")
     self.scene:showWithScene()
     cc.Director:getInstance():mainLoop() -- run scene
@@ -40,9 +40,9 @@ function TestGameScene:testCreateHpGauge()
 end
 
 function TestGameScene:testIdx2pt()
-    luaunit.assertEquals(self.scene:idx2pt(1, 1), {x = 66, y = 452})
+    luaunit.assertEquals(self.scene:idx2pt(1, 1), {x = 54, y = 464})
     self.app.getTeam = function(self) return "blue" end
-    luaunit.assertEquals(self.scene:idx2pt(1, 1), {x = 294, y = 188})
+    luaunit.assertEquals(self.scene:idx2pt(1, 1), {x = 306, y = 176})
 end
 
 function TestGameScene:testGetChipX()

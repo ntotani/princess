@@ -116,10 +116,10 @@ function FormationScene:onTouch(e)
                     cc.Label:createWithTTF("この配置でいいですか？", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(confirm)
                     local ok = cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(function()
                         confirm:removeSelf()
-                        local form = {self.hime.partyIdx .. self.hime.pos.i .. self.hime.pos.j}
+                        local form = {table.concat({self.hime.partyIdx, self.hime.pos.i, self.hime.pos.j}, ",")}
                         for _, friend in ipairs(self.friends:getChildren()) do
                             if friend.pos then
-                                form[#form + 1] = friend.partyIdx .. friend.pos.i .. friend.pos.j
+                                form[#form + 1] = table.concat({friend.partyIdx, friend.pos.i, friend.pos.j}, ",")
                             end
                         end
                         self:getApp():commitForm(form)
