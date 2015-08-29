@@ -24,6 +24,7 @@ cc.FileUtils:getInstance():addSearchPath("src/")
 cc.FileUtils:getInstance():addSearchPath("res/")
 
 require "config"
+DEBUG = 1
 require "cocos.init"
 
 os.exit(luaunit.LuaUnit.run('-v'))
