@@ -203,6 +203,24 @@ function GameScene:act2ccacts_attack(action)
     return ccacts
 end
 
+function GameScene:act2ccacts_heal(action)
+    local actor = self:act2actor(action)
+    local target = self:act2actor(action, "target")
+    local ccacts = {
+        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.i, action.j))),
+        cc.CallFunc:create(function()
+            target.gauge.setValue(math.min(action.hp + action.dmg, 100))
+            local par = cc.ParticleSystemQuad:create("particle/heal.plist")
+            par:setAutoRemoveOnFinish(true)
+            par:setBlendAdditive(false)
+            par:move(target:getPosition())
+            self:addChild(par)
+        end),
+        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.fi, action.fj))),
+    }
+    return ccacts
+end
+
 function GameScene:act2ccacts_ob(action)
     local actor = self:act2actor(action)
     return {
