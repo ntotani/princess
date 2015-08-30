@@ -226,15 +226,21 @@ function Shogi:move(friend, dir, acts)
     acts[#acts].j = nj
     if hit then
         local target = self.charas[hit]
-        local dmg = 40 * friend.power / target.defense * PLANET_RATE[friend.planet][target.planet]
+        local defense = friend.act == 0 and target.defense or target.resist
+        local dmg = math.floor(40 * friend.power / defense * PLANET_RATE[friend.planet][target.planet])
         acts[#acts].hp = target.hp
         acts[#acts].dmg = dmg
-        target.hp = math.max(target.hp - dmg, 0)
-        if target.hp <= 0 then
-            friend.i = ni
-            friend.j = nj
+        if friend.act == 2 then
+            target.hp = math.min(target.hp + dmg, 100)
+            acts[#acts].type = "heal"
+        else
+            target.hp = math.max(target.hp - dmg, 0)
+            if target.hp <= 0 then
+                friend.i = ni
+                friend.j = nj
+            end
+            acts[#acts].type = "attack"
         end
-        acts[#acts].type = "attack"
         acts[#acts].target = target.id
         if self:isHime(target) and target.hp <= 0 then
             acts[#acts + 1] = {type = "end", lose = target.team}

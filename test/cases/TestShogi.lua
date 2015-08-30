@@ -73,6 +73,33 @@ TestShogi = {
         luaunit.assertEquals(chara.i, 4)
         luaunit.assertEquals(chara.j, 4)
     end,
+    testMoveHitResist = function(self)
+        self.shogi:commitForm({red = {"1,9,3", "2,4,4"}, blue = {"1,1,3", "2,2,4"}})
+        local chara = self.shogi:getCharas()[2]
+        chara.act = 1
+        local hit = self.shogi:getCharas()[4]
+        local acts = {}
+        local ret = self.shogi:move(chara, {i = -2, j = 0}, acts)
+        luaunit.assertTrue(ret)
+        luaunit.assertEquals(acts, {{type = "attack", fi = 4, fj = 4, actor = 2, i = 2, j = 4, hp = 100, dmg = 53, target = 4}})
+        luaunit.assertEquals(hit.hp, 47)
+        luaunit.assertEquals(chara.i, 4)
+        luaunit.assertEquals(chara.j, 4)
+    end,
+    testMoveHitHeal = function(self)
+        self.shogi:commitForm({red = {"1,9,3", "2,4,4"}, blue = {"1,1,3", "2,2,4"}})
+        local chara = self.shogi:getCharas()[2]
+        chara.act = 2
+        local hit = self.shogi:getCharas()[4]
+        hit.hp = 1
+        local acts = {}
+        local ret = self.shogi:move(chara, {i = -2, j = 0}, acts)
+        luaunit.assertTrue(ret)
+        luaunit.assertEquals(acts, {{type = "heal", fi = 4, fj = 4, actor = 2, i = 2, j = 4, hp = 1, dmg = 53, target = 4}})
+        luaunit.assertEquals(hit.hp, 54)
+        luaunit.assertEquals(chara.i, 4)
+        luaunit.assertEquals(chara.j, 4)
+    end,
     testMoveKill = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,4,4"}, blue = {"1,1,3", "2,2,4"}})
         local chara = self.shogi:getCharas()[2]
@@ -139,6 +166,7 @@ TestShogi = {
     testProcessTurnDead = function(self)
         self.shogi:commitForm({red = {"1,4,4", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
         self.shogi:getCharas()[4].hp = 1
+        self.shogi:getCharas()[1].act = 0
         local acts = self.shogi:processTurn({"11", "41"})
         luaunit.assertEquals(#acts, 3)
         luaunit.assertEquals(acts[3], {type = "dead", actor = 4, chip = 1})
