@@ -242,17 +242,7 @@ function Shogi:move(friend, dir, acts)
 end
 
 function Shogi:farEnemies(who)
-    local dirs = {
-        {i = -2, j =  0},
-        {i = -1, j =  1},
-        {i = -1, j = -1},
-        {i =  1, j =  1},
-        {i =  1, j = -1},
-        {i =  2, j =  0},
-    }
-    if who.team == "blue" then
-        dirs = us.reverse(dirs)
-    end
+    local dirs = self:getDirs(who.team)
     local dist = us.map(self.tiles, function(_, e)
         return us.rep(-1, #e)
     end)
@@ -275,6 +265,38 @@ function Shogi:farEnemies(who)
     end):sort(function(a, b)
         return dist[a.i][a.j] > dist[b.i][b.j]
     end):value()
+end
+
+function Shogi:getDirs(team)
+    local dirs = {
+        {i = -2, j =  0},
+        {i = -1, j =  1},
+        {i = -1, j = -1},
+        {i =  1, j =  1},
+        {i =  1, j = -1},
+        {i =  2, j =  0},
+    }
+    if team == "blue" then
+        dirs = us.reverse(dirs)
+    end
+    return dirs
+end
+
+function Shogi:processSkill_1(actor, acts) -- 全体回復
+    for _, e in ipairs(self:getDirs(actor.team)) do
+        local ci, cj = actor.i + e.i, actor.j + e.j
+        local target = us.findWhere(self.charas, {i = ci, j = cj})
+        if target then
+            acts[#acts + 1] = {type = "heal", fi = actor.i, fj = actor.j, actor = actor.id}
+            acts[#acts].i = ci
+            acts[#acts].j = cj
+            acts[#acts].hp = target.hp
+            local dmg = us.findWhere(ASKILL, {id = "1"}).at
+            acts[#acts].dmg = dmg
+            target.hp = math.min(target.hp + dmg, 100)
+            acts[#acts].target = target.id
+        end
+    end
 end
 
 function Shogi:processSkill_4(actor, acts) -- 姫寄せ
