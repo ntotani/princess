@@ -48,9 +48,9 @@ end
 
 function GameScene:initChara(chara)
     local node = cc.Node:create():move(self:idx2pt(chara.i, chara.j))
-    node.sprite = jam.sprite("img/" .. chara.job .. "_" .. chara.color .. ".png", 32):addTo(node)
+    node.sprite = jam.sprite("img/chara/" .. chara.master.id .. ".png", 32):addTo(node)
     node.gauge = self:createHpGauge():move(-16, 16):addTo(node)
-    node.color = display.newSprite("icon/" .. chara.color .. ".png"):move(16, -16):addTo(node)
+    node.planet = display.newSprite("icon/" .. chara.planet .. ".png"):move(16, -16):addTo(node)
     if chara.team == self:getApp():getTeam() then
         node.sprite:frameIdx(9, 10, 11, 10)
         node:addTo(self.friends)

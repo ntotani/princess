@@ -1,22 +1,29 @@
 local us = require("lib.moses")
 local Shogi = {}
 
-local COLOR_RATE = {
-    tue = {tue = 1.0, wed = 0.5, thu = 2.0},
-    wed = {tue = 2.0, wed = 1.0, thu = 0.5},
-    thu = {tue = 0.5, wed = 2.0, thu = 1.0},
+local PLANET_RATE = {
+    sun = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 1.0, jup = 1.0, ven = 1.0, sat = 1.0},
+    mon = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 1.0, jup = 1.0, ven = 1.0, sat = 1.0},
+    mar = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 0.5, jup = 2.0, ven = 1.0, sat = 1.0},
+    mer = {sun = 1.0, mon = 1.0, mar = 2.0, mer = 0.5, jup = 0.5, ven = 1.0, sat = 1.0},
+    jup = {sun = 1.0, mon = 1.0, mar = 0.5, mer = 2.0, jup = 1.0, ven = 1.0, sat = 1.0},
+    ven = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 1.0, jup = 1.0, ven = 1.0, sat = 1.0},
+    sat = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 1.0, jup = 1.0, ven = 1.0, sat = 1.0},
 }
 
 local CHARAS = {
-    {id = "1", job = "hime",  attack = 100, block = 100, color = "tue"},
-    {id = "2", job = "hime",  attack = 100, block = 100, color = "wed"},
-    {id = "3", job = "hime",  attack = 100, block = 100, color = "thu"},
-    {id = "4", job = "ninja", attack = 100, block = 100, color = "tue"},
-    {id = "5", job = "ninja", attack = 100, block = 100, color = "wed"},
-    {id = "6", job = "ninja", attack = 100, block = 100, color = "thu"},
-    {id = "7", job = "witch", attack = 100, block = 100, color = "tue"},
-    {id = "8", job = "witch", attack = 100, block = 100, color = "wed"},
-    {id = "9", job = "witch", attack = 100, block = 100, color = "thu"},
+    {id = "1", name = "姫", planet = "sun", pskill = "1", askill = "1", act = 2, power = 60, defense = 50, resist = 80},
+    {id = "3", name = "浪人", planet = "mar", pskill = "3", askill = "3", act = 0, power = 80, defense = 80, resist = 60},
+}
+
+local PSKILL = {
+    {id = "1", name = "癒やし", desc = "周りの駒が毎ターン@ずつ回復する", at = 6},
+    {id = "3", name = "一矢", desc = "この駒を倒した相手に攻撃する"},
+}
+
+local ASKILL = {
+    {id = "1", name = "全体回復", desc = "味方全員を@回復する", at = 30},
+    {id = "3", name = "突撃", desc = "攻撃力2倍で2マス前進"},
 }
 
 local CHIPS = {
@@ -82,8 +89,8 @@ function Shogi:reset()
         {id = 6, i = 3, j = 1, team = "blue", hp = 100},
     }
     ]]
-    local himes = us.select(CHARAS, function(_, e) return e.job == "hime" end)
-    local others = us.select(CHARAS, function(_, e) return e.job ~= "hime" end)
+    local himes = us.select(CHARAS, function(_, e) return self:isHime(e) end)
+    local others = us.select(CHARAS, function(_, e) return not self:isHime(e) end)
     self.party = {
         red  = {himes[(self.ctx.random() % #himes) + 1]},
         blue = {himes[(self.ctx.random() % #himes) + 1]}
@@ -94,6 +101,10 @@ function Shogi:reset()
     end
     self.charas = {}
     self.chips = {}
+end
+
+function Shogi:isHime(chara)
+    return chara.name == "姫" or chara.name == "姫将"
 end
 
 function Shogi:getParty()
@@ -107,6 +118,7 @@ function Shogi:commitForm(form)
             e = string.split(e, ",")
             local master = self.party[team][tonumber(e[1])]
             local chara = {
+                master = master,
                 id = charaId,
                 i = tonumber(e[2]),
                 j = tonumber(e[3]),
@@ -160,13 +172,16 @@ function Shogi:processTurn(commands)
         else
             acts[#acts + 1] = {type = "chip", actor = charaId, chip = chipIdx}
             if chip == "skill" then
-                if friend.job == "hime" then
-                    self:move(us.findWhere(self.charas, {job = "hime", team = (friend.team == "red" and "blue" or "red")}), {i = -2, j = 0}, acts)
-                elseif friend.job == "ninja" then
+                if friend.askill == "4" then
+                    local target = us.detect(self.charas, function(e)
+                        return self:isHime(e) and e.team ~= friend.team
+                    end)
+                    self:move(self.charas[target], {i = -2, j = 0}, acts)
+                elseif friend.askill == "6" then
                     for _, dir in ipairs({{i = -1, j = -1}, {i = -1, j = -1}, {i = -1, j = -1}}) do
                         if self:move(friend, dir, acts) then break end
                     end
-                elseif friend.job == "witch" then
+                elseif friend.askill == "111" then -- dumy id
                     local target = self:farEnemies(friend)[1]
                     friend.i, friend.j, target.i, target.j = target.i, target.j, friend.i, friend.j
                     acts[#acts + 1] = {
@@ -198,7 +213,7 @@ function Shogi:move(friend, dir, acts)
         -- out of bounds
         acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = friend.id}
         friend.hp = 0
-        if friend.job == "hime" then
+        if self:isHime(friend) then
             acts[#acts + 1] = {type = "end", lose = friend.team}
         end
         return true
@@ -211,7 +226,7 @@ function Shogi:move(friend, dir, acts)
     acts[#acts].j = nj
     if hit then
         local target = self.charas[hit]
-        local dmg = 40 * friend.attack / target.block * COLOR_RATE[friend.color][target.color]
+        local dmg = 40 * friend.power / target.defense * PLANET_RATE[friend.planet][target.planet]
         acts[#acts].hp = target.hp
         acts[#acts].dmg = dmg
         target.hp = math.max(target.hp - dmg, 0)
@@ -221,14 +236,14 @@ function Shogi:move(friend, dir, acts)
         end
         acts[#acts].type = "attack"
         acts[#acts].target = target.id
-        if target.job == "hime" and target.hp <= 0 then
+        if self:isHime(target) and target.hp <= 0 then
             acts[#acts + 1] = {type = "end", lose = target.team}
         end
         return true
     end
     friend.i = ni
     friend.j = nj
-    if friend.job == "hime" then
+    if self:isHime(friend) then
         if self.tiles[ni][nj] == BLUE_CAMP and friend.team == "red" then
             acts[#acts + 1] = {type = "end", lose = "blue"}
             return true

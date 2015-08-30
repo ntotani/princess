@@ -25,7 +25,7 @@ function TestGameScene:testOnCreate()
     local redHime = self.scene.friends:getChildren()[1]
     luaunit.assertIs(redHime.sprite:getParent(), redHime)
     luaunit.assertIs(redHime.gauge:getParent(), redHime)
-    luaunit.assertIs(redHime.color:getParent(), redHime)
+    luaunit.assertIs(redHime.planet:getParent(), redHime)
     luaunit.assertNotNil(redHime.model)
 
     -- chips
