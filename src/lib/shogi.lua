@@ -172,7 +172,7 @@ function Shogi:processTurn(commands)
         else
             acts[#acts + 1] = {type = "chip", actor = charaId, chip = chipIdx}
             if chip == "skill" then
-                local method = "processSkill_" .. friend.askill
+                local method = "processAskill_" .. friend.askill
                 self[method](self, friend, acts)
             else
                 for _, dir in ipairs(CHIPS[chip]) do
@@ -282,7 +282,7 @@ function Shogi:getDirs(team)
     return dirs
 end
 
-function Shogi:processSkill_1(actor, acts) -- 全体回復
+function Shogi:processAskill_1(actor, acts) -- 全体回復
     for _, e in ipairs(self:getDirs(actor.team)) do
         local ci, cj = actor.i + e.i, actor.j + e.j
         local target = us.findWhere(self.charas, {i = ci, j = cj})
@@ -299,20 +299,20 @@ function Shogi:processSkill_1(actor, acts) -- 全体回復
     end
 end
 
-function Shogi:processSkill_4(actor, acts) -- 姫寄せ
+function Shogi:processAskill_4(actor, acts) -- 姫寄せ
     local target = us.detect(self.charas, function(e)
         return self:isHime(e) and e.team ~= actor.team
     end)
     self:move(self.charas[target], {i = -2, j = 0}, acts)
 end
 
-function Shogi:processSkill_6(actor, acts) -- 横断
+function Shogi:processAskill_6(actor, acts) -- 横断
     for _, dir in ipairs({{i = -1, j = -1}, {i = -1, j = -1}, {i = -1, j = -1}}) do
         if self:move(actor, dir, acts) then break end
     end
 end
 
-function Shogi:processSkill_111(actor, acts) -- 入れ替え
+function Shogi:processAskill_111(actor, acts) -- 入れ替え
     local target = self:farEnemies(actor)[1]
     actor.i, actor.j, target.i, target.j = target.i, target.j, actor.i, actor.j
     acts[#acts + 1] = {
