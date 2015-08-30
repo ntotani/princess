@@ -172,28 +172,8 @@ function Shogi:processTurn(commands)
         else
             acts[#acts + 1] = {type = "chip", actor = charaId, chip = chipIdx}
             if chip == "skill" then
-                if friend.askill == "4" then
-                    local target = us.detect(self.charas, function(e)
-                        return self:isHime(e) and e.team ~= friend.team
-                    end)
-                    self:move(self.charas[target], {i = -2, j = 0}, acts)
-                elseif friend.askill == "6" then
-                    for _, dir in ipairs({{i = -1, j = -1}, {i = -1, j = -1}, {i = -1, j = -1}}) do
-                        if self:move(friend, dir, acts) then break end
-                    end
-                elseif friend.askill == "111" then -- dumy id
-                    local target = self:farEnemies(friend)[1]
-                    friend.i, friend.j, target.i, target.j = target.i, target.j, friend.i, friend.j
-                    acts[#acts + 1] = {
-                        type = "swap",
-                        actor = friend.id,
-                        target = target.id,
-                        fi = target.i,
-                        fj = target.j,
-                        ti = friend.i,
-                        tj = friend.j,
-                    }
-                end
+                local method = "processSkill_" .. friend.askill
+                self[method](self, friend, acts)
             else
                 for _, dir in ipairs(CHIPS[chip]) do
                     if self:move(friend, dir, acts) then break end
@@ -295,6 +275,33 @@ function Shogi:farEnemies(who)
     end):sort(function(a, b)
         return dist[a.i][a.j] > dist[b.i][b.j]
     end):value()
+end
+
+function Shogi:processSkill_4(actor, acts) -- 姫寄せ
+    local target = us.detect(self.charas, function(e)
+        return self:isHime(e) and e.team ~= actor.team
+    end)
+    self:move(self.charas[target], {i = -2, j = 0}, acts)
+end
+
+function Shogi:processSkill_6(actor, acts) -- 横断
+    for _, dir in ipairs({{i = -1, j = -1}, {i = -1, j = -1}, {i = -1, j = -1}}) do
+        if self:move(actor, dir, acts) then break end
+    end
+end
+
+function Shogi:processSkill_111(actor, acts) -- 入れ替え
+    local target = self:farEnemies(actor)[1]
+    actor.i, actor.j, target.i, target.j = target.i, target.j, actor.i, actor.j
+    acts[#acts + 1] = {
+        type = "swap",
+        actor = actor.id,
+        target = target.id,
+        fi = target.i,
+        fj = target.j,
+        ti = actor.i,
+        tj = actor.j,
+    }
 end
 
 function Shogi.new(...)
