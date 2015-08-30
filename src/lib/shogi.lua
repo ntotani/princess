@@ -299,6 +299,15 @@ function Shogi:processAskill_1(actor, acts) -- 全体回復
     end
 end
 
+function Shogi:processAskill_3(actor, acts) -- 突撃
+    local prevPower = actor.power
+    actor.power = prevPower * 2
+    for _, dir in ipairs({{i = -2, j = 0}, {i = -2, j = 0}}) do
+        if self:move(actor, dir, acts) then break end
+    end
+    actor.power = prevPower
+end
+
 function Shogi:processAskill_4(actor, acts) -- 姫寄せ
     local target = us.detect(self.charas, function(e)
         return self:isHime(e) and e.team ~= actor.team
