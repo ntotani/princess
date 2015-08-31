@@ -142,7 +142,7 @@ function GameScene:act2ccacts_end(action)
     }
 end
 
-function GameScene:act2ccacts_dead(action)
+function GameScene:act2ccacts_miss(action)
     local isMyTeam = us.findWhere(self.shogi:getCharas(), {id = action.actor}).team == self:getApp():getTeam()
     local chip = us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip})
     local moveTo = cc.MoveTo:create(ACT_DEF_SEC, cc.p(chip:getPositionX(), isMyTeam and -36 or display.height + 36))

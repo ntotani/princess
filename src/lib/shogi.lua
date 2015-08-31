@@ -26,6 +26,7 @@ local ASKILL = {
     {id = "2", name = "全体回復", desc = "味方全員を@回復する", at = 70},
     {id = "3", name = "突撃", desc = "攻撃力2倍で2マス前進"},
     {id = "4", name = "姫寄せ", desc = "敵の姫は前進する"},
+    {id = "5", name = "帰還", desc = "自分の本陣に移動する"},
     {id = "6", name = "横断", desc = "↖に3マス進む"},
 }
 
@@ -171,7 +172,7 @@ function Shogi:processTurn(commands)
         local friend = us.findWhere(self.charas, {id = charaId})
         local chip = table.remove(self.chips[friend.team], chipIdx)
         if friend.hp <= 0 then
-            acts[#acts + 1] = {type = "dead", actor = charaId, chip = chipIdx}
+            acts[#acts + 1] = {type = "miss", actor = charaId, chip = chipIdx}
         else
             acts[#acts + 1] = {type = "chip", actor = charaId, chip = chipIdx}
             if chip == "skill" then
@@ -316,6 +317,30 @@ function Shogi:processAskill_4(actor, acts) -- 姫寄せ
         return self:isHime(e) and e.team ~= actor.team
     end)
     self:move(self.charas[target], {i = -2, j = 0}, acts)
+end
+
+function Shogi:processAskill_5(actor, acts) -- 帰還
+    local camp = actor.team == "red" and RED_CAMP or BLUE_CAMP
+    local ci, cj
+    for i = 1, #self.tiles do
+        for j = 1, #self.tiles[i] do
+            if self.tiles[i][j] == camp then
+                ci = i
+                cj = j
+                break
+            end
+        end
+    end
+    local charaOnCamp = us.detect(self.charas, function(e)
+        return e.i == ci and e.j == cj and e.hp > 0
+    end)
+    if charaOnCamp then
+        acts[#acts].type = "miss"
+    else
+        acts[#acts + 1] = {type = "move", actor = actor.id, fi = actor.i, fj = actor.j, i = ci, j = cj}
+        actor.i = ci
+        actor.j = cj
+    end
 end
 
 function Shogi:processAskill_6(actor, acts) -- 横断
