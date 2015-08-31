@@ -29,7 +29,7 @@ local ASKILL = {
     {id = "5", name = "帰還", desc = "自分の本陣に移動する"},
     {id = "6", name = "横断", desc = "↖に3マス進む"},
     {id = "7", name = "突進", desc = "目の前の駒を後退させながら2マス前進"},
-    {id = "8", name = "猛進",       desc = "前方の駒を後退させながら2マス前進"},
+    {id = "8", name = "猛進", desc = "前方の駒を後退させながら2マス前進"},
 }
 
 local CHIPS = {
@@ -364,6 +364,35 @@ function Shogi:processAskill_7(actor, acts) -- 突進
             end
             break
         end
+    end
+end
+
+function Shogi:processAskill_8(actor, acts) -- 猛進
+    for _, dir in ipairs({{i = -2, j = 0}, {i = -2, j = 0}}) do
+        local prevI, prevJ = actor.i, actor.j
+        local stop = self:move(actor, dir, acts)
+        if stop then
+            local tail = acts[#acts]
+            if tail.type == "attack" then
+                local target = us.findWhere(self.charas, {id = tail.target})
+                if target.hp > 0 then
+                    local vi = actor.team == target.team and -2 or 2
+                    self:move(target, {i = vi, j = 0}, acts)
+                end
+            end
+        end
+        local sign = actor.team == "red" and 1 or -1
+        for _, side in ipairs({{i = -sign, j = sign}, {i = -sign, j = -sign}}) do
+            local target = us.detect(self.charas, function(e)
+                return e.i == prevI + side.i and e.j == prevJ + side.j and e.hp > 0
+            end)
+            if target then
+                target = self.charas[target]
+                local v = target.team == "red" and side or {i = -side.i, j = -side.j}
+                self:move(target, v, acts)
+            end
+        end
+        if stop then break end
     end
 end
 
