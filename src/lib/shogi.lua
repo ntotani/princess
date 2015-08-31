@@ -28,6 +28,8 @@ local ASKILL = {
     {id = "4", name = "姫寄せ", desc = "敵の姫は前進する"},
     {id = "5", name = "帰還", desc = "自分の本陣に移動する"},
     {id = "6", name = "横断", desc = "↖に3マス進む"},
+    {id = "7", name = "突進", desc = "目の前の駒を後退させながら2マス前進"},
+    {id = "8", name = "猛進",       desc = "前方の駒を後退させながら2マス前進"},
 }
 
 local CHIPS = {
@@ -346,6 +348,22 @@ end
 function Shogi:processAskill_6(actor, acts) -- 横断
     for _, dir in ipairs({{i = -1, j = -1}, {i = -1, j = -1}, {i = -1, j = -1}}) do
         if self:move(actor, dir, acts) then break end
+    end
+end
+
+function Shogi:processAskill_7(actor, acts) -- 突進
+    for _, dir in ipairs({{i = -2, j = 0}, {i = -2, j = 0}}) do
+        if self:move(actor, dir, acts) then
+            local tail = acts[#acts]
+            if tail.type == "attack" then
+                local target = us.findWhere(self.charas, {id = tail.target})
+                if target.hp > 0 then
+                    local vi = actor.team == target.team and -2 or 2
+                    self:move(target, {i = vi, j = 0}, acts)
+                end
+            end
+            break
+        end
     end
 end
 
