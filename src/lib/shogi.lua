@@ -166,6 +166,16 @@ function Shogi:getChips(team)
     return us.first(self.chips[team], 4)
 end
 
+function Shogi:findChara(i, j)
+    local hit = us.detect(self.charas, function(e)
+        return e.i == i and e.j == j and e.hp > 0
+    end)
+    if hit then
+        return self.charas[hit]
+    end
+    return nil
+end
+
 function Shogi:processTurn(commands)
     local acts = {}
     for i, e in ipairs(commands) do
@@ -204,14 +214,12 @@ function Shogi:move(friend, dir, acts)
         end
         return true
     end
-    local hit = us.detect(self.charas, function(e)
-        return e.i == ni and e.j == nj and e.hp > 0
-    end)
+    local hit = self:findChara(ni, nj)
     acts[#acts + 1] = {type = "move", fi = friend.i, fj = friend.j, actor = friend.id}
     acts[#acts].i = ni
     acts[#acts].j = nj
     if hit then
-        local target = self.charas[hit]
+        local target = hit
         local defense = friend.act == 0 and target.defense or target.resist
         local dmg = math.floor(40 * friend.power / defense * PLANET_RATE[friend.planet][target.planet])
         acts[#acts].hp = target.hp
@@ -333,10 +341,7 @@ function Shogi:processAskill_5(actor, acts) -- 帰還
             end
         end
     end
-    local charaOnCamp = us.detect(self.charas, function(e)
-        return e.i == ci and e.j == cj and e.hp > 0
-    end)
-    if charaOnCamp then
+    if self:findChara(ci, cj) then
         acts[#acts].type = "miss"
     else
         acts[#acts + 1] = {type = "move", actor = actor.id, fi = actor.i, fj = actor.j, i = ci, j = cj}
@@ -383,11 +388,8 @@ function Shogi:processAskill_8(actor, acts) -- 猛進
         end
         local sign = actor.team == "red" and 1 or -1
         for _, side in ipairs({{i = -sign, j = sign}, {i = -sign, j = -sign}}) do
-            local target = us.detect(self.charas, function(e)
-                return e.i == prevI + side.i and e.j == prevJ + side.j and e.hp > 0
-            end)
+            local target = self:findChara(prevI + side.i, prevJ + side.j)
             if target then
-                target = self.charas[target]
                 local v = target.team == "red" and side or {i = -side.i, j = -side.j}
                 self:move(target, v, acts)
             end
