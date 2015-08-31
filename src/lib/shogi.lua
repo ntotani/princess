@@ -23,7 +23,10 @@ local PSKILL = {
 
 local ASKILL = {
     {id = "1", name = "全体回復", desc = "味方全員を@回復する", at = 30},
+    {id = "2", name = "全体回復", desc = "味方全員を@回復する", at = 70},
     {id = "3", name = "突撃", desc = "攻撃力2倍で2マス前進"},
+    {id = "4", name = "姫寄せ", desc = "敵の姫は前進する"},
+    {id = "6", name = "横断", desc = "↖に3マス進む"},
 }
 
 local CHIPS = {
