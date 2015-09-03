@@ -18,6 +18,7 @@ local CHARAS = {
 
 local PSKILL = {
     {id = "1", name = "癒やし", desc = "周りの駒が毎ターン@ずつ回復する", at = 6},
+    {id = "2", name = "癒やし", desc = "周りの駒が毎ターン@ずつ回復する", at = 12},
     {id = "3", name = "一矢", desc = "この駒を倒した相手に攻撃する"},
 }
 
@@ -193,6 +194,17 @@ function Shogi:processTurn(commands)
             else
                 for _, dir in ipairs(CHIPS[chip]) do
                     if self:move(friend, dir, acts) then break end
+                end
+            end
+        end
+    end
+    for _, e in ipairs(self.charas) do
+        if e.pskill == "1" or e.pskill == "2" then
+            local dmg = us.findWhere(PSKILL, {id = e.pskill}).at
+            for _, dir in ipairs(self:getDirs(e.team)) do
+                local target = self:findChara(e.i + dir.i, e.j + dir.j)
+                if target and target.hp < 100 then
+                    self:heal(e, target, dmg, acts)
                 end
             end
         end
