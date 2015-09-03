@@ -215,32 +215,17 @@ function Shogi:move(friend, dir, acts)
         return true
     end
     local hit = self:findChara(ni, nj)
-    acts[#acts + 1] = {type = "move", fi = friend.i, fj = friend.j, actor = friend.id}
-    acts[#acts].i = ni
-    acts[#acts].j = nj
     if hit then
-        local target = hit
-        local defense = friend.act == 0 and target.defense or target.resist
-        local dmg = math.floor(40 * friend.power / defense * PLANET_RATE[friend.planet][target.planet])
-        acts[#acts].hp = target.hp
-        acts[#acts].dmg = dmg
         if friend.act == 2 then
-            target.hp = math.min(target.hp + dmg, 100)
-            acts[#acts].type = "heal"
+            self:heal(friend, hit, nil, acts)
         else
-            target.hp = math.max(target.hp - dmg, 0)
-            if target.hp <= 0 then
-                friend.i = ni
-                friend.j = nj
-            end
-            acts[#acts].type = "attack"
-        end
-        acts[#acts].target = target.id
-        if self:isHime(target) and target.hp <= 0 then
-            acts[#acts + 1] = {type = "end", lose = target.team}
+            self:attack(friend, hit, nil, acts)
         end
         return true
     end
+    acts[#acts + 1] = {type = "move", fi = friend.i, fj = friend.j, actor = friend.id}
+    acts[#acts].i = ni
+    acts[#acts].j = nj
     friend.i = ni
     friend.j = nj
     if self:isHime(friend) then
@@ -253,6 +238,54 @@ function Shogi:move(friend, dir, acts)
         end
     end
     return false
+end
+
+function Shogi:calcDamage(actor, target)
+    local defense = actor.act == 0 and target.defense or target.resist
+    return math.floor(40 * actor.power / defense * PLANET_RATE[actor.planet][target.planet])
+end
+
+function Shogi:attack(actor, target, dmg, acts)
+    if dmg == nil then
+        dmg = self:calcDamage(actor, target)
+    end
+    table.insert(acts, {
+        type = "attack",
+        actor = actor.id,
+        fi = actor.i,
+        fj = actor.j,
+        target = target.id,
+        i = target.i,
+        j = target.j,
+        hp = target.hp,
+        dmg = dmg,
+    })
+    target.hp = math.max(target.hp - dmg, 0)
+    if target.hp <= 0 then
+        actor.i = target.i
+        actor.j = target.j
+    end
+    if self:isHime(target) and target.hp <= 0 then
+        table.insert(acts, {type = "end", lose = target.team})
+    end
+end
+
+function Shogi:heal(actor, target, dmg, acts)
+    if dmg == nil then
+        dmg = self:calcDamage(actor, target)
+    end
+    table.insert(acts, {
+        type = "heal",
+        actor = actor.id,
+        fi = actor.i,
+        fj = actor.j,
+        target = target.id,
+        i = target.i,
+        j = target.j,
+        hp = target.hp,
+        dmg = dmg
+    })
+    target.hp = math.min(target.hp + dmg, 100)
 end
 
 function Shogi:farEnemies(who)
@@ -301,14 +334,8 @@ function Shogi:processAskillTeamHeal(actor, acts, askillId) -- 全体回復
         local ci, cj = actor.i + e.i, actor.j + e.j
         local target = us.findWhere(self.charas, {i = ci, j = cj})
         if target then
-            acts[#acts + 1] = {type = "heal", fi = actor.i, fj = actor.j, actor = actor.id}
-            acts[#acts].i = ci
-            acts[#acts].j = cj
-            acts[#acts].hp = target.hp
             local dmg = us.findWhere(ASKILL, {id = askillId}).at
-            acts[#acts].dmg = dmg
-            target.hp = math.min(target.hp + dmg, 100)
-            acts[#acts].target = target.id
+            self:heal(actor, target, dmg, acts)
         end
     end
 end
