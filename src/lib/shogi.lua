@@ -296,7 +296,7 @@ function Shogi:getDirs(team)
     return dirs
 end
 
-function Shogi:processAskill_1(actor, acts) -- 全体回復
+function Shogi:processAskillTeamHeal(actor, acts, askillId) -- 全体回復
     for _, e in ipairs(self:getDirs(actor.team)) do
         local ci, cj = actor.i + e.i, actor.j + e.j
         local target = us.findWhere(self.charas, {i = ci, j = cj})
@@ -305,12 +305,20 @@ function Shogi:processAskill_1(actor, acts) -- 全体回復
             acts[#acts].i = ci
             acts[#acts].j = cj
             acts[#acts].hp = target.hp
-            local dmg = us.findWhere(ASKILL, {id = "1"}).at
+            local dmg = us.findWhere(ASKILL, {id = askillId}).at
             acts[#acts].dmg = dmg
             target.hp = math.min(target.hp + dmg, 100)
             acts[#acts].target = target.id
         end
     end
+end
+
+function Shogi:processAskill_1(actor, acts)
+    self:processAskillTeamHeal(actor, acts, "1")
+end
+
+function Shogi:processAskill_2(actor, acts)
+    self:processAskillTeamHeal(actor, acts, "2")
 end
 
 function Shogi:processAskill_3(actor, acts) -- 突撃
