@@ -281,7 +281,10 @@ function Shogi:attack(actor, target, dmg, acts)
         if self:isHime(target) then
             table.insert(acts, {type = "end", lose = target.team})
         else
-            self:moveTo(actor, target.i, target.j, acts)
+            local fin = self:moveTo(actor, target.i, target.j, acts)
+            if not fin and target.pskill == "3" and actor.hp > 0 then
+                self:attack(target, actor, nil, acts)
+            end
         end
     end
 end
