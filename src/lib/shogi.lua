@@ -20,6 +20,7 @@ local PSKILL = {
     {id = "1", name = "癒やし", desc = "周りの駒が毎ターン@ずつ回復する", at = 6},
     {id = "2", name = "癒やし", desc = "周りの駒が毎ターン@ずつ回復する", at = 12},
     {id = "3", name = "一矢", desc = "この駒を倒した相手に攻撃する"},
+    {id = "4", name = "兜の緒", desc = "駒を倒したら能力が上がる"},
 }
 
 local ASKILL = {
@@ -281,9 +282,13 @@ function Shogi:attack(actor, target, dmg, acts)
         if self:isHime(target) then
             table.insert(acts, {type = "end", lose = target.team})
         else
-            local fin = self:moveTo(actor, target.i, target.j, acts)
-            if not fin and target.pskill == "3" and actor.hp > 0 then
-                self:attack(target, actor, nil, acts)
+            if not self:moveTo(actor, target.i, target.j, acts) then
+                if target.pskill == "3" and actor.hp > 0 then
+                    self:attack(target, actor, nil, acts)
+                end
+                if actor.pskill == "4" and actor.hp > 0 then
+                    actor.power = actor.power * 1.5
+                end
             end
         end
     end
