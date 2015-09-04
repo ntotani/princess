@@ -238,13 +238,17 @@ function Shogi:move(friend, dir, acts)
     acts[#acts + 1] = {type = "move", fi = friend.i, fj = friend.j, actor = friend.id}
     acts[#acts].i = ni
     acts[#acts].j = nj
-    friend.i = ni
-    friend.j = nj
-    if self:isHime(friend) then
-        if self.tiles[ni][nj] == BLUE_CAMP and friend.team == "red" then
+    return self:moveTo(friend, ni, nj, acts)
+end
+
+function Shogi:moveTo(actor, di, dj, acts)
+    actor.i = di
+    actor.j = dj
+    if self:isHime(actor) then
+        if self.tiles[di][dj] == BLUE_CAMP and actor.team == "red" then
             acts[#acts + 1] = {type = "end", lose = "blue"}
             return true
-        elseif self.tiles[ni][nj] == RED_CAMP and friend.team == "blue" then
+        elseif self.tiles[di][dj] == RED_CAMP and actor.team == "blue" then
             acts[#acts + 1] = {type = "end", lose = "red"}
             return true
         end
@@ -274,11 +278,11 @@ function Shogi:attack(actor, target, dmg, acts)
     })
     target.hp = math.max(target.hp - dmg, 0)
     if target.hp <= 0 then
-        actor.i = target.i
-        actor.j = target.j
-    end
-    if self:isHime(target) and target.hp <= 0 then
-        table.insert(acts, {type = "end", lose = target.team})
+        if self:isHime(target) then
+            table.insert(acts, {type = "end", lose = target.team})
+        else
+            self:moveTo(actor, target.i, target.j, acts)
+        end
     end
 end
 
