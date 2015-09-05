@@ -24,6 +24,7 @@ local PSKILL = {
     {id = "5", name = "射手", desc = "@マス先まで攻撃できる", at = 1},
     {id = "6", name = "射手", desc = "@マス先まで攻撃できる", at = 2},
     {id = "7", name = "保険", desc = "体力満タンから倒されても生き残る"},
+    {id = "8", name = "倍速", desc = "二回ずつ行動できる"},
 }
 
 local ASKILL = {
@@ -196,7 +197,15 @@ function Shogi:processTurn(commands)
                 local method = "processAskill_" .. friend.askill
                 self[method](self, friend, acts)
             else
-                for _, dir in ipairs(CHIPS[chip]) do
+                local dirs = CHIPS[chip]
+                if friend.pskill == "8" then
+                    dirs = {}
+                    for _, e in ipairs(CHIPS[chip]) do
+                        table.insert(dirs, e)
+                        table.insert(dirs, e)
+                    end
+                end
+                for _, dir in ipairs(dirs) do
                     if self:move(friend, dir, acts) then break end
                 end
             end
