@@ -21,6 +21,8 @@ local PSKILL = {
     {id = "2", name = "癒やし", desc = "周りの駒が毎ターン@ずつ回復する", at = 12},
     {id = "3", name = "一矢", desc = "この駒を倒した相手に攻撃する"},
     {id = "4", name = "兜の緒", desc = "駒を倒したら能力が上がる"},
+    {id = "5", name = "射手", desc = "@マス先まで攻撃できる", at = 1},
+    {id = "6", name = "射手", desc = "@マス先まで攻撃できる", at = 2},
 }
 
 local ASKILL = {
@@ -216,8 +218,10 @@ function Shogi:processTurn(commands)
 end
 
 function Shogi:move(friend, dir, acts)
-    local ni = friend.i + dir.i * (friend.team == "red" and 1 or -1)
-    local nj = friend.j + dir.j * (friend.team == "red" and 1 or -1)
+    dir.i = dir.i * (friend.team == "red" and 1 or -1)
+    dir.j = dir.j * (friend.team == "red" and 1 or -1)
+    local ni = friend.i + dir.i
+    local nj = friend.j + dir.j
     if ni < 1 or ni > #self.tiles or nj < 1 or nj > #self.tiles[1] or self.tiles[ni][nj] == 0 then
         -- out of bounds
         acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = friend.id}
@@ -228,6 +232,14 @@ function Shogi:move(friend, dir, acts)
         return true
     end
     local hit = self:findChara(ni, nj)
+    if friend.pskill == "5" or friend.pskill == "6" and not hit then
+        for i = 1, us.findWhere(PSKILL, {id = friend.pskill}).at do
+            hit = self:findChara(ni + dir.i * i, nj + dir.j * i)
+            if hit then
+                break
+            end
+        end
+    end
     if hit then
         if friend.act == 2 then
             self:heal(friend, hit, nil, acts)
@@ -281,8 +293,9 @@ function Shogi:attack(actor, target, dmg, acts)
     if target.hp <= 0 then
         if self:isHime(target) then
             table.insert(acts, {type = "end", lose = target.team})
-        else
-            if not self:moveTo(actor, target.i, target.j, acts) then
+        elseif self:isNextTo(actor, target) then
+            local fin = self:moveTo(actor, target.i, target.j, acts)
+            if not fin then
                 if target.pskill == "3" and actor.hp > 0 then
                     self:attack(target, actor, nil, acts)
                 end
@@ -351,6 +364,15 @@ function Shogi:getDirs(team)
         dirs = us.reverse(dirs)
     end
     return dirs
+end
+
+function Shogi:isNextTo(a, b)
+    for _, e in ipairs(self:getDirs(a.team)) do
+        if a.i + e.i == b.i and a.j + e.j == b.j then
+            return true
+        end
+    end
+    return false
 end
 
 function Shogi:processAskillTeamHeal(actor, acts, askillId) -- 全体回復
