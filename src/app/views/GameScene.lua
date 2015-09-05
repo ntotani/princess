@@ -197,9 +197,6 @@ function GameScene:act2ccacts_attack(action)
         end),
         cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.fi, action.fj))),
     }
-    if action.dmg >= action.hp then
-        table.insert(ccacts, cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC, self:idx2pt(action.i, action.j))))
-    end
     return ccacts
 end
 

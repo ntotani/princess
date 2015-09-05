@@ -232,15 +232,6 @@ function Shogi:move(friend, dir, acts)
     dir.j = dir.j * (friend.team == "red" and 1 or -1)
     local ni = friend.i + dir.i
     local nj = friend.j + dir.j
-    if ni < 1 or ni > #self.tiles or nj < 1 or nj > #self.tiles[1] or self.tiles[ni][nj] == 0 then
-        -- out of bounds
-        acts[#acts + 1] = {type = "ob", i = ni, j = nj, actor = friend.id}
-        friend.hp = 0
-        if self:isHime(friend) then
-            acts[#acts + 1] = {type = "end", lose = friend.team}
-        end
-        return true
-    end
     local hit = self:findChara(ni, nj)
     if friend.pskill == "5" or friend.pskill == "6" and not hit then
         for i = 1, us.findWhere(PSKILL, {id = friend.pskill}).at do
@@ -258,13 +249,23 @@ function Shogi:move(friend, dir, acts)
         end
         return true
     end
-    acts[#acts + 1] = {type = "move", fi = friend.i, fj = friend.j, actor = friend.id}
-    acts[#acts].i = ni
-    acts[#acts].j = nj
     return self:moveTo(friend, ni, nj, acts)
 end
 
 function Shogi:moveTo(actor, di, dj, acts)
+    if di < 1 or di > #self.tiles or dj < 1 or dj > #self.tiles[1] or self.tiles[di][dj] == 0 then
+        -- out of bounds
+        acts[#acts + 1] = {type = "ob", actor = actor.id, i = di, j = dj}
+        actor.hp = 0
+        if self:isHime(actor) then
+            acts[#acts + 1] = {type = "end", lose = actor.team}
+        end
+        return true
+    end
+    if self:findChara(di, dj) then
+        return true
+    end
+    table.insert(acts, {type = "move", actor = actor.id, fi = actor.i, fj = actor.j, i = di, j = dj})
     actor.i = di
     actor.j = dj
     if self:isHime(actor) then
@@ -308,14 +309,14 @@ function Shogi:attack(actor, target, dmg, acts)
         if self:isHime(target) then
             table.insert(acts, {type = "end", lose = target.team})
         elseif self:isNextTo(actor, target) then
-            local fin = self:moveTo(actor, target.i, target.j, acts)
-            if not fin then
-                if target.pskill == "3" and actor.hp > 0 then
-                    self:attack(target, actor, nil, acts)
-                end
-                if actor.pskill == "4" and actor.hp > 0 then
-                    actor.power = actor.power * 1.5
-                end
+            if target.pskill == "3" and actor.hp > 0 then
+                self:attack(target, actor, nil, acts)
+            end
+            if actor.pskill == "4" and actor.hp > 0 then
+                actor.power = actor.power * 1.5
+            end
+            if actor.hp > 0 then
+                self:moveTo(actor, target.i, target.j, acts)
             end
         end
     end
