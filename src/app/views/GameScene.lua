@@ -188,15 +188,17 @@ function GameScene:act2ccacts_attack(action)
     local actor = self:act2actor(action)
     local target = self:act2actor(action, "target")
     local ccacts = {
-        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.i, action.j))),
         cc.CallFunc:create(function()
             target.gauge.setValue(action.hp - action.dmg)
             if action.dmg >= action.hp then
                 target:removeSelf()
             end
         end),
-        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.fi, action.fj))),
     }
+    if actor then
+        table.insert(ccacts, 1, cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.i, action.j))))
+        table.insert(ccacts, cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.fi, action.fj))))
+    end
     return ccacts
 end
 
