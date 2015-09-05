@@ -23,6 +23,7 @@ local PSKILL = {
     {id = "4", name = "兜の緒", desc = "駒を倒したら能力が上がる"},
     {id = "5", name = "射手", desc = "@マス先まで攻撃できる", at = 1},
     {id = "6", name = "射手", desc = "@マス先まで攻撃できる", at = 2},
+    {id = "7", name = "保険", desc = "体力満タンから倒されても生き残る"},
 }
 
 local ASKILL = {
@@ -289,7 +290,11 @@ function Shogi:attack(actor, target, dmg, acts)
         hp = target.hp,
         dmg = dmg,
     })
-    target.hp = math.max(target.hp - dmg, 0)
+    local max = 0
+    if target.pskill == "7" and target.hp >= 100 and dmg > target.hp then
+        max = 1
+    end
+    target.hp = math.max(target.hp - dmg, max)
     if target.hp <= 0 then
         if self:isHime(target) then
             table.insert(acts, {type = "end", lose = target.team})
