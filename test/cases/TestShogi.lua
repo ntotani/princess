@@ -442,6 +442,17 @@ TestShogi = {
         luaunit.assertEquals(acts[1], {type = "attack", actor = 2, fi = 7, fj = 3, target = 4, i = 6, j = 2, hp = 100, dmg = 40})
         luaunit.assertEquals(acts[2], {type = "move", actor = 2, fi = 7, fj = 3, i = 8, j = 4})
     end,
+    testProcessTurnPskill10 = function(self)
+        self.shogi:commitForm({red = {"1,9,3", "2,8,4"}, blue = {"1,1,3", "2,6,4", "3,4,4"}})
+        self.shogi.charas[5].pskill = "10"
+        local acts = {}
+        self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, acts)
+        luaunit.assertEquals(acts[1], {type = "swap", actor = 5, fi = 4, fj = 4, target = 4, ti = 6, tj = 4})
+        luaunit.assertEquals(acts[2], {type = "attack", actor = 2, fi = 8, fj = 4, target = 5, i = 6, j = 4, hp = 100, dmg = 40})
+        luaunit.assertEquals(self.shogi.charas[4].i, 4)
+        luaunit.assertEquals(self.shogi.charas[4].j, 4)
+        luaunit.assertEquals(self.shogi.charas[4].hp, 100)
+    end,
     testProcessTurnRefill = function(self)
         self.shogi:commitForm({red = {"1,9,3", "3,8,2"}, blue = {"1,1,3", "2,2,4"}})
         self.shogi.chips.red = {self.shogi.chips.red[1]}

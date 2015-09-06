@@ -26,6 +26,7 @@ local PSKILL = {
     {id = "7", name = "保険", desc = "体力満タンから倒されても生き残る"},
     {id = "8", name = "倍速", desc = "二回ずつ行動できる"},
     {id = "9", name = "反動", desc = "この駒を攻撃した相手は1マス下がる"},
+    {id = "10", name = "仁王", desc = "周囲の攻撃を自分に向ける"},
 }
 
 local ASKILL = {
@@ -287,6 +288,23 @@ function Shogi:calcDamage(actor, target)
 end
 
 function Shogi:attack(actor, target, dmg, acts)
+    for _, e in ipairs(self:getDirs(target.team)) do
+        local c = self:findChara(target.i + e.i, target.j + e.j)
+        if c and c.pskill == "10" then
+            table.insert(acts, {
+                type = "swap",
+                actor = c.id,
+                target = target.id,
+                fi = c.i,
+                fj = c.j,
+                ti = target.i,
+                tj = target.j,
+            })
+            c.i, c.j, target.i, target.j = target.i, target.j, c.i, c.j
+            target = c
+            break
+        end
+    end
     if dmg == nil then
         dmg = self:calcDamage(actor, target)
     end
