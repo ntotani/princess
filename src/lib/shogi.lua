@@ -14,6 +14,9 @@ local PLANET_RATE = {
 local CHARAS = {
     {id = "1", name = "姫", planet = "sun", pskill = "1", askill = "1", act = 2, power = 60, defense = 50, resist = 80},
     {id = "3", name = "浪人", planet = "mar", pskill = "3", askill = "3", act = 0, power = 80, defense = 80, resist = 60},
+    {id = "5", name = "占い師", planet = "mer", pskill = "5", askill = "4", act = 1, power = 70, defense = 60, resist = 90},
+    {id = "7", name = "足軽", planet = "jup", pskill = "7", askill = "6", act = 0, power = 70, defense = 50, resist = 50},
+    {id = "9", name = "鎧", planet = "sat", pskill = "9", askill = "7", act = 0, power = 60, defense = 100, resist = 80},
 }
 
 local PSKILL = {

@@ -39,7 +39,7 @@ function FormationScene:onCreate()
     local party = self.shogi:getParty()
     local myTeam = self:getApp():getTeam()
     for i, e in ipairs(party[myTeam]) do
-        if e.job == "hime" then
+        if self.shogi:isHime(e) then
             local ii, jj = self:searchTileIdx(myTeam == "red" and 2 or 3)
             self.hime = self:initChara(e):move(self:idx2pt(ii, jj)):addTo(self)
             self.hime.pos = {i = ii, j = jj}
@@ -52,7 +52,7 @@ function FormationScene:onCreate()
         end
     end
     for i, e in ipairs(party[myTeam == "red" and "blue" or "red"]) do
-        if e.job == "hime" then
+        if self.shogi:isHime(e) then
             self:initChara(e):move(self:idx2pt(self:searchTileIdx(myTeam == "red" and 3 or 2))):addTo(self)
         else
             self:initChara(e):move(i * 48, display.height - 80):addTo(self)
@@ -80,9 +80,9 @@ end
 
 function FormationScene:initChara(chara)
     local node = cc.Node:create()
-    node.sprite = jam.sprite("img/" .. chara.job .. "_" .. chara.color .. ".png", 32):addTo(node)
+    node.sprite = jam.sprite("img/chara/" .. chara.id .. ".png", 32):addTo(node)
     node.sprite:frameIdx(0, 1, 2, 1)
-    node.color = display.newSprite("icon/" .. chara.color .. ".png"):move(16, -16):addTo(node)
+    node.planet = display.newSprite("icon/" .. chara.planet .. ".png"):move(16, -16):addTo(node)
     return node
 end
 
