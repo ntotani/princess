@@ -25,6 +25,7 @@ local PSKILL = {
     {id = "6", name = "射手", desc = "@マス先まで攻撃できる", at = 2},
     {id = "7", name = "保険", desc = "体力満タンから倒されても生き残る"},
     {id = "8", name = "倍速", desc = "二回ずつ行動できる"},
+    {id = "9", name = "反動", desc = "この駒を攻撃した相手は1マス下がる"},
 }
 
 local ASKILL = {
@@ -319,6 +320,8 @@ function Shogi:attack(actor, target, dmg, acts)
                 self:moveTo(actor, target.i, target.j, acts)
             end
         end
+    elseif target.pskill == "9" and self:isNextTo(target, actor) then
+        self:moveTo(actor, actor.i + (actor.i - target.i), actor.j + (actor.j - target.j), acts)
     end
 end
 
