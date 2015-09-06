@@ -233,14 +233,14 @@ function Shogi:processTurn(commands)
 end
 
 function Shogi:move(friend, dir, acts)
-    dir.i = dir.i * (friend.team == "red" and 1 or -1)
-    dir.j = dir.j * (friend.team == "red" and 1 or -1)
-    local ni = friend.i + dir.i
-    local nj = friend.j + dir.j
+    local di = dir.i * (friend.team == "red" and 1 or -1)
+    local dj = dir.j * (friend.team == "red" and 1 or -1)
+    local ni = friend.i + di
+    local nj = friend.j + dj
     local hit = self:findChara(ni, nj)
     if friend.pskill == "5" or friend.pskill == "6" and not hit then
         for i = 1, us.findWhere(PSKILL, {id = friend.pskill}).at do
-            hit = self:findChara(ni + dir.i * i, nj + dir.j * i)
+            hit = self:findChara(ni + di * i, nj + dj * i)
             if hit then
                 break
             end

@@ -175,6 +175,14 @@ TestShogi = {
         luaunit.assertEquals(chara.j, 2)
         luaunit.assertEquals(#self.shogi.chips.red, 11)
     end,
+    testProcessTurnTwice = function(self)
+        self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,2"}})
+        self.shogi.chips.red[1] = "f"
+        self.shogi.chips.blue[1] = "f"
+        local acts = self.shogi:processTurn({"41", "21"})
+        luaunit.assertEquals(acts[2], {type = "move", actor = 4, fi = 2, fj = 2, i = 4, j = 2})
+        luaunit.assertEquals(acts[4], {type = "move", actor = 2, fi = 8, fj = 2, i = 6, j = 2})
+    end,
     testProcessTurnDead = function(self)
         self.shogi:commitForm({red = {"1,4,4", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
         self.shogi:getCharas()[4].hp = 1
