@@ -26,6 +26,10 @@ cc.FileUtils:getInstance():addSearchPath("res/")
 require "config"
 DEBUG = 1
 require "cocos.init"
+__G__TRACKBACK__ = function(msg)
+    print(debug.traceback(msg, 3))
+    os.exit(1)
+end
 
 os.exit(luaunit.LuaUnit.run('-v'))
 

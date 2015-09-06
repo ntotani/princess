@@ -94,6 +94,7 @@ function TestGameScene:testPskill3()
     self.app.shogi:commitForm({red = {"1,13,4", "2,12,5"}, blue = {"1,1,4", "2,10,5"}})
     self.app.shogi.chips.red[1] = "f"
     self.app.shogi.charas[4].hp = 1
+    self.scene:reset()
     self.scene:onTurn({"21"})
     setDeltaTime(100)
     cc.Director:getInstance():mainLoop() -- animation chip
