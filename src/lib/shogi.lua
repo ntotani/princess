@@ -459,8 +459,8 @@ function Shogi:processAskill_7(actor, acts) -- 突進
             if tail.type == "attack" then
                 local target = us.findWhere(self.charas, {id = tail.target})
                 if target.hp > 0 then
-                    local vi = actor.team == target.team and -2 or 2
-                    self:move(target, {i = vi, j = 0}, acts)
+                    local vi = actor.team == "red" and -2 or 2
+                    self:moveTo(target, target.i + vi, target.j, acts)
                 end
             end
             break
@@ -477,8 +477,8 @@ function Shogi:processAskill_8(actor, acts) -- 猛進
             if tail.type == "attack" then
                 local target = us.findWhere(self.charas, {id = tail.target})
                 if target.hp > 0 then
-                    local vi = actor.team == target.team and -2 or 2
-                    self:move(target, {i = vi, j = 0}, acts)
+                    local vi = actor.team == "red" and -2 or 2
+                    self:moveTo(target, target.i + vi, target.j, acts)
                 end
             end
         end
@@ -486,8 +486,11 @@ function Shogi:processAskill_8(actor, acts) -- 猛進
         for _, side in ipairs({{i = -sign, j = sign}, {i = -sign, j = -sign}}) do
             local target = self:findChara(prevI + side.i, prevJ + side.j)
             if target then
-                local v = target.team == "red" and side or {i = -side.i, j = -side.j}
-                self:move(target, v, acts)
+                self:moveTo(target, target.i + side.i, target.j + side.j, acts)
+                if acts[#acts].type == "end" then
+                    stop = true
+                    break
+                end
             end
         end
         if stop then break end
