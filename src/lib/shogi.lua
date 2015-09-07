@@ -404,12 +404,10 @@ function Shogi:isNextTo(a, b)
 end
 
 function Shogi:processAskillTeamHeal(actor, acts, askillId) -- 全体回復
-    for _, e in ipairs(self:getDirs(actor.team)) do
-        local ci, cj = actor.i + e.i, actor.j + e.j
-        local target = us.findWhere(self.charas, {i = ci, j = cj})
-        if target then
-            local dmg = us.findWhere(ASKILL, {id = askillId}).at
-            self:heal(actor, target, dmg, acts)
+    local dmg = us.findWhere(ASKILL, {id = askillId}).at
+    for _, e in ipairs(self.charas) do
+        if e.team == actor.team and e.hp < 100 then
+            self:heal(actor, e, dmg, acts)
         end
     end
 end
