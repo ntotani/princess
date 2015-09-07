@@ -299,7 +299,7 @@ end
 function Shogi:attack(actor, target, dmg, acts)
     for _, e in ipairs(self:getDirs(target.team)) do
         local c = self:findChara(target.i + e.i, target.j + e.j)
-        if c and c.pskill == "10" then
+        if c and c.pskill == "10" and c.team == target.team and c.id ~= actor.id then
             table.insert(acts, {
                 type = "swap",
                 actor = c.id,
