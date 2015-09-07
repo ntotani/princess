@@ -231,6 +231,10 @@ function GameScene:act2ccacts_ob(action)
     }
 end
 
+function GameScene:act2ccacts_evo(action)
+    return {}
+end
+
 function GameScene:act2actor(action, key)
     local charas = us.flatten({self.friends:getChildren(), self.enemies:getChildren()})
     key = key or "actor"

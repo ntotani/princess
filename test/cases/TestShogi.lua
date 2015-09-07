@@ -162,7 +162,9 @@ TestShogi = {
     testEvolve = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,4"}, blue = {"1,1,3", "2,2,2"}})
         self.shogi.tiles[6][4] = 6
-        self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, {})
+        local acts = {}
+        self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, acts)
+        luaunit.assertEquals(acts[2], {type = "evo", actor = 2, to = "4"})
         luaunit.assertEquals(self.shogi.charas[2].master.id, "4")
     end,
     testProcessTurn = function(self)
@@ -262,10 +264,8 @@ TestShogi = {
         luaunit.assertEquals(acts[1], {type = "miss", actor = 1, chip = 1})
     end,
     testProcessTurnSkill6 = function(self)
-        self.shogi:commitForm({red = {"1,9,3", "2,7,5"}, blue = {"1,1,3", "2,2,4"}})
-        self.shogi.charas[2].askill = "6"
-        local chips = self.shogi.chips.red
-        table.insert(chips, 1, table.remove(chips, us.detect(chips, "skill"))) -- pop skill top
+        self.shogi:commitForm({red = {"1,9,3", "4,7,5"}, blue = {"1,1,3", "2,2,4"}})
+        self.shogi.chips.red[1] = "skill"
         local acts = self.shogi:processTurn({"21"})
         luaunit.assertEquals(#acts, 4)
         luaunit.assertEquals(acts[2], {type = "move", fi = 7, fj = 5, actor = 2, i = 6, j = 4})
