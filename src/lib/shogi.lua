@@ -12,11 +12,16 @@ local PLANET_RATE = {
 }
 
 local CHARAS = {
-    {id = "1", name = "姫", planet = "sun", pskill = "1", askill = "1", act = 2, power = 60, defense = 50, resist = 80},
-    {id = "3", name = "浪人", planet = "mar", pskill = "3", askill = "3", act = 0, power = 80, defense = 80, resist = 60},
-    {id = "5", name = "占い師", planet = "mer", pskill = "5", askill = "4", act = 1, power = 70, defense = 60, resist = 90},
-    {id = "7", name = "足軽", planet = "jup", pskill = "7", askill = "6", act = 0, power = 70, defense = 50, resist = 50},
-    {id = "9", name = "鎧", planet = "sat", pskill = "9", askill = "7", act = 0, power = 60, defense = 100, resist = 80},
+    {id = "1", name = "姫", planet = "sun", pskill = "1", askill = "1", act = 2, power = 60, defense = 50, resist = 80, evo = "2"},
+    {id = "2", name = "姫将", planet = "sun", pskill = "2", askill = "2", act = 2, power = 100, defense = 60, resist = 100},
+    {id = "3", name = "浪人", planet = "mar", pskill = "3", askill = "3", act = 0, power = 80, defense = 80, resist = 60, evo = "4"},
+    {id = "4", name = "侍", planet = "mar", pskill = 4, askill = 3, act = 0, power = 130, defense = 100, resist = 70},
+    {id = "5", name = "占い師", planet = "mer", pskill = "5", askill = "4", act = 1, power = 70, defense = 60, resist = 90, evo = "6"},
+    {id = "6", name = "陰陽師", planet = "mer", pskill = "6", askill = "5", act = 1, power = 100, defense = 70, resist = 110},
+    {id = "7", name = "足軽", planet = "jup", pskill = "7", askill = "6", act = 0, power = 70, defense = 50, resist = 50, evo = "8"},
+    {id = "8", name = "忍者", planet = "jup", pskill = "8", askill = "5", act = 0, power = 120, defense = 60, resist = 60},
+    {id = "9", name = "鎧", planet = "sat", pskill = "9", askill = "7", act = 0, power = 60, defense = 100, resist = 80, evo = "10"},
+    {id = "10", name = "大鎧", planet = "sat", pskill = "10", askill = "8", act = 0, power = 70, defense = 120, resist = 100},
 }
 
 local PSKILL = {
@@ -73,7 +78,7 @@ local TILES = {
 {
     {0, 0, 0, 3, 0, 0, 0},
     {0, 0, 1, 0, 1, 0, 0},
-    {0, 1, 0, 1, 0, 1, 0},
+    {0, 1, 0, 1, 0, 6, 0},
     {1, 0, 1, 0, 1, 0, 1},
     {0, 1, 0, 1, 0, 1, 0},
     {1, 0, 1, 0, 1, 0, 1},
@@ -81,13 +86,15 @@ local TILES = {
     {1, 0, 1, 0, 1, 0, 1},
     {0, 1, 0, 1, 0, 1, 0},
     {1, 0, 1, 0, 1, 0, 1},
-    {0, 1, 0, 1, 0, 1, 0},
+    {0, 5, 0, 1, 0, 1, 0},
     {0, 0, 1, 0, 1, 0, 0},
     {0, 0, 0, 2, 0, 0, 0},
 }
 }
 local RED_CAMP = 2
 local BLUE_CAMP = 3
+local RED_EVO = 5
+local BLUE_EVO = 6
 
 function Shogi:ctor(ctx)
     self.ctx = ctx
@@ -96,8 +103,8 @@ function Shogi:ctor(ctx)
 end
 
 function Shogi:reset()
-    local himes = us.select(CHARAS, function(_, e) return self:isHime(e) end)
-    local others = us.select(CHARAS, function(_, e) return not self:isHime(e) end)
+    local himes = us.select(CHARAS, function(_, e) return self:isHime(e) and e.evo end)
+    local others = us.select(CHARAS, function(_, e) return not self:isHime(e) and e.evo end)
     self.party = {
         red  = {himes[(self.ctx.random() % #himes) + 1]},
         blue = {himes[(self.ctx.random() % #himes) + 1]}
@@ -272,6 +279,13 @@ function Shogi:moveTo(actor, di, dj, acts)
             acts[#acts + 1] = {type = "end", lose = "red"}
             return true
         end
+    end
+    if (self.tiles[di][dj] == BLUE_EVO and actor.team == "red" or
+        self.tiles[di][dj] == RED_EVO and actor.team == "blue") and actor.evo then
+        -- need action
+        local evo = us.findWhere(CHARAS, {id = actor.evo})
+        setmetatable(actor, {__index = evo})
+        actor.master = evo
     end
     return false
 end

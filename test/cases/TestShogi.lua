@@ -159,6 +159,12 @@ TestShogi = {
         luaunit.assertEquals(enemies[1].id, 2)
         luaunit.assertEquals(enemies[2].id, 1)
     end,
+    testEvolve = function(self)
+        self.shogi:commitForm({red = {"1,9,3", "2,8,4"}, blue = {"1,1,3", "2,2,2"}})
+        self.shogi.tiles[6][4] = 6
+        self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, {})
+        luaunit.assertEquals(self.shogi.charas[2].master.id, "4")
+    end,
     testProcessTurn = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
         self.shogi.chips.red[1] = "flf"
