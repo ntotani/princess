@@ -437,7 +437,7 @@ TestShogi = {
         self.shogi.charas[2].power = 1000
         local acts = {}
         self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, acts)
-        luaunit.assertEquals(acts[1], {type = "attack", actor = 2, fi = 8, fj = 4, target = 4, i = 6, j = 4, hp = 100, dmg = 400})
+        luaunit.assertEquals(acts[1], {type = "attack", actor = 2, fi = 8, fj = 4, target = 4, i = 6, j = 4, hp = 100, dmg = 99})
         luaunit.assertEquals(self.shogi.charas[4].hp, 1)
     end,
     testProcessTurnPskill8 = function(self)

@@ -96,16 +96,6 @@ function Shogi:ctor(ctx)
 end
 
 function Shogi:reset()
-    --[[
-    self.charas = {
-        {id = 1, i = 9, j = 3, team = "red",  hp = 100},
-        {id = 2, i = 8, j = 2, team = "red",  hp = 100},
-        {id = 3, i = 7, j = 5, team = "red",  hp = 100},
-        {id = 4, i = 1, j = 3, team = "blue", hp = 100},
-        {id = 5, i = 2, j = 4, team = "blue", hp = 100},
-        {id = 6, i = 3, j = 1, team = "blue", hp = 100},
-    }
-    ]]
     local himes = us.select(CHARAS, function(_, e) return self:isHime(e) end)
     local others = us.select(CHARAS, function(_, e) return not self:isHime(e) end)
     self.party = {
@@ -311,6 +301,9 @@ function Shogi:attack(actor, target, dmg, acts)
     if dmg == nil then
         dmg = self:calcDamage(actor, target)
     end
+    if target.pskill == "7" and target.hp >= 100 and dmg > target.hp then
+        dmg = 99
+    end
     table.insert(acts, {
         type = "attack",
         actor = actor.id,
@@ -322,11 +315,7 @@ function Shogi:attack(actor, target, dmg, acts)
         hp = target.hp,
         dmg = dmg,
     })
-    local max = 0
-    if target.pskill == "7" and target.hp >= 100 and dmg > target.hp then
-        max = 1
-    end
-    target.hp = math.max(target.hp - dmg, max)
+    target.hp = math.max(target.hp - dmg, 0)
     if target.hp <= 0 then
         if self:isHime(target) then
             table.insert(acts, {type = "end", lose = target.team})
