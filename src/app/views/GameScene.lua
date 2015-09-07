@@ -11,6 +11,9 @@ function GameScene:onCreate()
         for j, e in ipairs(line) do
             if e > 0 then
                 local path = self:isSideFour() and "img/tile_4.png" or "img/tile.png"
+                if e == 5 or e == 6 then
+                    path = "img/tile_gold_4.png"
+                end
                 display.newSprite(path):move(self:idx2pt(i, j)):addTo(self)
             end
         end

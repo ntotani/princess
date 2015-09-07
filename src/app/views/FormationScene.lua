@@ -6,11 +6,11 @@ local CHARA_NUM = 3
 
 function FormationScene:onCreate()
     self.MY_AREA = self:isSideFour() and {
-        {i = 11, j = 2},
         {i = 11, j = 4},
         {i = 11, j = 6},
         {i = 12, j = 3},
         {i = 12, j = 5},
+        {i = 10, j = 7},
     } or {
         {i = 7, j = 3},
         {i = 7, j = 5},
@@ -23,6 +23,9 @@ function FormationScene:onCreate()
         for j, e in ipairs(line) do
             if e > 0 then
                 local path = self:isSideFour() and "img/tile_4.png" or "img/tile.png"
+                if e == 5 or e == 6 then
+                    path = "img/tile_gold_4.png"
+                end
                 display.newSprite(path):move(self:idx2pt(i, j)):addTo(self)
             end
         end
@@ -34,6 +37,8 @@ function FormationScene:onCreate()
         end
         local path = self:isSideFour() and "img/tile_red_4.png" or "img/tile_red.png"
         display.newSprite(path):move(self:idx2pt(e.i, e.j)):addTo(self)
+        path = self:isSideFour() and "img/tile_blue_4.png" or "img/tile_blue.png"
+        display.newSprite(path):move(self:idx2pt(#self.shogi:getTiles() - e.i + 1, #self.shogi:getTiles()[1] - e.j + 1)):addTo(self)
     end
     self.friends = display.newLayer():addTo(self)
     local party = self.shogi:getParty()
