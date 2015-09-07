@@ -28,7 +28,7 @@ TestShogi = {
     testCommitForm = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
         luaunit.assertEquals(#self.shogi:getCharas(), 4)
-        luaunit.assertEquals(self.shogi:getCharas()[1], {id = 1, i = 9, j = 3, team = "red", hp = 100, master = self.shogi.party.red[1]})
+        luaunit.assertEquals(self.shogi:getCharas()[1], {id = 1, i = 9, j = 3, team = "red", hp = 100, pump = {power = 1.0, defense = 1.0, resist = 1.0}, master = self.shogi.party.red[1]})
         luaunit.assertFalse(self.shogi:isHime(self.shogi:getCharas()[2]))
         luaunit.assertTrue(self.shogi:isHime(self.shogi:getCharas()[3]))
         luaunit.assertFalse(self.shogi:isHime(self.shogi:getCharas()[4]))
@@ -401,9 +401,8 @@ TestShogi = {
         self.shogi:commitForm({red = {"1,9,3", "2,8,4"}, blue = {"1,1,3", "2,6,4"}})
         self.shogi.charas[2].pskill = "4"
         self.shogi.charas[4].hp = 1
-        luaunit.assertEquals(self.shogi.charas[2].power, 70)
         self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, {})
-        luaunit.assertEquals(self.shogi.charas[2].power, 105)
+        luaunit.assertEquals(self.shogi.charas[2].pump.power, 1.5)
     end,
     testProcessTurnPskill5 = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,4"}, blue = {"1,1,3", "2,4,4"}})

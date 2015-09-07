@@ -131,6 +131,7 @@ function Shogi:commitForm(form)
                 j = tonumber(e[3]),
                 team = team,
                 hp = 100,
+                pump = {power = 1.0, defense = 1.0, resist = 1.0},
             }
             setmetatable(chara, {__index = master})
             self.charas[#self.charas + 1] = chara
@@ -276,8 +277,9 @@ function Shogi:moveTo(actor, di, dj, acts)
 end
 
 function Shogi:calcDamage(actor, target)
-    local defense = actor.act == 0 and target.defense or target.resist
-    return math.floor(40 * actor.power / defense * PLANET_RATE[actor.planet][target.planet])
+    local attack = actor.power * actor.pump.power
+    local defense = actor.act == 0 and target.defense * target.pump.defense or target.resist * target.pump.resist
+    return math.floor(40 * attack / defense * PLANET_RATE[actor.planet][target.planet])
 end
 
 function Shogi:attack(actor, target, dmg, acts)
@@ -324,7 +326,7 @@ function Shogi:attack(actor, target, dmg, acts)
                 self:attack(target, actor, nil, acts)
             end
             if actor.pskill == "4" and actor.hp > 0 then
-                actor.power = actor.power * 1.5
+                actor.pump.power = actor.pump.power * 1.5
             end
             if actor.hp > 0 then
                 self:moveTo(actor, target.i, target.j, acts)
@@ -421,12 +423,11 @@ function Shogi:processAskill_2(actor, acts)
 end
 
 function Shogi:processAskill_3(actor, acts) -- 突撃
-    local prevPower = actor.power
-    actor.power = prevPower * 2
+    actor.pump.power = actor.pump.power * 2
     for _, dir in ipairs({{i = -2, j = 0}, {i = -2, j = 0}}) do
         if self:move(actor, dir, acts) then break end
     end
-    actor.power = prevPower
+    actor.pump.power = actor.pump.power / 2
 end
 
 function Shogi:processAskill_4(actor, acts) -- 姫寄せ
