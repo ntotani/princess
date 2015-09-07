@@ -229,7 +229,7 @@ function Shogi:move(friend, dir, acts)
     local ni = friend.i + di
     local nj = friend.j + dj
     local hit = self:findChara(ni, nj)
-    if friend.pskill == "5" or friend.pskill == "6" and not hit then
+    if (friend.pskill == "5" or friend.pskill == "6") and not hit then
         for i = 1, us.findWhere(PSKILL, {id = friend.pskill}).at do
             hit = self:findChara(ni + di * i, nj + dj * i)
             if hit then
