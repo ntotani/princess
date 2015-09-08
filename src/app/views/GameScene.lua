@@ -276,10 +276,26 @@ end
 
 function GameScene:act2ccacts_evo(action)
     local actor = self:act2actor(action)
+    local from = us.findWhere(self.shogi.getCharaMaster(), {id = action.from})
+    local to = us.findWhere(self.shogi.getCharaMaster(), {id = action.to})
+    local node = cc.Node:create():move(actor:getPosition()):addTo(self)
+    display.newSprite("img/window.png"):move(display.center):addTo(node)
+    cc.Label:createWithTTF("成り駒\n\n　" .. from.name .. " => " .. to.name, "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(node):setDimensions(200, 0)
+    node:setScale(0)
     return {
+        cc.Spawn:create(
+            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(0, 0))),
+            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 1))
+        ),
+        cc.DelayTime:create(1.0),
+        cc.Spawn:create(
+            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(actor:getPosition()))),
+            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 0))
+        ),
+        cc.TargetedAction:create(node, cc.RemoveSelf:create()),
         cc.CallFunc:create(function()
             actor.sprite:updateFrames("img/chara/" .. action.to .. ".png", 32)
-        end)
+        end),
     }
 end
 

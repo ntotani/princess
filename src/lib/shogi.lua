@@ -104,6 +104,10 @@ function Shogi.getPskill()
     return PSKILL
 end
 
+function Shogi.getCharaMaster()
+    return CHARAS
+end
+
 function Shogi:ctor(ctx)
     self.ctx = ctx
     self.tiles = us.clone(TILES[ctx.mapId])
@@ -298,7 +302,7 @@ function Shogi:moveTo(actor, di, dj, acts)
     if (self.tiles[di][dj] == BLUE_EVO and actor.team == "red" or
         self.tiles[di][dj] == RED_EVO and actor.team == "blue") and actor.evo then
         local evo = us.findWhere(CHARAS, {id = actor.evo})
-        table.insert(acts, {type = "evo", actor = actor.id, to = evo.id})
+        table.insert(acts, {type = "evo", actor = actor.id, from = actor.master.id, to = evo.id})
         setmetatable(actor, {__index = evo})
         actor.master = evo
     end

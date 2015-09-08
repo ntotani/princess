@@ -164,7 +164,7 @@ TestShogi = {
         self.shogi.tiles[6][4] = 6
         local acts = {}
         self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, acts)
-        luaunit.assertEquals(acts[2], {type = "evo", actor = 2, to = "4"})
+        luaunit.assertEquals(acts[2], {type = "evo", actor = 2, from = "3", to = "4"})
         luaunit.assertEquals(self.shogi.charas[2].master.id, "4")
     end,
     testProcessTurn = function(self)
