@@ -96,6 +96,10 @@ local BLUE_CAMP = 3
 local RED_EVO = 5
 local BLUE_EVO = 6
 
+function Shogi.getAskill()
+    return ASKILL
+end
+
 function Shogi.getPskill()
     return PSKILL
 end

@@ -40,11 +40,13 @@ function GameScene:reset()
     for i, e in ipairs(self.shogi:getChips(friendTeam)) do
         local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), 80):addTo(self.chips)
         chip.idx = i
+        chip.name = e
     end
     for i, e in ipairs(self.shogi:getChips(enemyTeam)) do
         local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), display.height - 80):addTo(self.enemyChips)
         chip:setScale(-1)
         chip.idx = i
+        chip.name = e
     end
     self.touchLayer:onTouch(us.bind(self.onTouch, self))
 end
@@ -160,10 +162,29 @@ function GameScene:act2ccacts_chip(action)
     local chip = us.findWhere(self[(isMyTeam and "chips" or "enemyChips")]:getChildren(), {idx = action.chip})
     local actor = self:act2actor(action)
     local moveTo = cc.MoveTo:create(ACT_DEF_SEC, cc.p(actor:getPosition()))
-    return {
+    local ccacts =  {
         cc.TargetedAction:create(chip, moveTo),
         cc.TargetedAction:create(chip, cc.RemoveSelf:create()),
     }
+    if chip.name == "skill" then
+        local skill = us.findWhere(self.shogi.getAskill(), {id = actor.model.askill})
+        local desc = skill.at == nil and skill.desc or string.gsub(skill.desc, "@", skill.at)
+        local node = cc.Node:create():move(actor:getPosition()):addTo(self)
+        display.newSprite("img/window.png"):move(display.center):addTo(node)
+        cc.Label:createWithTTF(skill.name .. "\n\n　" .. desc, "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(node):setDimensions(200, 0)
+        node:setScale(0)
+        table.insert(ccacts, cc.Spawn:create(
+            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(0, 0))),
+            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 1))
+        ))
+        table.insert(ccacts, cc.DelayTime:create(1.0))
+        table.insert(ccacts, cc.Spawn:create(
+            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(actor:getPosition()))),
+            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 0))
+        ))
+        table.insert(ccacts, cc.TargetedAction:create(node, cc.RemoveSelf:create()))
+    end
+    return ccacts
 end
 
 function GameScene:act2ccacts_move(action)
@@ -290,6 +311,7 @@ function GameScene:drawChip()
                 chip:move(display.width + chip:getContentSize().width, chipY)
                 chip:setScale(isMyTeam and 1 or -1)
                 chip.idx = i
+                chip.name = e
                 moveChip(chip, i)
             elseif chips[i].idx ~= i then
                 chips[i].idx = i
