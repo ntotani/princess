@@ -232,7 +232,12 @@ function GameScene:act2ccacts_ob(action)
 end
 
 function GameScene:act2ccacts_evo(action)
-    return {}
+    local actor = self:act2actor(action)
+    return {
+        cc.CallFunc:create(function()
+            actor.sprite:updateFrames("img/chara/" .. action.to .. ".png", 32)
+        end)
+    }
 end
 
 function GameScene:act2actor(action, key)

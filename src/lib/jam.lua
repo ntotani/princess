@@ -23,7 +23,7 @@ function Sprite:frameIdx(...)
     return self
 end
 
-function jam.sprite(name, size)
+local function image2frames(name, size)
     local texture = display.loadImage(name)
     local wid = texture:getPixelsWide()
     local hei = texture:getPixelsHigh()
@@ -33,10 +33,21 @@ function jam.sprite(name, size)
         cc.SpriteFrameCache:getInstance():addSpriteFrame(sf, name .. i)
         frames[#frames + 1] = sf
     end
+    return frames
+end
+
+function jam.sprite(name, size)
+    local frames = image2frames(name, size)
     local ret = display.newSprite(frames[1])
     ret.frames_ = frames
     ret.frameIdx_ = 0
     return ret
+end
+
+function Sprite:updateFrames(name, size)
+    self.frames_ = image2frames(name, size)
+    self:stopAllActions()
+    self:frameIdx(self.frameIdx_)
 end
 
 local function pauseAll_(node)
