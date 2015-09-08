@@ -96,6 +96,10 @@ local BLUE_CAMP = 3
 local RED_EVO = 5
 local BLUE_EVO = 6
 
+function Shogi.getPskill()
+    return PSKILL
+end
+
 function Shogi:ctor(ctx)
     self.ctx = ctx
     self.tiles = us.clone(TILES[ctx.mapId])
@@ -202,6 +206,7 @@ function Shogi:processTurn(commands)
             else
                 local dirs = CHIPS[chip]
                 if friend.pskill == "8" then
+                    table.insert(acts, {type = "pskill", actor = friend.id, id = "8"})
                     dirs = {}
                     for _, e in ipairs(CHIPS[chip]) do
                         table.insert(dirs, e)
@@ -217,9 +222,14 @@ function Shogi:processTurn(commands)
     for _, e in ipairs(self.charas) do
         if e.pskill == "1" or e.pskill == "2" then
             local dmg = us.findWhere(PSKILL, {id = e.pskill}).at
+            local actInsert = false
             for _, dir in ipairs(self:getDirs(e.team)) do
                 local target = self:findChara(e.i + dir.i, e.j + dir.j)
                 if target and target.hp < 100 then
+                    if not actInsert then
+                        actInsert = true
+                        table.insert(acts, {type = "pskill", actor = e.id, id = e.pskill})
+                    end
                     self:heal(e, target, dmg, acts)
                 end
             end
@@ -240,6 +250,7 @@ function Shogi:move(friend, dir, acts)
         for i = 1, us.findWhere(PSKILL, {id = friend.pskill}).at do
             hit = self:findChara(ni + di * i, nj + dj * i)
             if hit then
+                table.insert(acts, {type = "pskill", actor = friend.id, id = friend.pskill})
                 break
             end
         end
@@ -300,6 +311,7 @@ function Shogi:attack(actor, target, dmg, acts)
     for _, e in ipairs(self:getDirs(target.team)) do
         local c = self:findChara(target.i + e.i, target.j + e.j)
         if c and c.pskill == "10" and c.team == target.team and c.id ~= actor.id then
+            table.insert(acts, {type = "pskill", actor = c.id, id = "10"})
             table.insert(acts, {
                 type = "swap",
                 actor = c.id,
@@ -318,6 +330,7 @@ function Shogi:attack(actor, target, dmg, acts)
         dmg = self:calcDamage(actor, target)
     end
     if target.pskill == "7" and target.hp >= 100 and dmg > target.hp then
+        table.insert(acts, {type = "pskill", actor = target.id, id = "7"})
         dmg = 99
     end
     table.insert(acts, {
@@ -337,9 +350,11 @@ function Shogi:attack(actor, target, dmg, acts)
             table.insert(acts, {type = "end", lose = target.team})
         elseif self:isNextTo(actor, target) then
             if target.pskill == "3" and actor.hp > 0 then
+                table.insert(acts, {type = "pskill", actor = target.id, id = "3"})
                 self:attack(target, actor, nil, acts)
             end
             if actor.pskill == "4" and actor.hp > 0 then
+                table.insert(acts, {type = "pskill", actor = actor.id, id = "4"})
                 actor.pump.power = actor.pump.power * 1.5
             end
             if actor.hp > 0 then
@@ -347,6 +362,7 @@ function Shogi:attack(actor, target, dmg, acts)
             end
         end
     elseif target.pskill == "9" and self:isNextTo(target, actor) then
+        table.insert(acts, {type = "pskill", actor = target.id, id = "9"})
         self:moveTo(actor, actor.i + (actor.i - target.i), actor.j + (actor.j - target.j), acts)
     end
 end

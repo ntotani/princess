@@ -135,8 +135,8 @@ TestShogi = {
         local acts = {}
         local ret = self.shogi:move(self.shogi.charas[1], {i = -2, j = 0}, acts)
         luaunit.assertTrue(ret)
-        luaunit.assertEquals(#acts, 4)
-        luaunit.assertEquals(acts[4], {type = "end", lose = "blue"})
+        luaunit.assertEquals(#acts, 5)
+        luaunit.assertEquals(acts[5], {type = "end", lose = "blue"})
     end,
     testMoveBlueHime = function(self)
         self.shogi:commitForm({red = {"1,8,4", "2,8,2"}, blue = {"1,7,3", "2,2,4"}})
@@ -192,8 +192,8 @@ TestShogi = {
         self.shogi:getCharas()[4].hp = 1
         self.shogi.chips.red[1] = "f"
         local acts = self.shogi:processTurn({"21", "41"})
-        luaunit.assertEquals(#acts, 6)
-        luaunit.assertEquals(acts[5], {type = "miss", actor = 4, chip = 1})
+        luaunit.assertEquals(#acts, 8)
+        luaunit.assertEquals(acts[6], {type = "miss", actor = 4, chip = 1})
     end,
     testProcessTurnSkill1 = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,4", "3,7,1"}, blue = {"1,1,3", "2,2,2"}})
@@ -348,8 +348,9 @@ TestShogi = {
         self.shogi.charas[1].pskill = "1"
         self.shogi.charas[2].hp = 1
         local acts = self.shogi:processTurn({})
-        luaunit.assertEquals(#acts, 1)
-        luaunit.assertEquals(acts[1], {type = "heal", actor = 1, fi = 9, fj = 3, target = 2, i = 8, j = 2, hp = 1, dmg = 6})
+        luaunit.assertEquals(#acts, 2)
+        luaunit.assertEquals(acts[1], {type = "pskill", actor = 1, id = "1"})
+        luaunit.assertEquals(acts[2], {type = "heal", actor = 1, fi = 9, fj = 3, target = 2, i = 8, j = 2, hp = 1, dmg = 6})
         luaunit.assertEquals(self.shogi.charas[2].hp, 7)
     end,
     testProcessTurnPskill2 = function(self)
@@ -357,8 +358,9 @@ TestShogi = {
         self.shogi.charas[3].pskill = "2"
         self.shogi.charas[2].hp = 1
         local acts = self.shogi:processTurn({})
-        luaunit.assertEquals(#acts, 1)
-        luaunit.assertEquals(acts[1], {type = "heal", actor = 3, fi = 1, fj = 3, target = 2, i = 3, j = 3, hp = 1, dmg = 12})
+        luaunit.assertEquals(#acts, 2)
+        luaunit.assertEquals(acts[1], {type = "pskill", actor = 3, id = "2"})
+        luaunit.assertEquals(acts[2], {type = "heal", actor = 3, fi = 1, fj = 3, target = 2, i = 3, j = 3, hp = 1, dmg = 12})
         luaunit.assertEquals(self.shogi.charas[2].hp, 13)
     end,
     testProcessTurnPskill3 = function(self)
@@ -366,8 +368,9 @@ TestShogi = {
         self.shogi.charas[4].hp = 1
         local acts = {}
         self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, acts)
-        luaunit.assertEquals(#acts, 3)
-        luaunit.assertEquals(acts[2], {type = "attack", actor = 4, fi = 6, fj = 4, target = 2, i = 8, j = 4, hp = 100, dmg = 40})
+        luaunit.assertEquals(#acts, 4)
+        luaunit.assertEquals(acts[2], {type = "pskill", actor = 4, id = "3"})
+        luaunit.assertEquals(acts[3], {type = "attack", actor = 4, fi = 6, fj = 4, target = 2, i = 8, j = 4, hp = 100, dmg = 40})
         luaunit.assertEquals(self.shogi.charas[2].hp, 60)
         luaunit.assertEquals(self.shogi.charas[4].hp, 0)
     end,
@@ -377,8 +380,8 @@ TestShogi = {
         self.shogi.charas[4].hp = 1
         local acts = {}
         self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, acts)
-        luaunit.assertEquals(#acts, 2)
-        luaunit.assertEquals(acts[2], {type = "attack", actor = 4, fi = 6, fj = 4, target = 2, i = 8, j = 4, hp = 1, dmg = 40})
+        luaunit.assertEquals(#acts, 3)
+        luaunit.assertEquals(acts[3], {type = "attack", actor = 4, fi = 6, fj = 4, target = 2, i = 8, j = 4, hp = 1, dmg = 40})
         luaunit.assertEquals(self.shogi.charas[2].hp, 0)
         luaunit.assertEquals(self.shogi.charas[4].hp, 0)
     end,
@@ -393,7 +396,8 @@ TestShogi = {
         self.shogi:commitForm({red = {"1,9,3", "3,8,4"}, blue = {"1,1,3", "2,4,4"}})
         local acts = {}
         self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, acts)
-        luaunit.assertEquals(acts[1], {type = "attack", actor = 2, fi = 8, fj = 4, target = 4, i = 4, j = 4, hp = 100, dmg = 93})
+        luaunit.assertEquals(acts[1], {type = "pskill", actor = 2, id = "5"})
+        luaunit.assertEquals(acts[2], {type = "attack", actor = 2, fi = 8, fj = 4, target = 4, i = 4, j = 4, hp = 100, dmg = 93})
         luaunit.assertEquals(self.shogi.charas[2].i, 8)
         luaunit.assertEquals(self.shogi.charas[2].j, 4)
     end,
@@ -402,7 +406,8 @@ TestShogi = {
         self.shogi.charas[4].pskill = "6"
         local acts = {}
         self.shogi:move(self.shogi.charas[4], {i = -1, j = -1}, acts)
-        luaunit.assertEquals(acts[1], {type = "attack", actor = 4, fi = 2, fj = 2, target = 2, i = 5, j = 5, hp = 100, dmg = 93})
+        luaunit.assertEquals(acts[1], {type = "pskill", actor = 4, id = "6"})
+        luaunit.assertEquals(acts[2], {type = "attack", actor = 4, fi = 2, fj = 2, target = 2, i = 5, j = 5, hp = 100, dmg = 93})
         luaunit.assertEquals(self.shogi.charas[4].i, 2)
         luaunit.assertEquals(self.shogi.charas[4].j, 2)
     end,
@@ -412,7 +417,8 @@ TestShogi = {
         self.shogi.charas[2].power = 1000
         local acts = {}
         self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, acts)
-        luaunit.assertEquals(acts[1], {type = "attack", actor = 2, fi = 8, fj = 4, target = 4, i = 6, j = 4, hp = 100, dmg = 99})
+        luaunit.assertEquals(acts[1], {type = "pskill", actor = 4, id = "7"})
+        luaunit.assertEquals(acts[2], {type = "attack", actor = 2, fi = 8, fj = 4, target = 4, i = 6, j = 4, hp = 100, dmg = 99})
         luaunit.assertEquals(self.shogi.charas[4].hp, 1)
     end,
     testProcessTurnPskill8 = function(self)
@@ -420,23 +426,26 @@ TestShogi = {
         self.shogi.charas[2].pskill = "8"
         self.shogi.chips.red[1] = "f"
         local acts = self.shogi:processTurn({"21"})
-        luaunit.assertEquals(acts[2], {type = "move", actor = 2, fi = 8, fj = 4, i = 6, j = 4})
-        luaunit.assertEquals(acts[3], {type = "move", actor = 2, fi = 6, fj = 4, i = 4, j = 4})
+        luaunit.assertEquals(acts[2], {type = "pskill", actor = 2, id = "8"})
+        luaunit.assertEquals(acts[3], {type = "move", actor = 2, fi = 8, fj = 4, i = 6, j = 4})
+        luaunit.assertEquals(acts[4], {type = "move", actor = 2, fi = 6, fj = 4, i = 4, j = 4})
     end,
     testProcessTurnPskill9 = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,7,3"}, blue = {"1,1,3", "5,6,2"}})
         local acts = {}
         self.shogi:move(self.shogi.charas[2], {i = -1, j = -1}, acts)
         luaunit.assertEquals(acts[1], {type = "attack", actor = 2, fi = 7, fj = 3, target = 4, i = 6, j = 2, hp = 100, dmg = 32})
-        luaunit.assertEquals(acts[2], {type = "move", actor = 2, fi = 7, fj = 3, i = 8, j = 4})
+        luaunit.assertEquals(acts[2], {type = "pskill", actor = 4, id = "9"})
+        luaunit.assertEquals(acts[3], {type = "move", actor = 2, fi = 7, fj = 3, i = 8, j = 4})
     end,
     testProcessTurnPskill10 = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,4"}, blue = {"1,1,3", "2,6,4", "5,4,4"}})
         self.shogi.charas[5].pskill = "10"
         local acts = {}
         self.shogi:move(self.shogi.charas[2], {i = -2, j = 0}, acts)
-        luaunit.assertEquals(acts[1], {type = "swap", actor = 5, fi = 4, fj = 4, target = 4, ti = 6, tj = 4})
-        luaunit.assertEquals(acts[2], {type = "attack", actor = 2, fi = 8, fj = 4, target = 5, i = 6, j = 4, hp = 100, dmg = 32})
+        luaunit.assertEquals(acts[1], {type = "pskill", actor = 5, id = "10"})
+        luaunit.assertEquals(acts[2], {type = "swap", actor = 5, fi = 4, fj = 4, target = 4, ti = 6, tj = 4})
+        luaunit.assertEquals(acts[3], {type = "attack", actor = 2, fi = 8, fj = 4, target = 5, i = 6, j = 4, hp = 100, dmg = 32})
         luaunit.assertEquals(self.shogi.charas[4].i, 4)
         luaunit.assertEquals(self.shogi.charas[4].j, 4)
         luaunit.assertEquals(self.shogi.charas[4].hp, 100)
