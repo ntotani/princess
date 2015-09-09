@@ -111,6 +111,7 @@ end
 function Shogi:ctor(ctx)
     self.ctx = ctx
     self.tiles = us.clone(TILES[ctx.mapId])
+    self.deck = us.keys(CHIPS)
     self:reset()
 end
 
@@ -134,6 +135,10 @@ function Shogi:setParties(red, blue)
         red = us.map(red, function(_, e) return us.findWhere(CHARAS, {id = e}) end),
         blue = us.map(blue, function(_, e) return us.findWhere(CHARAS, {id = e}) end),
     }
+end
+
+function Shogi:setDeck(deck)
+    self.deck = deck
 end
 
 function Shogi:isHime(chara)
@@ -173,7 +178,7 @@ function Shogi:commitForm(form)
 end
 
 function Shogi:drawChips()
-    return us(CHIPS):keys():map(function(_, e)
+    return us(self.deck):map(function(_, e)
         return {val = e, w = self.ctx.random()}
     end):sort(function(a, b)
         return a.w < b.w

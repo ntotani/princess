@@ -30,6 +30,14 @@ TestShogi = {
         luaunit.assertEquals(self.shogi.party.blue[1].id, "3")
         luaunit.assertEquals(self.shogi.party.blue[2].id, "2")
     end,
+    testSetDeck = function(self)
+        self.shogi:setDeck({"f", "f", "f", "f", "f"})
+        self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
+        luaunit.assertEquals(self.shogi.chips.red[1], "f")
+        luaunit.assertEquals(self.shogi.chips.red[2], "f")
+        luaunit.assertEquals(self.shogi.chips.red[3], "f")
+        luaunit.assertEquals(self.shogi.chips.red[4], "f")
+    end,
     testCommitForm = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
         luaunit.assertEquals(#self.shogi:getCharas(), 4)
