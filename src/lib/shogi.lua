@@ -129,6 +129,13 @@ function Shogi:reset()
     self.chips = {}
 end
 
+function Shogi:setParties(red, blue)
+    self.party = {
+        red = us.map(red, function(_, e) return us.findWhere(CHARAS, {id = e}) end),
+        blue = us.map(blue, function(_, e) return us.findWhere(CHARAS, {id = e}) end),
+    }
+end
+
 function Shogi:isHime(chara)
     return chara.name == "姫" or chara.name == "姫将"
 end

@@ -23,6 +23,13 @@ TestShogi = {
         luaunit.assertEquals(self.shogi:getCharas(), {})
         luaunit.assertEquals(self.shogi.chips, {})
     end,
+    testSetParties = function(self)
+        self.shogi:setParties({"5", "4"}, {"3", "2"})
+        luaunit.assertEquals(self.shogi.party.red[1].id, "5")
+        luaunit.assertEquals(self.shogi.party.red[2].id, "4")
+        luaunit.assertEquals(self.shogi.party.blue[1].id, "3")
+        luaunit.assertEquals(self.shogi.party.blue[2].id, "2")
+    end,
     testCommitForm = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
         luaunit.assertEquals(#self.shogi:getCharas(), 4)
