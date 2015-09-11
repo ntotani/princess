@@ -246,9 +246,10 @@ end
 
 function GameScene:act2ccacts_pskill(action)
     local actor = self:act2actor(action)
+    local actorPos = actor and cc.p(actor:getPosition()) or cc.p(0, 0)
     local skill = us.findWhere(self.shogi:getPskill(), {id = action.id})
     local desc = skill.at == nil and skill.desc or string.gsub(skill.desc, "@", skill.at)
-    local node = cc.Node:create():move(actor:getPosition()):addTo(self)
+    local node = cc.Node:create():move(actorPos):addTo(self)
     display.newSprite("img/window.png"):move(display.center):addTo(node)
     cc.Label:createWithTTF(skill.name .. "\n\n　" .. desc, "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(node):setDimensions(200, 0)
     node:setScale(0)
@@ -259,7 +260,7 @@ function GameScene:act2ccacts_pskill(action)
         ),
         cc.DelayTime:create(1.0),
         cc.Spawn:create(
-            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(actor:getPosition()))),
+            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, actorPos)),
             cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 0))
         ),
         cc.TargetedAction:create(node, cc.RemoveSelf:create()),
