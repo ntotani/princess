@@ -4,11 +4,11 @@ local Shogi = {}
 local PLANET_RATE = {
     sun = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 1.0, jup = 1.0, ven = 1.0, sat = 1.0},
     mon = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 1.0, jup = 1.0, ven = 1.0, sat = 1.0},
-    mar = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 0.5, jup = 2.0, ven = 1.0, sat = 1.0},
-    mer = {sun = 1.0, mon = 1.0, mar = 2.0, mer = 0.5, jup = 0.5, ven = 1.0, sat = 1.0},
-    jup = {sun = 1.0, mon = 1.0, mar = 0.5, mer = 2.0, jup = 1.0, ven = 1.0, sat = 1.0},
+    mar = {sun = 2.0, mon = 1.0, mar = 1.0, mer = 0.5, jup = 2.0, ven = 1.0, sat = 0.5},
+    mer = {sun = 2.0, mon = 1.0, mar = 2.0, mer = 0.5, jup = 0.5, ven = 1.0, sat = 0.5},
+    jup = {sun = 2.0, mon = 1.0, mar = 0.5, mer = 2.0, jup = 1.0, ven = 1.0, sat = 0.5},
     ven = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 1.0, jup = 1.0, ven = 1.0, sat = 1.0},
-    sat = {sun = 1.0, mon = 1.0, mar = 1.0, mer = 1.0, jup = 1.0, ven = 1.0, sat = 1.0},
+    sat = {sun = 0.5, mon = 1.0, mar = 1.0, mer = 1.0, jup = 1.0, ven = 1.0, sat = 1.0},
 }
 
 local CHARAS = {
@@ -43,7 +43,7 @@ local ASKILL = {
     {id = "3", name = "突撃", desc = "攻撃力2倍で2マス前進"},
     {id = "4", name = "姫寄せ", desc = "敵の姫は前進する"},
     {id = "5", name = "帰還", desc = "自分の本陣に移動する"},
-    {id = "6", name = "横断", desc = "↖に3マス進む"},
+    {id = "6", name = "横断", desc = "左前に3マス進む"},
     {id = "7", name = "突進", desc = "目の前の駒を後退させながら2マス前進"},
     {id = "8", name = "猛進", desc = "前方の駒を後退させながら2マス前進"},
 }
@@ -106,6 +106,10 @@ end
 
 function Shogi.getCharaMaster()
     return CHARAS
+end
+
+function Shogi.getPlanetRate()
+    return PLANET_RATE
 end
 
 function Shogi:ctor(ctx)
