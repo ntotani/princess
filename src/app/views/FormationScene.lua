@@ -56,11 +56,12 @@ function FormationScene:onCreate()
             chara.backPt = cc.p(chara:getPosition())
         end
     end
+    self.enemies = display.newLayer():addTo(self)
     for i, e in ipairs(party[myTeam == "red" and "blue" or "red"]) do
         if self.shogi:isHime(e) then
-            self:initChara(e):move(self:idx2pt(self:searchTileIdx(myTeam == "red" and 3 or 2))):addTo(self)
+            self:initChara(e):move(self:idx2pt(self:searchTileIdx(myTeam == "red" and 3 or 2))):addTo(self.enemies)
         else
-            self:initChara(e):move(i * 48, display.height - 80):addTo(self)
+            self:initChara(e):move(i * 48, display.height - 80):addTo(self.enemies)
         end
     end
     local notice = cc.Node:create():addTo(self)
@@ -99,10 +100,9 @@ function FormationScene:onTouch(e)
             local len = 32
             if cc.rectContainsPoint(cc.rect(x - len / 2, y - len / 2, len, len), e) and not friend.pos then
                 self.holdChara = friend
-                return true
             end
         end
-        return false
+        return true
     end
     if e.name == "moved" and self.holdChara then
         self.holdChara:move(e)
@@ -148,15 +148,40 @@ function FormationScene:onTouch(e)
             end
         end
         if us.isEqual(cc.p(self.holdChara:getPosition()), self.holdChara.backPt) then
-            local spec = self:createSpec(self.holdChara.model):move(display.center):addTo(self)
-            self.touchLayer:onTouch(function()
-                spec:removeSelf()
-                self.touchLayer:onTouch(us.bind(self.onTouch, self))
-            end)
+            self:showSpec(self.holdChara)
         end
         self.holdChara:move(self.holdChara.backPt)
         self.holdChara = nil
+    else
+        for _, chara in ipairs(us.flatten({self.friends:getChildren(), self.enemies:getChildren(), self.hime})) do
+            local x, y = chara:getPosition()
+            local len = 32
+            if cc.rectContainsPoint(cc.rect(x - len / 2, y - len / 2, len, len), e) then
+                self:showSpec(chara)
+                break
+            end
+        end
     end
+end
+
+function FormationScene:showSpec(chara)
+    local pv = ccui.PageView:create():addTo(self)
+    local evo = us.findWhere(self.shogi.getCharaMaster(), {id = chara.model.evo})
+    local height
+    for _, e in ipairs({chara.model, evo}) do
+        local spec = self:createSpec(e)
+        height = spec:getContentSize().height
+        spec:move(display.cx, height / 2)
+        local page = ccui.Layout:create()
+        page:addChild(spec)
+        pv:addPage(page)
+    end
+    pv:move(0, (display.height - height) / 2)
+    pv:setContentSize(display.width, height)
+    self.touchLayer:onTouch(function()
+        pv:removeSelf()
+        self.touchLayer:onTouch(us.bind(self.onTouch, self))
+    end)
 end
 
 return FormationScene

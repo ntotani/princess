@@ -15,7 +15,7 @@ local CHARAS = {
     {id = "1", name = "姫", planet = "sun", pskill = "1", askill = "1", act = 2, power = 60, defense = 50, resist = 80, evo = "2"},
     {id = "2", name = "姫将", planet = "sun", pskill = "2", askill = "2", act = 2, power = 100, defense = 60, resist = 100},
     {id = "3", name = "浪人", planet = "mar", pskill = "3", askill = "3", act = 0, power = 80, defense = 80, resist = 60, evo = "4"},
-    {id = "4", name = "侍", planet = "mar", pskill = 4, askill = 3, act = 0, power = 130, defense = 100, resist = 70},
+    {id = "4", name = "侍", planet = "mar", pskill = "4", askill = "3", act = 0, power = 130, defense = 100, resist = 70},
     {id = "5", name = "占い師", planet = "mer", pskill = "5", askill = "4", act = 1, power = 70, defense = 60, resist = 90, evo = "6"},
     {id = "6", name = "陰陽師", planet = "mer", pskill = "6", askill = "5", act = 1, power = 100, defense = 70, resist = 110},
     {id = "7", name = "足軽", planet = "jup", pskill = "7", askill = "6", act = 0, power = 70, defense = 50, resist = 50, evo = "8"},
