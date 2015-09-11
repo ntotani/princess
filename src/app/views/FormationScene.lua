@@ -88,6 +88,7 @@ function FormationScene:initChara(chara)
     node.sprite = jam.sprite("img/chara/" .. chara.id .. ".png", 32):addTo(node)
     node.sprite:frameIdx(0, 1, 2, 1)
     node.planet = display.newSprite("icon/" .. chara.planet .. ".png"):move(16, -16):addTo(node)
+    node.model = chara
     return node
 end
 
@@ -145,6 +146,13 @@ function FormationScene:onTouch(e)
                 end
                 return
             end
+        end
+        if us.isEqual(cc.p(self.holdChara:getPosition()), self.holdChara.backPt) then
+            local spec = self:createSpec(self.holdChara.model):move(display.center):addTo(self)
+            self.touchLayer:onTouch(function()
+                spec:removeSelf()
+                self.touchLayer:onTouch(us.bind(self.onTouch, self))
+            end)
         end
         self.holdChara:move(self.holdChara.backPt)
         self.holdChara = nil

@@ -1,3 +1,5 @@
+local us = require("lib.moses")
+local jam = require("lib.jam")
 
 local ViewBase = class("ViewBase", cc.Node)
 
@@ -80,6 +82,49 @@ function ViewBase:idx2pt(i, j)
         j = col - j + 1
     end
     return cc.p(display.cx + tileMarginX * (j - math.ceil(col / 2)) * 1.5, display.cy + tileMarginY * (math.ceil(row / 2) - i))
+end
+
+function ViewBase:createSpec(model)
+    local spec = display.newSprite("img/spec.png")
+    local size = spec:getContentSize()
+    local font = "font/PixelMplus12-Regular.ttf"
+    cc.Label:createWithTTF(model.name, font, 36):align(cc.p(0, 1), 10, size.height - 10):addTo(spec)
+    jam.sprite("img/chara/" .. model.id .. ".png", 32):align(cc.p(1, 1), size.width - 10, size.height - 10):addTo(spec)
+    display.newSprite("icon/" .. model.planet .. ".png"):align(cc.p(1, 0.5), size.width - 42, size.height - 26):addTo(spec)
+    local rate = self.shogi.getPlanetRate()
+    local good, bad = {}, {}
+    for _, e in ipairs(us.keys(rate)) do
+        if rate[model.planet][e] > 1.0 or rate[e][model.planet] < 1.0 then
+            table.insert(good, e)
+            elseif rate[e][model.planet] > 1.0 or rate[model.planet][e] < 1.0 then
+                table.insert(bad, e)
+            end
+    end
+    local lab = cc.Label:createWithTTF("得意", font, 18):align(cc.p(0, 1), 20, size.height - 70):addTo(spec)
+    for i, e in ipairs(good) do
+        display.newSprite("icon/" .. e .. ".png"):align(cc.p(0, 0.5), size.width / 2 + (i - 1) * 32, lab:getPositionY() - lab:getContentSize().height / 2):addTo(spec)
+    end
+    lab = cc.Label:createWithTTF("苦手", font, 18):align(cc.p(0, 1), 20, lab:getPositionY() - 32):addTo(spec)
+    for i, e in ipairs(bad) do
+        display.newSprite("icon/" .. e .. ".png"):align(cc.p(0, 0.5), size.width / 2 + (i - 1) * 32, lab:getPositionY() - lab:getContentSize().height / 2):addTo(spec)
+    end
+    lab = cc.Label:createWithTTF("行動", font, 18):align(cc.p(0, 1), 20, lab:getPositionY() - 42):addTo(spec)
+    cc.Label:createWithTTF(({"物理攻撃", "魔法攻撃", "回復"})[model.act + 1], font, 18):align(cc.p(0, 1), size.width / 2, lab:getPositionY()):addTo(spec)
+    lab = cc.Label:createWithTTF(({"攻撃力", "魔力", "回復力"})[model.act + 1], font, 18):align(cc.p(0, 1), 20, lab:getPositionY() - 24):addTo(spec)
+    cc.Label:createWithTTF(model.power, font, 18):align(cc.p(0, 1), size.width / 2, lab:getPositionY()):addTo(spec)
+    lab = cc.Label:createWithTTF("物理防御", font, 18):align(cc.p(0, 1), 20, lab:getPositionY() - 24):addTo(spec)
+    cc.Label:createWithTTF(model.defense, font, 18):align(cc.p(0, 1), size.width / 2, lab:getPositionY()):addTo(spec)
+    lab = cc.Label:createWithTTF("魔法防御", font, 18):align(cc.p(0, 1), 20, lab:getPositionY() - 24):addTo(spec)
+    cc.Label:createWithTTF(model.resist, font, 18):align(cc.p(0, 1), size.width / 2, lab:getPositionY()):addTo(spec)
+    local askill = us.findWhere(self.shogi.getAskill(), {id = model.askill})
+    lab = cc.Label:createWithTTF("特技「" .. askill.name .. "」", font, 18):align(cc.p(0, 1), 20, lab:getPositionY() - 42):addTo(spec)
+    lab = cc.Label:createWithTTF(askill.at and string.gsub(askill.desc, "@", askill.at) or askill.desc, font, 12):align(cc.p(0, 1), 20, lab:getPositionY() - 24):addTo(spec)
+    lab:setDimensions(size.width - 40, 0)
+    local pskill = us.findWhere(self.shogi.getPskill(), {id = model.pskill})
+    lab = cc.Label:createWithTTF("特性「" .. pskill.name .. "」", font, 18):align(cc.p(0, 1), 20, lab:getPositionY() - 32):addTo(spec)
+    lab = cc.Label:createWithTTF(pskill.at and string.gsub(pskill.desc, "@", pskill.at) or pskill.desc, font, 12):align(cc.p(0, 1), 20, lab:getPositionY() - 24):addTo(spec)
+    lab:setDimensions(size.width - 40, 0)
+    return spec
 end
 
 return ViewBase
