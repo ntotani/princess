@@ -41,7 +41,8 @@ function PuzzleApp:addListener(listener)
 end
 
 function PuzzleApp:commit(charaId, chipIdx)
-    self.listener({charaId .. chipIdx})
+    local enemies = us.select(self.shogi.charas, function(_, e) return e.team == "blue" end)
+    self.listener({charaId .. chipIdx, enemies[1].id .. "1"})
 end
 
 function PuzzleApp:reset()
