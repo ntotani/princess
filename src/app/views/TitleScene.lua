@@ -5,15 +5,36 @@ function TitleScene:onCreate()
     cc.TMXTiledMap:create("tmx/forest.tmx"):addTo(self)
     self.smoke = display.newLayer(display.COLOR_BLACK):addTo(self)
     self.smoke:setOpacity(0)
+    self.puzzle = cc.Menu:create():move(0, 0):addTo(self):setVisible(false)
+    for i = 1, 10 do
+        local margin = (360 - 73 * 4) / 5
+        local x = ((i - 1) % 4) * (73 + margin) + margin + 73 / 2
+        local y = display.height - (math.floor((i - 1) / 4) * (73 + margin) + margin + 73 / 2)
+        local mii = cc.MenuItemImage:create("img/btn.png", "img/btn.png"):move(x, y):onClicked(function()
+            local app = require("app.ctx.PuzzleApp"):create({level = i})
+            app:run("GameScene")
+        end):addTo(self.puzzle)
+        cc.Label:createWithTTF(i, "font/PixelMplus12-Regular.ttf", 24):move(73 / 2, 73 / 2):addTo(mii):setColor(display.COLOR_BLACK)
+    end
     self.titles = cc.Node:create():addTo(self)
     display.newSprite("img/logo.png"):move(display.cx, display.height * 3 / 5):addTo(self.titles)
+    local puzzleButton = cc.MenuItemImage:create("img/button_puzzle.png", "img/button_puzzle.png")
+        :move(display.cx, display.height * 0.35)
+        :onClicked(us.bind(self.onPuzzle, self))
     local roomButton = cc.MenuItemImage:create("img/button_room.png", "img/button_room.png")
         :move(display.cx, display.height * 0.25)
         :onClicked(us.bind(self.onRoom, self))
     local joinButton = cc.MenuItemImage:create("img/button_join.png", "img/button_join.png")
         :move(display.cx, display.height * 0.15)
         :onClicked(us.bind(self.onJoin, self))
-    cc.Menu:create(roomButton, joinButton):move(0, 0):addTo(self.titles)
+    cc.Menu:create(puzzleButton, roomButton, joinButton):move(0, 0):addTo(self.titles)
+end
+
+function TitleScene:onPuzzle()
+    self.titles:moveBy({time = 0.2, x = -display.width})
+    self.smoke:fadeTo({time = 0.2, opacity = 127, onComplete = function()
+        self.puzzle:setVisible(true)
+    end})
 end
 
 function TitleScene:onRoom()
