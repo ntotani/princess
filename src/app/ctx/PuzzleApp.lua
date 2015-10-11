@@ -6,26 +6,7 @@ function PuzzleApp:onCreate()
     local file = string.format("puzzle/%03d.json", self.configs_.level)
     local level = cc.FileUtils:getInstance():getStringFromFile(file)
     level = json.decode(level)
-    self.shogi = require("lib.shogi").new({random = random, mapId = level.map})
-    self.shogi:setDeck(level.friend.deck)
-    self.shogi.party = {red = {}, blue = {}}
-    self.shogi:commitForm({
-        red = self:level2form_(level.friend.chara, "red"),
-        blue = self:level2form_(level.enemy.chara, "blue")
-    })
-end
-
-function PuzzleApp:level2form_(chara, team)
-    local form = {}
-    local master2party = {}
-    for _, e in ipairs(chara) do
-        if not master2party[e.id] then
-            table.insert(self.shogi.party[team], us.findWhere(self.shogi.getCharaMaster(), {id = e.id}))
-            master2party[e.id] = #self.shogi.party[team]
-        end
-        table.insert(form, string.format("%d,%d,%d", master2party[e.id], e.i, e.j))
-    end
-    return form
+    self.shogi = require("lib.solver").level2shogi(random, level)
 end
 
 function PuzzleApp:getTeam()
