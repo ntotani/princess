@@ -16,6 +16,7 @@ function testSample()
 end
 
 require "test.cases.TestShogi"
+require "test.cases.TestSolver"
 require "test.cases.TestGameScene"
 require "test.cases.TestTitleScene"
 
