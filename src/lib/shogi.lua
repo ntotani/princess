@@ -409,7 +409,7 @@ function Shogi:heal(actor, target, dmg, acts)
     target.hp = math.min(target.hp + dmg, 100)
 end
 
-function Shogi:farEnemies(who)
+function Shogi:calcDist(who)
     local dirs = self:getDirs(who.team)
     local dist = us.map(self.tiles, function(_, e)
         return us.rep(-1, #e)
@@ -428,6 +428,11 @@ function Shogi:farEnemies(who)
             end
         end
     end
+    return dist
+end
+
+function Shogi:farEnemies(who)
+    local dist = self:calcDist(who)
     return us(self.charas):select(function(i, e)
         return e.team ~= who.team
     end):sort(function(a, b)

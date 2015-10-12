@@ -29,17 +29,21 @@ end
 function Solver.solve(shogi, charaId, chipIdx)
     local enemies = us.select(shogi.charas, function(_, e) return e.team == "blue" end)
     local chips = shogi:getChips("blue")
-    local act2score = {}
+    local scores = {}
     for i, chara in ipairs(enemies) do
         for j, chip in ipairs(chips) do
             local act = chara.id .. j
             local copy = us.clone(shogi)
             setmetatable(copy, {__index = Shogi})
+            for _, e in ipairs(copy.charas) do
+                setmetatable(e, {__index = e.master})
+            end
             copy:processTurn({charaId .. chipIdx, act})
-            act2score[act] = Solver.evalScore(copy)
+            table.insert(scores, {act = act, score = Solver.evalScore(copy)})
         end
     end
-    return act2score
+    table.sort(scores, function(a, b) return a.score > b.score end)
+    return scores[1].act
 end
 
 function Solver.evalScore(shogi)
@@ -69,13 +73,38 @@ function Solver.evalScore(shogi)
             return 4294967295
         end
     end
+    local score = 0
+
     -- 姫の体力差
-    -- 敵姫のゴールまでの距離で減点
-    -- 味方姫のゴールまでの距離で加点
+    if blueHime and redHime then
+        score = score + (blueHime.hp - redHime.hp)
+    end
+
+    -- 敵味方の姫からゴールまでの距離で加減点
+    if redHime then
+        local dist = Solver.dist2camp(shogi, redHime, Shogi.BLUE_CAMP)
+        score = score - dist
+    end
+    if blueHime then
+        local dist = Solver.dist2camp(shogi, blueHime, Shogi.RED_CAMP)
+        score = score + dist
+    end
+
     -- コマ数の差
     -- 体力の差
     -- 駒同士の相性と距離
-    return 1
+    return score
+end
+
+function Solver.dist2camp(shogi, hime, camp)
+    local dist = shogi:calcDist(hime)
+    for i = 1, #dist do
+        for j = 1, #dist[i] do
+            if dist[i][j] == camp then
+                return dist[i][j]
+            end
+        end
+    end
 end
 
 return Solver

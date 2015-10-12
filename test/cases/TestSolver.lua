@@ -21,12 +21,7 @@ end
 
 function TestSolver:testSolve()
     local act = self.solver.solve(self.shogi, 1, 1)
-    local expected = {}
-    expected["31"] = 1
-    expected["32"] = 1
-    expected["41"] = 1
-    expected["42"] = 1
-    luaunit.assertEquals(act, expected)
+    luaunit.assertEquals(act, "31")
 end
 
 function TestSolver:testScoreIsEnd()
@@ -38,6 +33,7 @@ function TestSolver:testScoreIsEnd()
     redHime.i = 1
     blueHime.i = 3
     luaunit.assertEquals(self.solver.evalScore(self.shogi), 0)
+    redHime.i = 7
     redHime.hp = 0
     luaunit.assertEquals(self.solver.evalScore(self.shogi), 4294967295)
     redHime.hp = 1
