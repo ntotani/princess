@@ -91,8 +91,8 @@ local TILES = {
     {0, 0, 0, 2, 0, 0, 0},
 }
 }
-local RED_CAMP = 2
-local BLUE_CAMP = 3
+Shogi.RED_CAMP = 2
+Shogi.BLUE_CAMP = 3
 local RED_EVO = 5
 local BLUE_EVO = 6
 
@@ -307,10 +307,10 @@ function Shogi:moveTo(actor, di, dj, acts)
     actor.i = di
     actor.j = dj
     if self:isHime(actor) then
-        if self.tiles[di][dj] == BLUE_CAMP and actor.team == "red" then
+        if self.tiles[di][dj] == Shogi.BLUE_CAMP and actor.team == "red" then
             acts[#acts + 1] = {type = "end", lose = "blue"}
             return true
-        elseif self.tiles[di][dj] == RED_CAMP and actor.team == "blue" then
+        elseif self.tiles[di][dj] == Shogi.RED_CAMP and actor.team == "blue" then
             acts[#acts + 1] = {type = "end", lose = "red"}
             return true
         end
@@ -492,7 +492,7 @@ function Shogi:processAskill_4(actor, acts) -- 姫寄せ
 end
 
 function Shogi:processAskill_5(actor, acts) -- 帰還
-    local camp = actor.team == "red" and RED_CAMP or BLUE_CAMP
+    local camp = actor.team == "red" and Shogi.RED_CAMP or Shogi.BLUE_CAMP
     local ci, cj
     for i = 1, #self.tiles do
         for j = 1, #self.tiles[i] do
