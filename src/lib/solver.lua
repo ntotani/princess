@@ -82,29 +82,31 @@ function Solver.evalScore(shogi)
 
     -- 敵味方の姫からゴールまでの距離で加減点
     if redHime then
-        local dist = Solver.dist2camp(shogi, redHime, Shogi.BLUE_CAMP)
-        score = score - dist
+        local ci, cj = shogi:findTile(Shogi.BLUE_CAMP)
+        local path = shogi:calcPath(redHime, ci, cj)
+        if path then
+            -- ToDo 距離3までのみを考慮すべきなのとキャンプに他の駒がいるか
+            score = score - #path
+        end
     end
     if blueHime then
-        local dist = Solver.dist2camp(shogi, blueHime, Shogi.RED_CAMP)
-        score = score + dist
+        local ci, cj = shogi:findTile(Shogi.RED_CAMP)
+        local path = shogi:calcPath(blueHime, ci, cj)
+        if path then
+            score = score + #path
+        end
     end
 
     -- コマ数の差
+    local reds = us.select(charas, function(_, e) return e.team == "red" and e.hp > 0 end)
+    local blues = us.select(charas, function(_, e) return e.team == "blue" and e.hp > 0 end)
+    score = score + (#blues - #reds)
+
     -- 体力の差
+    score = score + (us.reduce(blues, function(e) return e.hp end) - us.reduce(reds, function(e) return e.hp end))
+
     -- 駒同士の相性と距離
     return score
-end
-
-function Solver.dist2camp(shogi, hime, camp)
-    local dist = shogi:calcDist(hime)
-    for i = 1, #dist do
-        for j = 1, #dist[i] do
-            if dist[i][j] == camp then
-                return dist[i][j]
-            end
-        end
-    end
 end
 
 return Solver

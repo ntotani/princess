@@ -195,6 +195,16 @@ function Shogi:getTiles()
     return self.tiles
 end
 
+function Shogi:findTile(tile)
+    for i = 1, #self.tiles do
+        for j = 1, #self.tiles[i] do
+            if self.tiles[i][j] == tile then
+                return i, j
+            end
+        end
+    end
+end
+
 function Shogi:getCharas()
     return self.charas
 end
@@ -429,6 +439,34 @@ function Shogi:calcDist(who)
         end
     end
     return dist
+end
+
+function Shogi:calcPath(who, gi, gj)
+    if self:findChara(gi, gj) then return nil end
+    local dirs = self:getDirs(who.team)
+    local memo = us.map(self.tiles, function(_, e)
+        return us.rep({dist = -1, fi = -1, fj = -1}, #e)
+    end)
+    local currentDist = 0
+    memo[who.i][who.j].dist = 0
+    local queue = {{i = who.i, j = who.j}}
+    while #queue > 0 do
+        local c = table.remove(queue, 1)
+        for _, dir in ipairs(dirs) do
+            local ni, nj = c.i + dir.i, c.j + dir.j
+            if ni > 0 and ni <= #memo and nj > 0 and nj <= #memo[ni] and memo[ni][nj].dist == -1 and not self:findChara(ni, ni) then
+                currentDist = currentDist + 1
+                memo[ni][nj] = {dist = currentDist, fi = c.i, fj = c.j}
+                table.insert(queue, {i = ni, j = nj})
+            end
+        end
+    end
+    local path, ci, cj = {}, gi, gj
+    while ci ~= who.i or cj ~= who.j do
+        table.insert(path, {i = ci, j = cj})
+        ci, cj = memo[ci][cj].fi, memo[ci][cj].fj
+    end
+    return path
 end
 
 function Shogi:farEnemies(who)

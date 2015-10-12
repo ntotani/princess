@@ -21,7 +21,7 @@ end
 
 function TestSolver:testSolve()
     local act = self.solver.solve(self.shogi, 1, 1)
-    luaunit.assertEquals(act, "31")
+    luaunit.assertEquals(act, "42")
 end
 
 function TestSolver:testScoreIsEnd()
