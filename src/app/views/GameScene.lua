@@ -136,12 +136,12 @@ function GameScene:onTurn(commands)
 end
 
 function GameScene:act2ccacts_end(action)
-    local message = self:getApp():endMessage(action.lose ~= self:getApp():getTeam())
+    local texts = self:getApp():endTexts(action.lose ~= self:getApp():getTeam())
     return {
         cc.CallFunc:create(function()
-            self:showPrompt(self, message, "もう一回", function()
+            self:showPrompt(self, texts.message, texts.ok, function()
                 self:getApp():endPositive()
-            end, "やめる", function()
+            end, texts.ng, function()
                 self:getApp():endNegative()
             end)
         end)

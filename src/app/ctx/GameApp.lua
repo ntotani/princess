@@ -37,8 +37,12 @@ function GameApp:commit(charaId, chipIdx)
     self:sendRequest({acts = {__op = "Add", objects = {charaId .. chipIdx}}})
 end
 
-function GameApp:endMessage(win)
-    return "YOU " .. (win and "WIN" or "LOSE")
+function GameApp:endTexts(win)
+    return {
+        message = "YOU " .. (win and "WIN" or "LOSE"),
+        ok = "もう一回",
+        ng = "やめる"
+    }
 end
 
 function GameApp:endPositive()

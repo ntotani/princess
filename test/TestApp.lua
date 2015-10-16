@@ -30,8 +30,12 @@ function TestApp:commit(charaId, chipIdx)
     self.listener({charaId .. chipIdx})
 end
 
-function TestApp:endMessage(win)
-    return "YOU " .. (win and "WIN" or "LOSE")
+function TestApp:endTexts(win)
+    return {
+        message = "YOU " .. (win and "WIN" or "LOSE"),
+        ok = "もう一回",
+        ng = "やめる"
+    }
 end
 
 function TestApp:endPositive()
