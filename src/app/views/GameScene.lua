@@ -136,7 +136,7 @@ function GameScene:onTurn(commands)
 end
 
 function GameScene:act2ccacts_end(action)
-    local message = "YOU " .. (action.lose == self:getApp():getTeam() and "LOSE" or "WIN")
+    local message = self:getApp():endMessage(action.lose ~= self:getApp():getTeam())
     return {
         cc.CallFunc:create(function()
             self:showPrompt(self, message, "もう一回", function()

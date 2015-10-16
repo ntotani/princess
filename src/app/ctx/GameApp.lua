@@ -37,6 +37,10 @@ function GameApp:commit(charaId, chipIdx)
     self:sendRequest({acts = {__op = "Add", objects = {charaId .. chipIdx}}})
 end
 
+function GameApp:endMessage(win)
+    return "YOU " .. (win and "WIN" or "LOSE")
+end
+
 function GameApp:endPositive()
     if self:getTeam() == "red" then
         self:sendRequest({red = {}, blue = {}, acts = {}})

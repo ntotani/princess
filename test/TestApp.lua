@@ -30,6 +30,10 @@ function TestApp:commit(charaId, chipIdx)
     self.listener({charaId .. chipIdx})
 end
 
+function TestApp:endMessage(win)
+    return "YOU " .. (win and "WIN" or "LOSE")
+end
+
 function TestApp:endPositive()
     self.shogi:reset()
     self:enterScene("FormationScene")
