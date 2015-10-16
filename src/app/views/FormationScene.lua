@@ -120,9 +120,7 @@ function FormationScene:onTouch(e)
                 if #form >= CHARA_NUM then
                     self.touchLayer:removeTouch()
                     local confirm = cc.Node:create():addTo(self)
-                    display.newSprite("img/window.png"):move(display.center):addTo(confirm)
-                    cc.Label:createWithTTF("この配置でいいですか？", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(confirm)
-                    local ok = cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(function()
+                    self:showPrompt(confirm, "この配置でいいですか？", "はい", function()
                         confirm:removeSelf()
                         local form = {table.concat({self.hime.partyIdx, self.hime.pos.i, self.hime.pos.j}, ",")}
                         for _, friend in ipairs(self.friends:getChildren()) do
@@ -133,16 +131,14 @@ function FormationScene:onTouch(e)
                         self:getApp():commitForm(form)
                         display.newSprite("img/window.png"):move(display.center):addTo(self)
                         cc.Label:createWithTTF("相手を待っています...", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(self)
-                    end):move(50, 0):addChild(cc.Label:createWithTTF("はい", "font/PixelMplus12-Regular.ttf", 18):move(39, 21))
-                    local ng = cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(function()
+                    end, "いいえ", function()
                         for _, friend in ipairs(self.friends:getChildren()) do
                             friend:move(friend.backPt)
                             friend.pos = nil
                         end
                         confirm:removeSelf()
                         self.touchLayer:onTouch(us.bind(self.onTouch, self))
-                    end):move(-50, 0):addChild(cc.Label:createWithTTF("いいえ", "font/PixelMplus12-Regular.ttf", 18):move(39, 21))
-                    cc.Menu:create(ok, ng):move(display.cx, display.cy - 70):addTo(confirm)
+                    end)
                 end
                 return
             end
