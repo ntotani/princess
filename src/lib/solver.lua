@@ -103,7 +103,7 @@ function Solver.evalScore(shogi)
     score = score + (#blues - #reds)
 
     -- 体力の差
-    score = score + (us.reduce(blues, function(e) return e.hp end) - us.reduce(reds, function(e) return e.hp end))
+    score = score + (us.reduce(blues, function(p, e) return p + e.hp end, 0) - us.reduce(reds, function(p, e) return p + e.hp end, 0))
 
     -- 駒同士の相性と距離
     return score
