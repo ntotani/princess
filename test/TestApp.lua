@@ -30,9 +30,13 @@ function TestApp:commit(charaId, chipIdx)
     self.listener({charaId .. chipIdx})
 end
 
-function TestApp:reset()
+function TestApp:endPositive()
     self.shogi:reset()
     self:enterScene("FormationScene")
+end
+
+function TestApp:endNegative()
+    print("endNegative")
 end
 
 return TestApp

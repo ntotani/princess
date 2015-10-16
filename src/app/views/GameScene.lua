@@ -136,12 +136,13 @@ function GameScene:onTurn(commands)
 end
 
 function GameScene:act2ccacts_end(action)
-    local name = action.lose == self:getApp():getTeam() and "lose" or "win"
+    local message = "YOU " .. (action.lose == self:getApp():getTeam() and "LOSE" or "WIN")
     return {
         cc.CallFunc:create(function()
-            display.newSprite("img/" .. name  .. ".png"):move(display.center):addTo(self)
-            self.touchLayer:onTouch(function()
-                self:getApp():reset()
+            self:showPrompt(self, message, "もう一回", function()
+                self:getApp():endPositive()
+            end, "やめる", function()
+                self:getApp():endNegative()
             end)
         end)
     }

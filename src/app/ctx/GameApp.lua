@@ -37,12 +37,17 @@ function GameApp:commit(charaId, chipIdx)
     self:sendRequest({acts = {__op = "Add", objects = {charaId .. chipIdx}}})
 end
 
-function GameApp:reset()
+function GameApp:endPositive()
     if self:getTeam() == "red" then
         self:sendRequest({red = {}, blue = {}, acts = {}})
     end
     self.shogi:reset()
     self:enterScene("FormationScene")
+end
+
+function GameApp:endNegative()
+    -- TODO disconnect
+    self:enterScene("TitleScene")
 end
 
 function GameApp:sendRequest(body)

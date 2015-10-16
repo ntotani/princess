@@ -40,7 +40,6 @@ function TitleApp:initWebsocket(isBuild, onCreateRoom, roomId)
         elseif msg.event == "start" then
             self.ws:unregisterScriptHandler(cc.WEBSOCKET_MESSAGE)
             local data = json.decode(msg.data)
-            local scene = cc.Scene:create()
             require("app.ctx.GameApp"):create({
                 socket = self.ws,
                 matchId = data.id,
