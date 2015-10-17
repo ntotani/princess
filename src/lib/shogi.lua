@@ -115,7 +115,7 @@ end
 function Shogi:ctor(ctx)
     self.ctx = ctx
     self.tiles = us.clone(TILES[ctx.mapId])
-    self.deck = us.keys(CHIPS)
+    self.deck = {red = us.keys(CHIPS), blue = us.keys(CHIPS)}
     self:reset()
 end
 
@@ -141,8 +141,8 @@ function Shogi:setParties(red, blue)
     }
 end
 
-function Shogi:setDeck(deck)
-    self.deck = deck
+function Shogi:setDeck(team, deck)
+    self.deck[team] = deck
 end
 
 function Shogi:isHime(chara)
@@ -176,13 +176,13 @@ function Shogi:commitForm(form)
     apply("red")
     apply("blue")
     self.chips = {
-        red = self:drawChips(),
-        blue = self:drawChips(),
+        red = self:drawChips("red"),
+        blue = self:drawChips("blue"),
     }
 end
 
-function Shogi:drawChips()
-    return us(self.deck):map(function(_, e)
+function Shogi:drawChips(team)
+    return us(self.deck[team]):map(function(_, e)
         return {val = e, w = self.ctx.random()}
     end):sort(function(a, b)
         return a.w < b.w
@@ -269,8 +269,8 @@ function Shogi:processTurn(commands)
             end
         end
     end
-    if #self.chips.red < 1 then self.chips.red = self:drawChips() end
-    if #self.chips.blue < 1 then self.chips.blue = self:drawChips() end
+    if #self.chips.red < 1 then self.chips.red = self:drawChips("red") end
+    if #self.chips.blue < 1 then self.chips.blue = self:drawChips("blue") end
     return acts
 end
 
