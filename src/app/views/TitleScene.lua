@@ -1,4 +1,6 @@
 local us = require("lib.moses")
+local PuzzleApp = require("app.ctx.PuzzleApp")
+
 local TitleScene = class("TitleScene", cc.load("mvc").ViewBase)
 
 function TitleScene:onCreate()
@@ -6,13 +8,13 @@ function TitleScene:onCreate()
     self.smoke = display.newLayer(display.COLOR_BLACK):addTo(self)
     self.smoke:setOpacity(0)
     self.puzzle = cc.Menu:create():move(0, 0):addTo(self):setVisible(false)
-    for i = 1, 10 do
+    for i = 1, 100 do
+        if not PuzzleApp.existLevel(i) then break end
         local margin = (360 - 73 * 4) / 5
         local x = ((i - 1) % 4) * (73 + margin) + margin + 73 / 2
         local y = display.height - (math.floor((i - 1) / 4) * (73 + margin) + margin + 73 / 2)
         local mii = cc.MenuItemImage:create("img/btn.png", "img/btn.png"):move(x, y):onClicked(function()
-            local app = require("app.ctx.PuzzleApp"):create({level = i})
-            app:run("GameScene")
+            PuzzleApp:create({level = i}):run("GameScene")
         end):addTo(self.puzzle)
         cc.Label:createWithTTF(i, "font/PixelMplus12-Regular.ttf", 24):move(73 / 2, 73 / 2):addTo(mii):setColor(display.COLOR_BLACK)
     end

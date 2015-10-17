@@ -136,11 +136,12 @@ function GameScene:onTurn(commands)
 end
 
 function GameScene:act2ccacts_end(action)
-    local texts = self:getApp():endTexts(action.lose ~= self:getApp():getTeam())
+    local win = action.lose ~= self:getApp():getTeam()
+    local texts = self:getApp():endTexts(win)
     return {
         cc.CallFunc:create(function()
             self:showPrompt(self, texts.message, texts.ok, function()
-                self:getApp():endPositive()
+                self:getApp():endPositive(win)
             end, texts.ng, function()
                 self:getApp():endNegative()
             end)
