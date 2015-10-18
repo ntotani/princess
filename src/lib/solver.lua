@@ -107,6 +107,16 @@ function Solver.evalScore(shogi)
     score = score + (us.reduce(blues, function(p, e) return p + e.hp end, 0) - us.reduce(reds, function(p, e) return p + e.hp end, 0))
 
     -- 駒同士の相性と距離
+    local rate = Shogi.getPlanetRate()
+    for _, red in ipairs(reds) do
+        for _, blue in ipairs(blues) do
+            local path = shogi:calcPath(red, blue.i, blue.j)
+            if path then
+                local blueAd = rate[blue.planet][red.planet] / rate[red.planet][blue.planet]
+                score = score + (blueAd - 1.0) * 100
+            end
+        end
+    end
     return score
 end
 
