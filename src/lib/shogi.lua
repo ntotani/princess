@@ -305,7 +305,7 @@ function Shogi:moveTo(actor, di, dj, acts)
         -- out of bounds
         acts[#acts + 1] = {type = "ob", actor = actor.id, i = di, j = dj}
         actor.hp = 0
-        if self:isHime(actor) then
+        if self:isHime(actor) or not us.any(self.charas, function(e) return e.team == actor.team and e.hp > 0 end) then
             acts[#acts + 1] = {type = "end", lose = actor.team}
         end
         return true
@@ -380,7 +380,7 @@ function Shogi:attack(actor, target, dmg, acts)
     })
     target.hp = math.max(target.hp - dmg, 0)
     if target.hp <= 0 then
-        if self:isHime(target) then
+        if self:isHime(target) or not us.any(self.charas, function(e) return e.team == target.team and e.hp > 0 end) then
             table.insert(acts, {type = "end", lose = target.team})
         elseif self:isNextTo(actor, target) then
             if target.pskill == "3" and actor.hp > 0 then
