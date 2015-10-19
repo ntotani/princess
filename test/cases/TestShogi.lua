@@ -48,6 +48,19 @@ TestShogi = {
         luaunit.assertEquals(#self.shogi.chips.red, 12)
         luaunit.assertEquals(#self.shogi.chips.blue, 12)
     end,
+    testCalcDamage = function(self)
+        self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
+        local atk = self.shogi.charas[2]
+        local def = self.shogi.charas[4]
+        luaunit.assertEquals(self.shogi:calcDamage(atk, def), 40)
+    end,
+    testCalcDamageLeast1 = function(self)
+        self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
+        local atk = self.shogi.charas[2]
+        local def = self.shogi.charas[4]
+        def.pump.defense = 100
+        luaunit.assertEquals(self.shogi:calcDamage(atk, def), 1)
+    end,
     testMoveOb = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
         local chara = self.shogi:getCharas()[2]

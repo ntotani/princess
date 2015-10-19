@@ -338,7 +338,7 @@ end
 function Shogi:calcDamage(actor, target)
     local attack = actor.power * actor.pump.power
     local defense = actor.act == 0 and target.defense * target.pump.defense or target.resist * target.pump.resist
-    return math.floor(40 * attack / defense * PLANET_RATE[actor.planet][target.planet])
+    return math.max(math.floor(40 * attack / defense * PLANET_RATE[actor.planet][target.planet]), 1)
 end
 
 function Shogi:attack(actor, target, dmg, acts)
