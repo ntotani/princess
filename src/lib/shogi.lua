@@ -454,13 +454,14 @@ function Shogi:calcPath(who, gi, gj)
         local c = table.remove(queue, 1)
         for _, dir in ipairs(dirs) do
             local ni, nj = c.i + dir.i, c.j + dir.j
-            if ni > 0 and ni <= #memo and nj > 0 and nj <= #memo[ni] and memo[ni][nj].dist == -1 and not self:findChara(ni, ni) then
+            if ni > 0 and ni <= #memo and nj > 0 and nj <= #memo[ni] and memo[ni][nj].dist == -1 and not self:findChara(ni, nj) then
                 currentDist = currentDist + 1
                 memo[ni][nj] = {dist = currentDist, fi = c.i, fj = c.j}
                 table.insert(queue, {i = ni, j = nj})
             end
         end
     end
+    if memo[gi][gj].dist == -1 then return nil end
     local path, ci, cj = {}, gi, gj
     while ci ~= who.i or cj ~= who.j do
         table.insert(path, {i = ci, j = cj})

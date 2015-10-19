@@ -200,6 +200,19 @@ TestShogi = {
         luaunit.assertEquals(acts[2], {type = "evo", actor = 2, from = "3", to = "4"})
         luaunit.assertEquals(self.shogi.charas[2].master.id, "4")
     end,
+    testCalcPathCharaOnGoal = function(self)
+        self.shogi:commitForm({red = {"1,9,3"}, blue = {"1,1,3"}})
+        luaunit.assertNil(self.shogi:calcPath(self.shogi.charas[1], 1, 3))
+    end,
+    testCalcPath = function(self)
+        self.shogi:commitForm({red = {"1,9,3"}, blue = {"1,1,3"}})
+        local path = self.shogi:calcPath(self.shogi.charas[1], 5, 3)
+        luaunit.assertEquals(path, {{i = 5, j = 3}, {i = 7, j = 3}})
+    end,
+    testCalcPathNoPath = function(self)
+        self.shogi:commitForm({red = {"1,9,3"}, blue = {"1,3,3", "3,2,2", "5,2,4"}})
+        luaunit.assertNil(self.shogi:calcPath(self.shogi.charas[1], 1, 3))
+    end,
     testProcessTurn = function(self)
         self.shogi:commitForm({red = {"1,9,3", "2,8,2"}, blue = {"1,1,3", "2,2,4"}})
         self.shogi.chips.red[1] = "flf"
