@@ -171,20 +171,11 @@ function GameScene:act2ccacts_chip(action)
     if chip.name == "skill" then
         local skill = us.findWhere(self.shogi.getAskill(), {id = actor.model.askill})
         local desc = skill.at == nil and skill.desc or string.gsub(skill.desc, "@", skill.at)
-        local node = cc.Node:create():move(actor:getPosition()):addTo(self)
-        display.newSprite("img/window.png"):move(display.center):addTo(node)
-        cc.Label:createWithTTF(skill.name .. "\n\n　" .. desc, "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(node):setDimensions(200, 0)
-        node:setScale(0)
-        table.insert(ccacts, cc.Spawn:create(
-            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(0, 0))),
-            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 1))
-        ))
-        table.insert(ccacts, cc.DelayTime:create(1.0))
-        table.insert(ccacts, cc.Spawn:create(
-            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(actor:getPosition()))),
-            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 0))
-        ))
-        table.insert(ccacts, cc.TargetedAction:create(node, cc.RemoveSelf:create()))
+        local x, y = actor:getPosition()
+        local messageActions = self:getMessageActions(x, y, skill.name .. "\n\n　" .. desc, 2.0)
+        for _, e in ipairs(messageActions) do
+            table.insert(ccacts, e)
+        end
     end
     return ccacts
 end
@@ -248,25 +239,10 @@ end
 
 function GameScene:act2ccacts_pskill(action)
     local actor = self:act2actor(action)
-    local actorPos = actor and cc.p(actor:getPosition()) or cc.p(0, 0)
+    local actorPos = actor and cc.p(actor:getPosition()) or display.center
     local skill = us.findWhere(self.shogi:getPskill(), {id = action.id})
     local desc = skill.at == nil and skill.desc or string.gsub(skill.desc, "@", skill.at)
-    local node = cc.Node:create():move(actorPos):addTo(self)
-    display.newSprite("img/window.png"):move(display.center):addTo(node)
-    cc.Label:createWithTTF(skill.name .. "\n\n　" .. desc, "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(node):setDimensions(200, 0)
-    node:setScale(0)
-    return {
-        cc.Spawn:create(
-            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(0, 0))),
-            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 1))
-        ),
-        cc.DelayTime:create(1.0),
-        cc.Spawn:create(
-            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, actorPos)),
-            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 0))
-        ),
-        cc.TargetedAction:create(node, cc.RemoveSelf:create()),
-    }
+    return self:getMessageActions(actorPos.x, actorPos.y, skill.name .. "\n\n　" .. desc, 2.0)
 end
 
 function GameScene:act2ccacts_ob(action)
@@ -281,25 +257,12 @@ function GameScene:act2ccacts_evo(action)
     local actor = self:act2actor(action)
     local from = us.findWhere(self.shogi.getCharaMaster(), {id = action.from})
     local to = us.findWhere(self.shogi.getCharaMaster(), {id = action.to})
-    local node = cc.Node:create():move(actor:getPosition()):addTo(self)
-    display.newSprite("img/window.png"):move(display.center):addTo(node)
-    cc.Label:createWithTTF("成り駒\n\n　" .. from.name .. " => " .. to.name, "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(node):setDimensions(200, 0)
-    node:setScale(0)
-    return {
-        cc.Spawn:create(
-            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(0, 0))),
-            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 1))
-        ),
-        cc.DelayTime:create(1.0),
-        cc.Spawn:create(
-            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(actor:getPosition()))),
-            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 0))
-        ),
-        cc.TargetedAction:create(node, cc.RemoveSelf:create()),
-        cc.CallFunc:create(function()
-            actor.sprite:updateFrames("img/chara/" .. action.to .. ".png", 32)
-        end),
-    }
+    local x, y = actor:getPosition()
+    local ccacts = self:getMessageActions(x, y, "成り駒\n\n　" .. from.name .. " => " .. to.name, 2.0)
+    table.insert(ccacts, cc.CallFunc:create(function()
+        actor.sprite:updateFrames("img/chara/" .. action.to .. ".png", 32)
+    end))
+    return ccacts
 end
 
 function GameScene:act2actor(action, key)
@@ -339,6 +302,25 @@ function GameScene:drawChip()
         end
     end
     return cc.Spawn:create(chipActions)
+end
+
+function GameScene:getMessageActions(sx, sy, message, delta)
+    local node = cc.Node:create():move(sx, sy):addTo(self)
+    display.newSprite("img/window.png"):move(display.center):addTo(node)
+    cc.Label:createWithTTF(message, "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(node):setDimensions(200, 0)
+    node:setScale(0)
+    return {
+        cc.Spawn:create(
+            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(0, 0))),
+            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 1))
+        ),
+        cc.DelayTime:create(delta),
+        cc.Spawn:create(
+            cc.TargetedAction:create(node, cc.MoveTo:create(ACT_DEF_SEC / 2, cc.p(sx, sy))),
+            cc.TargetedAction:create(node, cc.ScaleTo:create(ACT_DEF_SEC / 2, 0))
+        ),
+        cc.TargetedAction:create(node, cc.RemoveSelf:create())
+    }
 end
 
 return GameScene
