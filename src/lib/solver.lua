@@ -28,7 +28,7 @@ function Solver.level2shogi(random, level)
 end
 
 function Solver.solve(shogi, charaId, chipIdx)
-    local enemies = us.select(shogi.charas, function(_, e) return e.team == "blue" end)
+    local enemies = us.select(shogi.charas, function(_, e) return e.team == "blue" and e.hp > 0 end)
     local chips = shogi:getChips("blue")
     local scores = {}
     for i, chara in ipairs(enemies) do
@@ -47,6 +47,13 @@ function Solver.solve(shogi, charaId, chipIdx)
     return scores[1].act
 end
 
+local SCORE_MAX      = 432000000
+local HIME_DIFF_RATE =   4320000 --   99  ~ -99
+local CAMP_NEAR_RATE =   1440000 --    3  ~ -3
+local CHARA_NUM_RATE =    480000 --    3  ~ -3
+local HP_DIFF_RATE   =      1600 --  399  ~ -399
+local DMG_DIST_RATE  =         1 -- 1600  ~  0.1
+
 function Solver.evalScore(shogi)
     -- そもそも詰んでる
     local charas = shogi:getCharas()
@@ -56,10 +63,10 @@ function Solver.evalScore(shogi)
     if redHime then
         redHime = charas[redHime]
         if redHime.hp <= 0 then
-            return 4294967295
+            return SCORE_MAX
         end
         if shogi:getTiles()[redHime.i][redHime.j] == Shogi.BLUE_CAMP then
-            return 0
+            return -SCORE_MAX
         end
     end
     local blueHime = us.detect(charas, function(e)
@@ -68,52 +75,53 @@ function Solver.evalScore(shogi)
     if blueHime then
         blueHime = charas[blueHime]
         if blueHime.hp <= 0 then
-            return 0
+            return -SCORE_MAX
         end
         if shogi:getTiles()[blueHime.i][blueHime.j] == Shogi.RED_CAMP then
-            return 4294967295
+            return SCORE_MAX
         end
     end
     local score = 0
 
     -- 姫の体力差
     if blueHime and redHime then
-        score = score + (blueHime.hp - redHime.hp)
+        score = score + (blueHime.hp - redHime.hp) * HIME_DIFF_RATE
     end
 
     -- 敵味方の姫からゴールまでの距離で加減点
     if redHime then
         local ci, cj = shogi:findTile(Shogi.BLUE_CAMP)
         local path = shogi:calcPath(redHime, ci, cj)
-        if path then
-            -- ToDo 距離3までのみを考慮すべきなのとキャンプに他の駒がいるか
-            score = score - #path
+        if path and #path >= 3 then
+            score = score - (#path * CAMP_NEAR_RATE)
         end
     end
     if blueHime then
         local ci, cj = shogi:findTile(Shogi.RED_CAMP)
         local path = shogi:calcPath(blueHime, ci, cj)
-        if path then
-            score = score + #path
+        if path and #path >= 3 then
+            score = score + (#path * CAMP_NEAR_RATE)
         end
     end
 
     -- コマ数の差
     local reds = us.select(charas, function(_, e) return e.team == "red" and e.hp > 0 end)
     local blues = us.select(charas, function(_, e) return e.team == "blue" and e.hp > 0 end)
-    score = score + (#blues - #reds)
+    score = score + (#blues - #reds) * CAMP_NEAR_RATE
 
     -- 体力の差
-    score = score + (us.reduce(blues, function(p, e) return p + e.hp end, 0) - us.reduce(reds, function(p, e) return p + e.hp end, 0))
+    score = score + (us.reduce(blues, function(p, e) return p + e.hp end, 0) - us.reduce(reds, function(p, e) return p + e.hp end, 0)) * HP_DIFF_RATE
 
     -- 駒同士の相性と距離
-    local rate = Shogi.getPlanetRate()
     for _, red in ipairs(reds) do
         for _, blue in ipairs(blues) do
-            local path = shogi:calcPath(red, blue.i, blue.j)
-            if path then
-                local blueAd = rate[blue.planet][red.planet] / rate[red.planet][blue.planet]
-                score = score + (blueAd - 1.0) * 100
+            if blue.act ~= 2 then -- 回復駒は無視
+                local path = shogi:calcPath(blue, red.i, red.j)
+                if path then
+                    local atk = shogi:calcDamage(blue, red)
+                    local def = shogi:calcDamage(red, blue)
+                    score = score + math.floor(atk / def / #path * DMG_DIST_RATE)
+                end
             end
         end
     end

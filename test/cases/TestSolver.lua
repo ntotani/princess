@@ -25,19 +25,20 @@ function TestSolver:testSolve()
 end
 
 function TestSolver:testScoreIsEnd()
+    local scoreMax = 432000000
     local redHime = self.shogi.charas[1]
     local blueHime = self.shogi.charas[3]
     redHime.i = 7
     blueHime.i = 9
-    luaunit.assertEquals(self.solver.evalScore(self.shogi), 4294967295)
+    luaunit.assertEquals(self.solver.evalScore(self.shogi), scoreMax)
     redHime.i = 1
     blueHime.i = 3
-    luaunit.assertEquals(self.solver.evalScore(self.shogi), 0)
+    luaunit.assertEquals(self.solver.evalScore(self.shogi), -scoreMax)
     redHime.i = 7
     redHime.hp = 0
-    luaunit.assertEquals(self.solver.evalScore(self.shogi), 4294967295)
+    luaunit.assertEquals(self.solver.evalScore(self.shogi), scoreMax)
     redHime.hp = 1
     blueHime.hp = 0
-    luaunit.assertEquals(self.solver.evalScore(self.shogi), 0)
+    luaunit.assertEquals(self.solver.evalScore(self.shogi), -scoreMax)
 end
 
