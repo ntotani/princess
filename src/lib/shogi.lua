@@ -506,7 +506,7 @@ end
 function Shogi:processAskillTeamHeal(actor, acts, askillId) -- 全体回復
     local dmg = us.findWhere(ASKILL, {id = askillId}).at
     for _, e in ipairs(self.charas) do
-        if e.team == actor.team and e.hp < 100 then
+        if e.team == actor.team and 0 < e.hp and e.hp < 100 then
             self:heal(actor, e, dmg, acts)
         end
     end
