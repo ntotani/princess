@@ -35,20 +35,18 @@ function GameScene:reset()
     for _, e in ipairs(self.shogi:getCharas()) do
         self:initChara(e)
     end
-    local friendTeam = self:getApp():getTeam()
-    local enemyTeam = friendTeam == "red" and "blue" or "red"
-    for i, e in ipairs(self.shogi:getChips(friendTeam)) do
-        local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), 80):addTo(self.chips)
-        chip.idx = i
-        chip.name = e
+    local ccacts = {}
+    local message = self:getApp():getInitialMessage()
+    if message then
+        for _, e in ipairs(self:getMessageActions(display.cx, display.cy, message, 3.0)) do
+            table.insert(ccacts, e)
+        end
     end
-    for i, e in ipairs(self.shogi:getChips(enemyTeam)) do
-        local chip = display.newSprite("chip/" .. e .. ".png"):move(self:getChipX(i), display.height - 80):addTo(self.enemyChips)
-        chip:setScale(-1)
-        chip.idx = i
-        chip.name = e
-    end
-    self.touchLayer:onTouch(us.bind(self.onTouch, self))
+    table.insert(ccacts, self:drawChip())
+    table.insert(ccacts, cc.CallFunc:create(function()
+        self.touchLayer:onTouch(us.bind(self.onTouch, self))
+    end))
+    self:runAction(cc.Sequence:create(ccacts))
 end
 
 function GameScene:initChara(chara)

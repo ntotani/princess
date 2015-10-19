@@ -37,6 +37,10 @@ function GameApp:commit(charaId, chipIdx)
     self:sendRequest({acts = {__op = "Add", objects = {charaId .. chipIdx}}})
 end
 
+function GameApp:getInitialMessage()
+    return nil
+end
+
 function GameApp:endTexts(win)
     return {
         message = "YOU " .. (win and "WIN" or "LOSE"),

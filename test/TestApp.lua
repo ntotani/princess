@@ -30,6 +30,10 @@ function TestApp:commit(charaId, chipIdx)
     self.listener({charaId .. chipIdx})
 end
 
+function TestApp:getInitialMessage()
+    return nil
+end
+
 function TestApp:endTexts(win)
     return {
         message = "YOU " .. (win and "WIN" or "LOSE"),

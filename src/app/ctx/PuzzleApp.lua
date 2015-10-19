@@ -13,9 +13,9 @@ function PuzzleApp.existLevel(level)
 end
 
 function PuzzleApp:onCreate()
-    local level = cc.FileUtils:getInstance():getStringFromFile(level2path(self.configs_.level))
-    level = json.decode(level)
-    self.shogi = Solver.level2shogi(random, level)
+    self.level = cc.FileUtils:getInstance():getStringFromFile(level2path(self.configs_.level))
+    self.level = json.decode(self.level)
+    self.shogi = Solver.level2shogi(random, self.level)
 end
 
 function PuzzleApp:getTeam()
@@ -33,6 +33,10 @@ end
 function PuzzleApp:commit(charaId, chipIdx)
     local enemies = us.select(self.shogi.charas, function(_, e) return e.team == "blue" end)
     self.listener({charaId .. chipIdx, Solver.solve(self.shogi, charaId, chipIdx)})
+end
+
+function PuzzleApp:getInitialMessage()
+    return self.level.message
 end
 
 function PuzzleApp:endTexts(win)
