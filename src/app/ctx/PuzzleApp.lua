@@ -45,7 +45,7 @@ function PuzzleApp:endTexts(win)
 end
 
 function PuzzleApp:endPositive(win)
-    if not PuzzleApp.existLevel(self.configs_.level + 1) then
+    if win and not PuzzleApp.existLevel(self.configs_.level + 1) then
         self:enterScene("TitleScene")
     else
         PuzzleApp:create({level = self.configs_.level + (win and 1 or 0)}):run("GameScene")
