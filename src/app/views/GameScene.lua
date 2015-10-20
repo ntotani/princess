@@ -85,6 +85,16 @@ function GameScene:getChipX(idx)
 end
 
 function GameScene:onTouch(e)
+    local touchChara = function(layer)
+        local len = 48
+        for _, chara in ipairs(layer:getChildren()) do
+            local x, y = chara:getPosition()
+            if cc.rectContainsPoint(cc.rect(x - len / 2, y - len / 2, len, len), e) then
+                return chara
+            end
+        end
+        return nil
+    end
     if e.name == "began" and not self.holdChip then
         for _, chip in ipairs(self.chips:getChildren()) do
             local bb = chip:getBoundingBox()
@@ -94,19 +104,19 @@ function GameScene:onTouch(e)
                 return true
             end
         end
+        local friend = touchChara(self.friends)
+        if friend then self:showSpec(friend.model.master) end
+        local enemy = touchChara(self.enemies)
+        if enemy then self:showSpec(enemy.model.master) end
         return false
     end
     if e.name == "moved" and self.holdChip then
         self.holdChip:move(e)
     elseif self.holdChip then
-        local len = 48
-        for _, friend in ipairs(self.friends:getChildren()) do
-            local x, y = friend:getPosition()
-            if cc.rectContainsPoint(cc.rect(x - len / 2, y - len / 2, len, len), e) then
-                self.touchLayer:removeTouch()
-                self:getApp():commit(friend.model.id, self.holdChip.idx)
-                break
-            end
+        local friend = touchChara(self.friends)
+        if friend then
+            self.touchLayer:removeTouch()
+            self:getApp():commit(friend.model.id, self.holdChip.idx)
         end
         self.holdChip:move(self.holdChip.backPt)
         self.holdChip = nil

@@ -127,6 +127,47 @@ function ViewBase:createSpec(model)
     return spec
 end
 
+function ViewBase:showSpec(chara)
+    local smoke = display.newLayer(cc.c4f(0, 0, 0, 0.7), display.size):addTo(self)
+    local dots = cc.DrawNode:create():addTo(smoke)
+    local draw = function(i, opacity)
+        local color = cc.c4f(1, 1, 1, opacity)
+        dots:drawDot(cc.p(display.cx + (i - 1.5) * 16, 90), 4, color)
+    end
+    draw(1, 1)
+    draw(2, 0.5)
+    local pv = ccui.PageView:create():addTo(self)
+    pv:setContentSize(display.size)
+    local evo = us.findWhere(self.shogi.getCharaMaster(), {id = chara.evo})
+    for _, e in ipairs({chara, evo}) do
+        local spec = self:createSpec(e)
+        spec:move(display.center)
+        local page = ccui.Layout:create()
+        page:addChild(spec)
+        pv:addPage(page)
+    end
+    local moved = false
+    pv:addEventListener(function(sender, event)
+        if event ~= ccui.PageViewEventType.turning then return end
+        dots:clear()
+        for i = 1, 2 do
+            draw(i, i == sender:getCurPageIndex() + 1 and 1 or 0.5)
+        end
+    end)
+    pv:addTouchEventListener(function(sender, event)
+        if event == ccui.TouchEventType.began then
+            moved = false
+        elseif event == ccui.TouchEventType.moved then
+            moved = true
+        elseif not moved then
+            smoke:removeSelf()
+            pv:runAction(cc.RemoveSelf:create())
+            self.touchLayer:onTouch(us.bind(self.onTouch, self))
+        end
+    end)
+    self.touchLayer:onTouch(function()end)
+end
+
 function ViewBase:showPrompt(parent, message, ok, onOk, ng, onNg)
     display.newSprite("img/window.png"):move(display.center):addTo(parent)
     cc.Label:createWithTTF(message, "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(parent)

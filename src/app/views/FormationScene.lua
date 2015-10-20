@@ -144,7 +144,7 @@ function FormationScene:onTouch(e)
             end
         end
         if us.isEqual(cc.p(self.holdChara:getPosition()), self.holdChara.backPt) then
-            self:showSpec(self.holdChara)
+            self:showSpec(self.holdChara.model)
         end
         self.holdChara:move(self.holdChara.backPt)
         self.holdChara = nil
@@ -153,31 +153,11 @@ function FormationScene:onTouch(e)
             local x, y = chara:getPosition()
             local len = 32
             if cc.rectContainsPoint(cc.rect(x - len / 2, y - len / 2, len, len), e) then
-                self:showSpec(chara)
+                self:showSpec(chara.model)
                 break
             end
         end
     end
-end
-
-function FormationScene:showSpec(chara)
-    local pv = ccui.PageView:create():addTo(self)
-    local evo = us.findWhere(self.shogi.getCharaMaster(), {id = chara.model.evo})
-    local height
-    for _, e in ipairs({chara.model, evo}) do
-        local spec = self:createSpec(e)
-        height = spec:getContentSize().height
-        spec:move(display.cx, height / 2)
-        local page = ccui.Layout:create()
-        page:addChild(spec)
-        pv:addPage(page)
-    end
-    pv:move(0, (display.height - height) / 2)
-    pv:setContentSize(display.width, height)
-    self.touchLayer:onTouch(function()
-        pv:removeSelf()
-        self.touchLayer:onTouch(us.bind(self.onTouch, self))
-    end)
 end
 
 return FormationScene
