@@ -5,10 +5,10 @@
  </tileset>
  <layer name="タイル・レイヤー1" width="9" height="16">
   <data encoding="base64" compression="zlib">
-   eJxjZGBgYBzFo5hMDAClYACR
+   eJxjZGBgYAJiZiyYBYgZoXhUzagabGoAoa8BcQ==
   </data>
  </layer>
- <layer name="タイル・レイヤー 2" width="9" height="16">
+ <layer name="タイル・レイヤー 2" width="9" height="16" visible="0">
   <data encoding="base64" compression="zlib">
    eJzjZmBg4B5EeBTgBwMdP+gYAIOdAxk=
   </data>
