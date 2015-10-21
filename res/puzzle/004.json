@@ -1,13 +1,13 @@
 {
-    "message":"練習問題",
+    "message":"駒は場外に出ると倒れます",
     "map":1,
     "friend":{
-        "chara":[{"id":"3", "i":8, "j":4}, {"id":"3", "i":8, "j":2}],
-        "deck":["f", "rf", "lf", "rb", "lb", "b", "ff", "rfrf", "lflf", "frf", "flf"]
+        "chara":[{"id":"3", "i":7, "j":3}],
+        "deck":["frf", "f", "rf", "lf"]
     },
     "enemy":{
         "chara":[{"id":"1", "i":1, "j":3}, {"id":"3", "i":2, "j":2}],
-        "deck":["f", "rf", "lf", "rb", "lb", "b", "ff", "rfrf", "lflf", "frf", "flf"]
+        "deck":["b", "b", "b", "b"]
     }
 }
 

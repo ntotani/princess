@@ -1,0 +1,13 @@
+{
+    "message":"姫は周りの駒を少しずつ回復します",
+    "map":1,
+    "friend":{
+        "chara":[{"id":"1", "i":9, "j":3}, {"id":"3", "i":8, "j":2, "hp":30}, {"id":"7", "i":8, "j":4, "hp":30}],
+        "deck":["f", "rf", "lf", "rb", "lb", "b", "ff", "rfrf", "lflf", "frf", "flf"]
+    },
+    "enemy":{
+        "chara":[{"id":"1", "i":1, "j":3}, {"id":"7", "i":3, "j":3}],
+        "deck":["f", "rf", "lf", "rb", "lb", "b", "ff", "rfrf", "lflf", "frf", "flf"]
+    }
+}
+
