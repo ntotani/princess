@@ -35,18 +35,26 @@ function GameScene:reset()
     for _, e in ipairs(self.shogi:getCharas()) do
         self:initChara(e)
     end
-    local ccacts = {}
+    local startAction = function()
+        self:runAction(cc.Sequence:create(self:drawChip(), cc.CallFunc:create(function()
+            self.touchLayer:onTouch(us.bind(self.onTouch, self))
+        end)))
+    end
     local message = self:getApp():getInitialMessage()
     if message then
+        local ccacts = {}
         for _, e in ipairs(self:getMessageActions(display.cx, display.cy, message, 3.0)) do
             table.insert(ccacts, e)
         end
+        table.insert(ccacts, cc.CallFunc:create(startAction))
+        ccacts = cc.Sequence:create(ccacts)
+        self:runAction(ccacts)
+        self.touchLayer:onTouch(function()
+            ccacts:step(100)
+        end)
+    else
+        startAction()
     end
-    table.insert(ccacts, self:drawChip())
-    table.insert(ccacts, cc.CallFunc:create(function()
-        self.touchLayer:onTouch(us.bind(self.onTouch, self))
-    end))
-    self:runAction(cc.Sequence:create(ccacts))
 end
 
 function GameScene:initChara(chara)
