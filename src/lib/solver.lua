@@ -17,13 +17,22 @@ end
 
 function Solver.level2shogi(random, level)
     local shogi = Shogi.new({random = random, mapId = level.map})
-    shogi:setDeck("red", level.friend.deck)
-    shogi:setDeck("blue", level.enemy.deck)
+    if level.friend.deck then shogi:setDeck("red", level.friend.deck) end
+    if level.enemy.deck then shogi:setDeck("blue", level.enemy.deck) end
     shogi.party = {red = {}, blue = {}}
     shogi:commitForm({
         red = level2form_(shogi, level.friend.chara, "red"),
         blue = level2form_(shogi, level.enemy.chara, "blue")
     })
+    local charaId = 1
+    local applyHp = function(charas)
+        for _, e in ipairs(charas) do
+            if e.hp then shogi:getCharas()[charaId].hp = e.hp end
+            charaId = charaId + 1
+        end
+    end
+    applyHp(level.friend.chara)
+    applyHp(level.enemy.chara)
     return shogi
 end
 

@@ -53,6 +53,7 @@ function GameScene:initChara(chara)
     local node = cc.Node:create():move(self:idx2pt(chara.i, chara.j))
     node.sprite = jam.sprite("img/chara/" .. chara.master.id .. ".png", 32):addTo(node)
     node.gauge = self:createHpGauge():move(-16, 16):addTo(node)
+    node.gauge.setValue(chara.hp)
     node.planet = display.newSprite("icon/" .. chara.planet .. ".png"):move(16, -16):addTo(node)
     if chara.team == self:getApp():getTeam() then
         node.sprite:frameIdx(9, 10, 11, 10)
@@ -76,7 +77,6 @@ function GameScene:createHpGauge()
             gauge:drawSolidRect(cc.p(2, 2), cc.p((wid - 4) * value / 100 + 2, hei - 2), cc.c4f(0, 1, 0, 1))
         end
     end
-    gauge.setValue(100)
     return gauge
 end
 
