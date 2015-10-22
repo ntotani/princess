@@ -50,6 +50,9 @@ function TestGameScene:testGetChipX()
 end
 
 function TestGameScene:testOnTouch_hold()
+    cc.Director:getInstance():mainLoop() -- run action
+    setDeltaTime(100)
+    cc.Director:getInstance():mainLoop() -- animation chip
     local ret = self.scene:onTouch({name = "began", x = 51, y = 80})
     luaunit.assertTrue(ret)
     luaunit.assertNotNil(self.scene.holdChip)
@@ -63,6 +66,9 @@ function TestGameScene:testOnTouch_notHold()
 end
 
 function TestGameScene:testOnTouch_move()
+    cc.Director:getInstance():mainLoop() -- run action
+    setDeltaTime(100)
+    cc.Director:getInstance():mainLoop() -- animation chip
     self.scene:onTouch({name = "began", x = 51, y = 80})
     self.scene:onTouch({name = "moved", x = 0, y = 0})
     luaunit.assertEquals(cc.p(self.scene.holdChip:getPosition()), cc.p(0, 0))
@@ -76,6 +82,9 @@ function TestGameScene:testOnTouch_drop()
 end
 
 function TestGameScene:testOnTouch_commit()
+    cc.Director:getInstance():mainLoop() -- run action
+    setDeltaTime(100)
+    cc.Director:getInstance():mainLoop() -- animation chip
     local called = false
     self.app.commit = function(self, chara, chip)
         luaunit.assertEquals(chara, 1)
