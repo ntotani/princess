@@ -138,13 +138,23 @@ function ViewBase:showSpec(chara)
     draw(2, 0.5)
     local pv = ccui.PageView:create():addTo(self)
     pv:setContentSize(display.size)
-    local evo = us.findWhere(self.shogi.getCharaMaster(), {id = chara.evo})
-    for _, e in ipairs({chara, evo}) do
+    local reg, evo
+    if chara.evo then
+        reg = chara
+        evo = us.findWhere(self.shogi.getCharaMaster(), {id = reg.evo})
+    else
+        evo = chara
+        reg = us.findWhere(self.shogi.getCharaMaster(), {evo = evo.id})
+    end
+    for _, e in ipairs({reg, evo}) do
         local spec = self:createSpec(e)
         spec:move(display.center)
         local page = ccui.Layout:create()
         page:addChild(spec)
         pv:addPage(page)
+    end
+    if chara == evo then
+        pv:scrollToPage(1)
     end
     local moved = false
     pv:addEventListener(function(sender, event)
