@@ -7,17 +7,7 @@ function TitleScene:onCreate()
     cc.TMXTiledMap:create("tmx/forest.tmx"):addTo(self)
     self.smoke = display.newLayer(display.COLOR_BLACK):addTo(self)
     self.smoke:setOpacity(0)
-    self.puzzle = cc.Menu:create():move(0, 0):addTo(self):setVisible(false)
-    for i = 1, 100 do
-        if not PuzzleApp.existLevel(i) then break end
-        local margin = (360 - 73 * 4) / 5
-        local x = ((i - 1) % 4) * (73 + margin) + margin + 73 / 2
-        local y = display.height - (math.floor((i - 1) / 4) * (73 + margin) + margin + 73 / 2)
-        local mii = cc.MenuItemImage:create("img/btn.png", "img/btn.png"):move(x, y):onClicked(function()
-            PuzzleApp:create({level = i}):run("GameScene")
-        end):addTo(self.puzzle)
-        cc.Label:createWithTTF(i, "font/PixelMplus12-Regular.ttf", 24):move(73 / 2, 73 / 2):addTo(mii):setColor(display.COLOR_BLACK)
-    end
+    self:initPuzzle_()
     self.titles = cc.Node:create():addTo(self)
     display.newSprite("img/logo.png"):move(display.cx, display.height * 3 / 5):addTo(self.titles)
     local puzzleButton = cc.MenuItemImage:create("img/button_puzzle.png", "img/button_puzzle.png")
@@ -30,6 +20,35 @@ function TitleScene:onCreate()
         :move(display.cx, display.height * 0.15)
         :onClicked(us.bind(self.onJoin, self))
     cc.Menu:create(puzzleButton, roomButton, joinButton):move(0, 0):addTo(self.titles)
+end
+
+function TitleScene:initPuzzle_()
+    local tileLen = display.newSprite("img/btn.png"):getContentSize().width
+    local margin = (display.width - tileLen * 4) / 5
+    self.puzzle = ccui.ListView:create():addTo(self):setVisible(false)
+    self.puzzle:setContentSize(display.size)
+    self.puzzle:setItemsMargin(margin)
+    self.puzzle:pushBackCustomItem(ccui.VBox:create(cc.size(display.width, margin / 2)))
+    for i = 1, 100 do
+        if not PuzzleApp.existLevel(i) then break end
+        local layout
+        if (i - 1) % 4 == 0 then
+            layout = ccui.Layout:create()
+            layout:setContentSize(display.width, tileLen)
+            self.puzzle:pushBackCustomItem(layout)
+        else
+            local items = self.puzzle:getItems()
+            layout = items[#items]
+        end
+        local x = ((i - 1) % 4) * (tileLen + margin) + margin + tileLen / 2
+        local y = tileLen / 2
+        ccui.Button:create("img/btn.png", "img/btn.png"):move(x, y):addTo(layout):addTouchEventListener(function(sender, event)
+            if event ~= ccui.TouchEventType.ended then return end
+            PuzzleApp:create({level = i}):run("GameScene")
+        end)
+        cc.Label:createWithTTF(i, "font/PixelMplus12-Regular.ttf", 24):move(x, y):addTo(layout):setColor(display.COLOR_BLACK)
+    end
+    self.puzzle:pushBackCustomItem(ccui.VBox:create(cc.size(display.width, margin / 2)))
 end
 
 function TitleScene:onPuzzle()
