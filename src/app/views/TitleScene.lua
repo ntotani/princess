@@ -49,6 +49,7 @@ function TitleScene:initPuzzle_()
     list:setContentSize(display.width, display.height - height)
     list:setItemsMargin(margin)
     list:pushBackCustomItem(ccui.VBox:create(cc.size(display.width, margin / 2)))
+    local progress = cc.UserDefault:getInstance():getIntegerForKey("progress", 1)
     for i = 1, 100 do
         if not PuzzleApp.existLevel(i) then break end
         local layout
@@ -62,11 +63,16 @@ function TitleScene:initPuzzle_()
         end
         local x = ((i - 1) % 4) * (tileLen + margin) + margin + tileLen / 2
         local y = tileLen / 2
-        ccui.Button:create("img/button/chip.png", "img/button/chip.png"):move(x, y):addTo(layout):addTouchEventListener(function(sender, event)
+        local btn = ccui.Button:create("img/button/chip.png", "img/button/chip.png"):move(x, y):addTo(layout)
+        btn:addTouchEventListener(function(sender, event)
             if event ~= ccui.TouchEventType.ended then return end
             PuzzleApp:create({level = i}):run("GameScene")
         end)
         cc.Label:createWithTTF(i, "font/PixelMplus12-Regular.ttf", 24):move(x, y):addTo(layout):setColor(display.COLOR_BLACK)
+        if i > progress then
+            btn:setEnabled(false)
+            btn:setColor(cc.c3b(127, 127, 127))
+        end
     end
     list:pushBackCustomItem(ccui.VBox:create(cc.size(display.width, margin / 2)))
 end
