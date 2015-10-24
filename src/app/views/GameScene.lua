@@ -304,7 +304,8 @@ function GameScene:drawChip()
         for i, e in ipairs(model) do
             local chips = view:getChildren()
             if i > #chips then
-                local chip = display.newSprite("chip/" .. e .. ".png"):addTo(view)
+                local chip = display.newSprite("img/button/chip.png"):addTo(view)
+                display.newSprite("chip/" .. e .. ".png"):addTo(chip):move(chip:getContentSize().width / 2, chip:getContentSize().height / 2)
                 local chipY = isMyTeam and 80 or display.height - 80
                 chip:move(display.width + chip:getContentSize().width, chipY)
                 chip:setScale(isMyTeam and 1 or -1)
