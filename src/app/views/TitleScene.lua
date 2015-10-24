@@ -9,21 +9,28 @@ function TitleScene:onCreate()
     self.smoke:setOpacity(0)
     self:initPuzzle_()
     self.titles = cc.Node:create():addTo(self)
-    display.newSprite("img/logo.png"):move(display.cx, display.height * 3 / 5):addTo(self.titles)
-    local puzzleButton = cc.MenuItemImage:create("img/button_puzzle.png", "img/button_puzzle.png")
+    display.newSprite("img/logo.png"):move(display.cx, display.height * 4 / 6):addTo(self.titles)
+    local applyText = function(btn, text)
+        local cs = btn:getContentSize()
+        cc.Label:createWithTTF(text, "font/PixelMplus12-Regular.ttf", 24):move(cs.width / 2, cs.height / 2):addTo(btn):setColor(display.COLOR_BLACK)
+    end
+    local puzzleButton = cc.MenuItemImage:create("img/button/long.png", "img/button/long.png")
         :move(display.cx, display.height * 0.35)
         :onClicked(us.bind(self.onPuzzle, self))
-    local roomButton = cc.MenuItemImage:create("img/button_room.png", "img/button_room.png")
+    applyText(puzzleButton, "ひとりで遊ぶ")
+    local roomButton = cc.MenuItemImage:create("img/button/long.png", "img/button/long.png")
         :move(display.cx, display.height * 0.25)
         :onClicked(us.bind(self.onRoom, self))
-    local joinButton = cc.MenuItemImage:create("img/button_join.png", "img/button_join.png")
+    applyText(roomButton, "部屋を作る")
+    local joinButton = cc.MenuItemImage:create("img/button/long.png", "img/button/long.png")
         :move(display.cx, display.height * 0.15)
         :onClicked(us.bind(self.onJoin, self))
+    applyText(joinButton, "部屋に入る")
     cc.Menu:create(puzzleButton, roomButton, joinButton):move(0, 0):addTo(self.titles)
 end
 
 function TitleScene:initPuzzle_()
-    local tileLen = display.newSprite("img/btn.png"):getContentSize().width
+    local tileLen = display.newSprite("img/button/chip.png"):getContentSize().width
     local margin = (display.width - tileLen * 4) / 5
     self.puzzle = ccui.ListView:create():addTo(self):setVisible(false)
     self.puzzle:setContentSize(display.size)
@@ -42,7 +49,7 @@ function TitleScene:initPuzzle_()
         end
         local x = ((i - 1) % 4) * (tileLen + margin) + margin + tileLen / 2
         local y = tileLen / 2
-        ccui.Button:create("img/btn.png", "img/btn.png"):move(x, y):addTo(layout):addTouchEventListener(function(sender, event)
+        ccui.Button:create("img/button/chip.png", "img/button/chip.png"):move(x, y):addTo(layout):addTouchEventListener(function(sender, event)
             if event ~= ccui.TouchEventType.ended then return end
             PuzzleApp:create({level = i}):run("GameScene")
         end)
