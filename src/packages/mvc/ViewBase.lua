@@ -179,12 +179,15 @@ function ViewBase:showSpec(chara)
 end
 
 function ViewBase:showPrompt(parent, message, ok, onOk, ng, onNg)
-    display.newSprite("img/window.png"):move(display.center):addTo(parent)
+    local win = display.newSprite("img/window.png"):move(display.center):addTo(parent)
     cc.Label:createWithTTF(message, "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(parent)
     local item = function(cb, x, lab)
-        return cc.MenuItemImage:create("img/button.png", "img/button.png"):onClicked(cb):move(x, 0):addChild(cc.Label:createWithTTF(lab, "font/PixelMplus12-Regular.ttf", 18):move(39, 21))
+        local img = cc.MenuItemImage:create("img/button/small.png", "img/button/small.png"):onClicked(cb):move(x, 0)
+        local cs = img:getContentSize()
+        cc.Label:createWithTTF(lab, "font/PixelMplus12-Regular.ttf", 18):move(cs.width / 2, cs.height / 2):addTo(img):setColor(display.COLOR_BLACK)
+        return img
     end
-    cc.Menu:create(item(onOk, 50, ok), item(onNg, -50, ng)):move(display.cx, display.cy - 70):addTo(parent)
+    cc.Menu:create(item(onOk, 50, ok), item(onNg, -50, ng)):move(display.cx, display.cy - win:getContentSize().height / 2):addTo(parent)
 end
 
 return ViewBase
