@@ -30,21 +30,34 @@ function TitleScene:onCreate()
 end
 
 function TitleScene:initPuzzle_()
+    self.puzzle = cc.Node:create():addTo(self):setVisible(false)
+    local back = ccui.Button:create("img/button/small.png", "img/button/small.png")
+    local height = back:getContentSize().height
+    display.newLayer(cc.c3b(77, 77, 77), cc.size(display.width, height)):move(0, display.height - height):addTo(self.puzzle)
+    back:move(back:getContentSize().width / 2, display.height - height / 2):addTo(self.puzzle)
+    back:addTouchEventListener(function(sender, event)
+        if event ~= ccui.TouchEventType.ended then return end
+        self.puzzle:setVisible(false)
+        self.titles:moveBy({time = 0.2, x = display.width})
+        self.smoke:fadeTo({time = 0.2, opacity = 0})
+    end)
+    cc.Label:createWithTTF("戻る", "font/PixelMplus12-Regular.ttf", 18):move(back:getPosition()):addTo(self.puzzle):setColor(display.COLOR_BLACK)
+    cc.Label:createWithTTF("問題集", "font/PixelMplus12-Regular.ttf", 24):move(display.cx, display.height - height / 2):addTo(self.puzzle)
     local tileLen = display.newSprite("img/button/chip.png"):getContentSize().width
     local margin = (display.width - tileLen * 4) / 5
-    self.puzzle = ccui.ListView:create():addTo(self):setVisible(false)
-    self.puzzle:setContentSize(display.size)
-    self.puzzle:setItemsMargin(margin)
-    self.puzzle:pushBackCustomItem(ccui.VBox:create(cc.size(display.width, margin / 2)))
+    local list = ccui.ListView:create():addTo(self.puzzle)
+    list:setContentSize(display.width, display.height - height)
+    list:setItemsMargin(margin)
+    list:pushBackCustomItem(ccui.VBox:create(cc.size(display.width, margin / 2)))
     for i = 1, 100 do
         if not PuzzleApp.existLevel(i) then break end
         local layout
         if (i - 1) % 4 == 0 then
             layout = ccui.Layout:create()
             layout:setContentSize(display.width, tileLen)
-            self.puzzle:pushBackCustomItem(layout)
+            list:pushBackCustomItem(layout)
         else
-            local items = self.puzzle:getItems()
+            local items = list:getItems()
             layout = items[#items]
         end
         local x = ((i - 1) % 4) * (tileLen + margin) + margin + tileLen / 2
@@ -55,7 +68,7 @@ function TitleScene:initPuzzle_()
         end)
         cc.Label:createWithTTF(i, "font/PixelMplus12-Regular.ttf", 24):move(x, y):addTo(layout):setColor(display.COLOR_BLACK)
     end
-    self.puzzle:pushBackCustomItem(ccui.VBox:create(cc.size(display.width, margin / 2)))
+    list:pushBackCustomItem(ccui.VBox:create(cc.size(display.width, margin / 2)))
 end
 
 function TitleScene:onPuzzle()
