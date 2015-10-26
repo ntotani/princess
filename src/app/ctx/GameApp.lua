@@ -1,4 +1,6 @@
 local json = require("json")
+local TitleApp = require("app.ctx.TitleApp")
+
 local GameApp = class("GameApp", cc.load("mvc").AppBase)
 
 function GameApp:onCreate()
@@ -59,7 +61,7 @@ end
 
 function GameApp:endNegative()
     -- TODO disconnect
-    self:enterScene("TitleScene")
+    TitleApp:create():enterScene("TitleScene")
 end
 
 function GameApp:sendRequest(body)

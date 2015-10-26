@@ -1,6 +1,7 @@
 local json = require("json")
 local us = require("lib.moses")
 local Solver = require("lib.solver")
+local TitleApp = require("app.ctx.TitleApp")
 
 local PuzzleApp = class("PuzzleApp", cc.load("mvc").AppBase)
 
@@ -52,14 +53,14 @@ end
 
 function PuzzleApp:endPositive(win)
     if win and not PuzzleApp.existLevel(self.configs_.level + 1) then
-        self:enterScene("TitleScene")
+        TitleApp:create():enterScene("TitleScene")
     else
         PuzzleApp:create({level = self.configs_.level + (win and 1 or 0)}):run("GameScene")
     end
 end
 
 function PuzzleApp:endNegative()
-    self:enterScene("TitleScene")
+    TitleApp:create():enterScene("TitleScene")
 end
 
 return PuzzleApp
