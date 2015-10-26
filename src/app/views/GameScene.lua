@@ -30,6 +30,7 @@ function GameScene:onCreate()
     ccexp.AudioEngine:play2d("sound/critical.mp3", false, 0)
     ccexp.AudioEngine:play2d("sound/guard.mp3", false, 0)
     ccexp.AudioEngine:play2d("sound/heal.mp3", false, 0)
+    ccexp.AudioEngine:play2d("sound/move.mp3", false, 0)
 end
 
 function GameScene:reset()
@@ -205,7 +206,10 @@ function GameScene:act2ccacts_move(action)
     local actor = self:act2actor(action)
     local pt = self:idx2pt(action.i, action.j)
     return {
-        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC, pt))
+        cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC, pt)),
+        cc.CallFunc:create(function()
+            ccexp.AudioEngine:play2d("sound/move.mp3", false, 1.0)
+        end),
     }
 end
 
