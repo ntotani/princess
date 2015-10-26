@@ -29,6 +29,7 @@ function GameScene:onCreate()
     ccexp.AudioEngine:play2d("sound/hit.mp3", false, 0)
     ccexp.AudioEngine:play2d("sound/critical.mp3", false, 0)
     ccexp.AudioEngine:play2d("sound/guard.mp3", false, 0)
+    ccexp.AudioEngine:play2d("sound/heal.mp3", false, 0)
 end
 
 function GameScene:reset()
@@ -231,7 +232,7 @@ function GameScene:act2ccacts_attack(action)
             label:moveBy({time = 0.5, y = 16, removeSelf = true})
             label:enableShadow()
             local pr = self.shogi.getPlanetRate()
-            local rate = pr[actor.model.planet][target.model.planet]
+            local rate = pr[us.findWhere(self.shogi:getCharas(), {id = action.actor}).planet][target.model.planet]
             if rate > 1 then
                 ccexp.AudioEngine:play2d("sound/critical.mp3", false, 1.0)
                 label:setColor(display.COLOR_RED)
@@ -266,6 +267,11 @@ function GameScene:act2ccacts_heal(action)
             par:setBlendAdditive(false)
             par:move(target:getPosition())
             self:addChild(par)
+            local label = cc.Label:createWithTTF(action.dmg, "font/PixelMplus12-Regular.ttf", 24):move(target:getPositionX(), target:getPositionY() + 16):addTo(self)
+            label:moveBy({time = 0.5, y = 16, removeSelf = true})
+            label:enableShadow()
+            label:setColor(display.COLOR_GREEN)
+            ccexp.AudioEngine:play2d("sound/heal.mp3", false, 1.0)
         end),
         cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.fi, action.fj))),
     }
