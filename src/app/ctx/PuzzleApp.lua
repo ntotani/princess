@@ -40,7 +40,7 @@ function PuzzleApp:getInitialMessage()
 end
 
 function PuzzleApp:endTexts(win)
-    cc.UserDefault:getInstance():setIntegerForKey("progress", self.configs_.level)
+    cc.UserDefault:getInstance():setIntegerForKey("progress", self.configs_.level + 1)
     cc.UserDefault:getInstance():flush()
     local hasNext = PuzzleApp.existLevel(self.configs_.level + 1)
     return {

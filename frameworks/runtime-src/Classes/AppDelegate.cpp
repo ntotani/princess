@@ -1,6 +1,6 @@
 #include "AppDelegate.h"
 #include "CCLuaEngine.h"
-#include "SimpleAudioEngine.h"
+#include "AudioEngine.h"
 #include "cocos2d.h"
 #include "lua_module_register.h"
 
@@ -12,8 +12,6 @@
 #include "runtime/Runtime.h"
 #include "ide-support/RuntimeLuaImpl.h"
 #endif
-
-using namespace CocosDenshion;
 
 USING_NS_CC;
 using namespace std;
@@ -38,7 +36,7 @@ AppDelegate::AppDelegate()
 
 AppDelegate::~AppDelegate()
 {
-    SimpleAudioEngine::end();
+    experimental::AudioEngine::end();
 
 #if (COCOS2D_DEBUG > 0) && (CC_CODE_IDE_DEBUG_SUPPORT > 0)
     // NOTE:Please don't remove this call if you want to debug with Cocos Code IDE
@@ -105,7 +103,7 @@ void AppDelegate::applicationDidEnterBackground()
 {
     Director::getInstance()->stopAnimation();
 
-    SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+    experimental::AudioEngine::pauseAll();
 }
 
 // this function will be called when the app is active again
@@ -113,5 +111,5 @@ void AppDelegate::applicationWillEnterForeground()
 {
     Director::getInstance()->startAnimation();
 
-    SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+    experimental::AudioEngine::resumeAll();
 }

@@ -25,6 +25,10 @@ function GameScene:onCreate()
     self:getApp():addListener(us.bind(self.onTurn, self))
     self.touchLayer = display.newLayer():addTo(self)
     self:reset()
+    -- preload
+    ccexp.AudioEngine:play2d("sound/hit.mp3", false, 0)
+    ccexp.AudioEngine:play2d("sound/critical.mp3", false, 0)
+    ccexp.AudioEngine:play2d("sound/guard.mp3", false, 0)
 end
 
 function GameScene:reset()
@@ -223,14 +227,29 @@ function GameScene:act2ccacts_attack(action)
     local ccacts = {
         cc.CallFunc:create(function()
             target.gauge.setValue(action.hp - action.dmg)
-            if action.dmg >= action.hp then
-                target:removeSelf()
+            local label = cc.Label:createWithTTF(action.dmg, "font/PixelMplus12-Regular.ttf", 24):move(target:getPositionX(), target:getPositionY() + 16):addTo(self)
+            label:moveBy({time = 0.5, y = 16, removeSelf = true})
+            label:enableShadow()
+            local pr = self.shogi.getPlanetRate()
+            local rate = pr[actor.model.planet][target.model.planet]
+            if rate > 1 then
+                ccexp.AudioEngine:play2d("sound/critical.mp3", false, 1.0)
+                label:setColor(display.COLOR_RED)
+            elseif rate < 1 then
+                ccexp.AudioEngine:play2d("sound/guard.mp3", false, 1.0)
+                label:setColor(display.COLOR_BLUE)
+            else
+                ccexp.AudioEngine:play2d("sound/hit.mp3", false, 1.0)
             end
-        end),
+        end)
     }
     if actor then
         table.insert(ccacts, 1, cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.i, action.j))))
         table.insert(ccacts, cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC / 2, self:idx2pt(action.fi, action.fj))))
+    end
+    if action.dmg >= action.hp then
+        table.insert(ccacts, cc.TargetedAction:create(target, cc.Blink:create(0.5, 4)))
+        table.insert(ccacts, cc.TargetedAction:create(target, cc.RemoveSelf:create()))
     end
     return ccacts
 end
