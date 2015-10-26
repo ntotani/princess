@@ -290,6 +290,7 @@ function GameScene:act2ccacts_ob(action)
     local actor = self:act2actor(action)
     return {
         cc.TargetedAction:create(actor, cc.MoveTo:create(ACT_DEF_SEC, self:idx2pt(action.i, action.j))),
+        cc.TargetedAction:create(actor, cc.Blink:create(0.5, 4)),
         cc.TargetedAction:create(actor, cc.RemoveSelf:create()),
     }
 end
