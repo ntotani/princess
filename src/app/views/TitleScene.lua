@@ -5,6 +5,7 @@ local TitleScene = class("TitleScene", cc.load("mvc").ViewBase)
 
 function TitleScene:onCreate()
     cc.TMXTiledMap:create("tmx/forest.tmx"):addTo(self)
+    cc.Label:createWithTTF("uracon 2015, SE by 369", "font/PixelMplus12-Regular.ttf", 16):align(cc.p(0.5, 0), display.cx, 5):addTo(self):enableShadow()
     self.smoke = display.newLayer(display.COLOR_BLACK):addTo(self)
     self.smoke:setOpacity(0)
     self:initHeader()
@@ -35,6 +36,7 @@ function TitleScene:onCreate()
         local mes = cc.Label:createWithTTF("接続が切れました", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(self)
         win:runAction(cc.Sequence:create(cc.DelayTime:create(2), cc.TargetedAction:create(mes, cc.RemoveSelf:create()), cc.RemoveSelf:create()))
     end
+    ccexp.AudioEngine:play2d("sound/tap.mp3", false, 0.0)
 end
 
 function TitleScene:initHeader()
@@ -52,6 +54,7 @@ function TitleScene:initHeader()
         self.header.title:setString("")
         self.titles:moveBy({time = 0.2, x = display.width})
         self.smoke:fadeTo({time = 0.2, opacity = 0})
+        ccexp.AudioEngine:play2d("sound/tap.mp3", false, 1.0)
     end)
     cc.Label:createWithTTF("戻る", "font/PixelMplus12-Regular.ttf", 18):move(back:getPosition()):addTo(self.header):setColor(display.COLOR_BLACK)
     self.header.title = cc.Label:createWithTTF("", "font/PixelMplus12-Regular.ttf", 24):move(display.cx, display.height - height / 2):addTo(self.header)
@@ -84,6 +87,7 @@ function TitleScene:initPuzzle()
         btn:addTouchEventListener(function(sender, event)
             if event ~= ccui.TouchEventType.ended then return end
             PuzzleApp:create({level = i}):run("GameScene")
+            ccexp.AudioEngine:play2d("sound/tap.mp3", false, 1.0)
         end)
         cc.Label:createWithTTF(i, "font/PixelMplus12-Regular.ttf", 24):move(x, y):addTo(layout):setColor(display.COLOR_BLACK)
         if i > progress then

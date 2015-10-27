@@ -26,6 +26,10 @@ local Menu = cc.Menu
 local MenuItem = cc.MenuItem
 
 function MenuItem:onClicked(callback)
-    self:registerScriptTapHandler(callback)
+    self:registerScriptTapHandler(function()
+        callback()
+        ccexp.AudioEngine:play2d("sound/tap.mp3", false, 1.0)
+    end)
     return self
 end
+
