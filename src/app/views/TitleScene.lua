@@ -30,6 +30,11 @@ function TitleScene:onCreate()
         :onClicked(us.bind(self.onJoin, self))
     applyText(joinButton, "部屋に入る")
     cc.Menu:create(puzzleButton, roomButton, joinButton):move(0, 0):addTo(self.titles)
+    if self:getApp():isNetworkError() then
+        local win = display.newSprite("img/window.png"):move(display.center):addTo(self)
+        local mes = cc.Label:createWithTTF("接続が切れました", "font/PixelMplus12-Regular.ttf", 18):move(display.center):addTo(self)
+        win:runAction(cc.Sequence:create(cc.DelayTime:create(2), cc.TargetedAction:create(mes, cc.RemoveSelf:create()), cc.RemoveSelf:create()))
+    end
 end
 
 function TitleScene:initHeader()

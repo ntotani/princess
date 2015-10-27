@@ -2,6 +2,7 @@ local json = require("json")
 local TitleApp = class("TitleApp", cc.load("mvc").AppBase)
 
 function TitleApp:onCreate()
+    self.networkError = false
 end
 
 function TitleApp:createRoom(callback)
@@ -11,7 +12,7 @@ end
 function TitleApp:joinRoom(roomId)
     self:initWebsocket(false, nil, roomId)
 end
-        
+ 
 function TitleApp:initWebsocket(isBuild, onCreateRoom, roomId)
     self.corner = isBuild and "red" or "blue"
     self.ws = cc.WebSocket:create("ws://ws.pusherapp.com/app/753bbbbb0ecb441ce3eb?protocol=7")
@@ -46,9 +47,13 @@ function TitleApp:initWebsocket(isBuild, onCreateRoom, roomId)
                 team = self.corner,
                 seed = data.seed,
             }):enterScene("FormationScene")
-
+        elseif msg.event == "pusher:error" then
+            self:backToScene()
+        elseif msg.event == "pusher_internal:member_removed" then
+            self:backToScene()
         end
     end, cc.WEBSOCKET_MESSAGE)
+    self.ws:registerScriptHandler(function(msg) self.backToScene() end, cc.WEBSOCKET_ERROR)
 end
 
 function TitleApp:cloudFunc(name, params, callback)
@@ -63,10 +68,21 @@ function TitleApp:cloudFunc(name, params, callback)
             local response = json.decode(xhr.response)
             callback(response.result)
         else
-            print("xhr.readyState is:", xhr.readyState, "xhr.status is: ",xhr.status)
+            self:backToScene()
         end
     end)
     xhr:send(json.encode(params))
+end
+
+function TitleApp:backToScene()
+    if self.ws then self.ws:close() end
+    self.networkError = true
+    self:enterScene("TitleScene")
+end
+
+function TitleApp:isNetworkError()
+    self.networkError = not self.networkError
+    return not self.networkError
 end
 
 return TitleApp
