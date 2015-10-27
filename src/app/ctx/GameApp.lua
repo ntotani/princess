@@ -13,8 +13,13 @@ function GameApp:onCreate()
         elseif msg.event == "form" then
             self.shogi:commitForm(json.decode(msg.data))
             self:enterScene("GameScene")
+        elseif msg.event == "pusher:error" then
+            self:backToTitle(true)
+        elseif msg.event == "pusher_internal:member_removed" then
+            self:backToTitle(true)
         end
     end, cc.WEBSOCKET_MESSAGE)
+    self.configs_.socket:registerScriptHandler(function(msg) self:backToTitle(true) end, cc.WEBSOCKET_ERROR)
 end
 
 function GameApp:getTeam()
@@ -60,8 +65,7 @@ function GameApp:endPositive()
 end
 
 function GameApp:endNegative()
-    -- TODO disconnect
-    TitleApp:create():enterScene("TitleScene")
+    self:backToTitle(false)
 end
 
 function GameApp:sendRequest(body)
@@ -75,10 +79,15 @@ function GameApp:sendRequest(body)
         if xhr.readyState == 4 and (xhr.status >= 200 and xhr.status < 207) then
             --print(xhr.response)
         else
-            print("xhr.readyState is:", xhr.readyState, "xhr.status is: ",xhr.status)
+            self:backToTitle(true)
         end
     end)
     xhr:send(json.encode(body))
+end
+
+function GameApp:backToTitle(networkError)
+    self.configs_.socket:close()
+    TitleApp:create({networkError = networkError}):enterScene("TitleScene")
 end
 
 return GameApp

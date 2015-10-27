@@ -2,7 +2,7 @@ local json = require("json")
 local TitleApp = class("TitleApp", cc.load("mvc").AppBase)
 
 function TitleApp:onCreate()
-    self.networkError = false
+    self.networkError = self.configs_.networkError and true or false
 end
 
 function TitleApp:createRoom(callback)
@@ -23,10 +23,11 @@ function TitleApp:initWebsocket(isBuild, onCreateRoom, roomId)
             local data = json.decode(msg.data)
             local channelId = isBuild and "" or roomId
             self:cloudFunc("pusher", {socket_id = data.socket_id, channel_id = channelId}, function(ret)
+                self.channelId = "private-" .. ret.channel_id
                 self.ws:sendString(json.encode({
                     event = "pusher:subscribe",
                     data = {
-                        channel = "private-" .. ret.channel_id,
+                        channel = self.channelId,
                         auth = ret.auth
                     }
                 }))
@@ -40,12 +41,14 @@ function TitleApp:initWebsocket(isBuild, onCreateRoom, roomId)
             end
         elseif msg.event == "start" then
             self.ws:unregisterScriptHandler(cc.WEBSOCKET_MESSAGE)
+            self.ws:unregisterScriptHandler(cc.WEBSOCKET_ERROR)
             local data = json.decode(msg.data)
             require("app.ctx.GameApp"):create({
                 socket = self.ws,
                 matchId = data.id,
                 team = self.corner,
                 seed = data.seed,
+                channel = self.channelId,
             }):enterScene("FormationScene")
         elseif msg.event == "pusher:error" then
             self:backToScene()
@@ -53,7 +56,7 @@ function TitleApp:initWebsocket(isBuild, onCreateRoom, roomId)
             self:backToScene()
         end
     end, cc.WEBSOCKET_MESSAGE)
-    self.ws:registerScriptHandler(function(msg) self.backToScene() end, cc.WEBSOCKET_ERROR)
+    self.ws:registerScriptHandler(function(msg) self:backToScene() end, cc.WEBSOCKET_ERROR)
 end
 
 function TitleApp:cloudFunc(name, params, callback)
