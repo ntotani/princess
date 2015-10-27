@@ -93,8 +93,8 @@ local TILES = {
 }
 Shogi.RED_CAMP = 2
 Shogi.BLUE_CAMP = 3
-local RED_EVO = 5
-local BLUE_EVO = 6
+Shogi.RED_EVO = 5
+Shogi.BLUE_EVO = 6
 
 function Shogi.getAskill()
     return ASKILL
@@ -314,6 +314,10 @@ function Shogi:moveTo(actor, di, dj, acts)
         return true
     end
     table.insert(acts, {type = "move", actor = actor.id, fi = actor.i, fj = actor.j, i = di, j = dj})
+    return self:commitMove(actor, di, dj, acts)
+end
+
+function Shogi:commitMove(actor, di, dj, acts)
     actor.i = di
     actor.j = dj
     if self:isHime(actor) then
@@ -325,8 +329,8 @@ function Shogi:moveTo(actor, di, dj, acts)
             return true
         end
     end
-    if (self.tiles[di][dj] == BLUE_EVO and actor.team == "red" or
-        self.tiles[di][dj] == RED_EVO and actor.team == "blue") and actor.evo then
+    if (self.tiles[di][dj] == Shogi.BLUE_EVO and actor.team == "red" or
+        self.tiles[di][dj] == Shogi.RED_EVO and actor.team == "blue") and actor.evo then
         local evo = us.findWhere(CHARAS, {id = actor.evo})
         table.insert(acts, {type = "evo", actor = actor.id, from = actor.master.id, to = evo.id})
         setmetatable(actor, {__index = evo})
@@ -355,7 +359,9 @@ function Shogi:attack(actor, target, dmg, acts)
                 ti = target.i,
                 tj = target.j,
             })
-            c.i, c.j, target.i, target.j = target.i, target.j, c.i, c.j
+            local ti, tj = target.i, target.j
+            if self:commitMove(target, c.i, c.j, acts) then return end
+            if self:commitMove(c, ti, tj, acts) then return end
             target = c
             break
         end
@@ -609,16 +615,19 @@ end
 
 function Shogi:processAskill_111(actor, acts) -- 入れ替え
     local target = self:farEnemies(actor)[1]
-    actor.i, actor.j, target.i, target.j = target.i, target.j, actor.i, actor.j
     acts[#acts + 1] = {
         type = "swap",
         actor = actor.id,
         target = target.id,
-        fi = target.i,
-        fj = target.j,
-        ti = actor.i,
-        tj = actor.j,
+        fi = actor.i,
+        fj = actor.j,
+        ti = target.i,
+        tj = target.j,
     }
+    local ti, tj = target.i, target.j
+    if not self:commitMove(target, actor.i, actor.j, acts) then
+        self:commitMove(actor, ti, tj, acts)
+    end
 end
 
 function Shogi.new(...)
