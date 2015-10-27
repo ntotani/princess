@@ -3,6 +3,7 @@ local jam = require("lib.jam")
 local GameScene = class("GameScene", cc.load("mvc").ViewBase)
 
 local ACT_DEF_SEC = 0.3
+local CHIP_HEIGHT = 80
 
 function GameScene:onCreate()
     self.shogi = self:getApp():getShogi()
@@ -43,6 +44,8 @@ function GameScene:reset()
     end
     local startAction = function()
         self:runAction(cc.Sequence:create(self:drawChip(), cc.CallFunc:create(function()
+            self.tutorialHand = display.newSprite("img/hand.png"):move(self:getChipX(1.5), CHIP_HEIGHT):addTo(self)
+            self.tutorialHand:runAction(cc.RepeatForever:create(cc.Sequence:create(cc.MoveBy:create(0.5, cc.p(0, 64)), cc.DelayTime:create(1.0), cc.CallFunc:create(function(n) n:setPositionY(CHIP_HEIGHT) end))))
             self.touchLayer:onTouch(us.bind(self.onTouch, self))
         end)))
     end
@@ -126,6 +129,10 @@ function GameScene:onTouch(e)
     end
     if e.name == "moved" and self.holdChip then
         self.holdChip:move(e)
+        if self.tutorialHand then
+            self.tutorialHand:removeSelf()
+            self.tutorialHand = nil
+        end
     elseif self.holdChip then
         local friend = touchChara(self.friends)
         if friend then
@@ -336,7 +343,7 @@ function GameScene:drawChip()
             if i > #chips then
                 local chip = display.newSprite("img/button/chip.png"):addTo(view)
                 display.newSprite("chip/" .. e .. ".png"):addTo(chip):move(chip:getContentSize().width / 2, chip:getContentSize().height / 2)
-                local chipY = isMyTeam and 80 or display.height - 80
+                local chipY = isMyTeam and CHIP_HEIGHT or display.height - CHIP_HEIGHT
                 chip:move(display.width + chip:getContentSize().width, chipY)
                 chip:setScale(isMyTeam and 1 or -1)
                 chip.idx = i
