@@ -4,7 +4,7 @@ local us = require("src.lib.moses")
 TestTitleScene = {}
 
 function TestTitleScene:setUp()
-    self.app = {}
+    self.app = {isNetworkError = function() return false end}
     self.scene = require("app.views.TitleScene"):create(self.app, "TitleScene")
     self.scene:showWithScene()
     cc.Director:getInstance():mainLoop() -- run scene
