@@ -6,7 +6,7 @@ DEBUG = 2
 CC_USE_FRAMEWORK = true
 
 -- show FPS on screen
-CC_SHOW_FPS = true
+CC_SHOW_FPS = false
 
 -- disable create unexpected global variable
 CC_DISABLE_GLOBAL = true
@@ -15,12 +15,13 @@ CC_DISABLE_GLOBAL = true
 CC_DESIGN_RESOLUTION = {
     width = 360,
     height = 640,
-    autoscale = "FIXED_WIDTH",
+    autoscale = "SHOW_ALL",
     callback = function(framesize)
         local ratio = framesize.width / framesize.height
         if ratio <= 1.34 then
             -- iPad 768*1024(1536*2048) is 4:3 screen
-            return {autoscale = "FIXED_WIDTH"}
+            return {autoscale = "SHOW_ALL"}
         end
     end
 }
+
