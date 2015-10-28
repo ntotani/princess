@@ -68,7 +68,7 @@
 		C63C84021B5483B100CE4CDB /* libcocos2d Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C63C83FF1B5483B100CE4CDB /* libcocos2d Mac.a */; };
 		C63C84031B5483B100CE4CDB /* libluacocos2d Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C63C84001B5483B100CE4CDB /* libluacocos2d Mac.a */; };
 		C63C84041B5483B100CE4CDB /* libsimulator Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C63C84011B5483B100CE4CDB /* libsimulator Mac.a */; };
-		C6552FB81BE0A6AD00F0EE60 /* Default-1024h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C6552FB71BE0A6AD00F0EE60 /* Default-1024h@2x.png */; settings = {ASSET_TAGS = (); }; };
+		C6552FB81BE0A6AD00F0EE60 /* Default-1024h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = C6552FB71BE0A6AD00F0EE60 /* Default-1024h@2x.png */; };
 		D6B061351803AC000077942B /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6B061341803AC000077942B /* CoreMotion.framework */; };
 		DA9E7D881AB1ABCC004B27C8 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA9E7D871AB1ABCC004B27C8 /* Security.framework */; };
 		F293B3CD15EB7BE500256477 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F293B3CC15EB7BE500256477 /* QuartzCore.framework */; };
@@ -709,7 +709,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				COMPRESS_PNG_FILES = NO;
 				ENABLE_BITCODE = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
