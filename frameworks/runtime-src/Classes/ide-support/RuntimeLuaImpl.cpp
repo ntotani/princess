@@ -333,7 +333,7 @@ void RuntimeLuaImpl::init()
     ScriptEngineManager::getInstance()->setScriptEngine(engine);
     lua_module_register(engine->getLuaStack()->getLuaState());
     register_runtime_override_function(engine->getLuaStack()->getLuaState());
-    engine->getLuaStack()->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
+    engine->getLuaStack()->setXXTEAKeyAndSign("pUxpJt6L4KFn", strlen("pUxpJt6L4KFn"), "4cbmXep6nmAf", strlen("4cbmXep6nmAf"));
 }
 
 #endif // (COCOS2D_DEBUG > 0) && (CC_CODE_IDE_DEBUG_SUPPORT > 0)

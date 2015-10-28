@@ -77,7 +77,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     register_all_packages();
 
     LuaStack* stack = engine->getLuaStack();
-    stack->setXXTEAKeyAndSign("2dxLua", strlen("2dxLua"), "XXTEA", strlen("XXTEA"));
+    stack->setXXTEAKeyAndSign("pUxpJt6L4KFn", strlen("pUxpJt6L4KFn"), "4cbmXep6nmAf", strlen("4cbmXep6nmAf"));
 
     lua_getglobal(stack->getLuaState(), "_G");
     lua_register(stack->getLuaState(), "randomSeed", random_seed_glue);
