@@ -8,6 +8,7 @@ require "config"
 require "cocos.init"
 
 local function main()
+    math.newrandomseed()
     require("app.ctx.TitleApp"):create():run("TitleScene")
 end
 
